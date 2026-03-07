@@ -33,7 +33,7 @@ Why tokens matter for guardrails:
 - Guardrails that add content to the prompt (safety instructions, retrieved context, few-shot examples) consume tokens and reduce the space available for user content.
 - Some attack techniques exploit token boundaries — for example, splitting a forbidden word across tokens to bypass keyword filters.
 
-**The context window** is the model's working memory. It includes everything fed into the model for a single inference call. A typical context window ranges from 4,000 to 200,000+ tokens depending on the model. Once the context window is full, content must be dropped or summarized. This is important for guardrails because:
+**The context window** is the model's working memory. It includes everything fed into the model for a single inference call. A typical context window ranges from 8,000 to over 1,000,000 tokens depending on the model, with most production models offering 32,000 to 200,000 tokens. Once the context window is full, content must be dropped or summarized. This is important for guardrails because:
 - As conversations grow longer, the system prompt's influence is **diluted** — it becomes a smaller fraction of the total context, and the model may pay less attention to it relative to recent conversation turns
 - In applications that manually manage context (rather than using chat APIs that automatically preserve the system message), safety instructions can be literally truncated when the window fills up
 - Attackers can exploit this by using long conversations to weaken the effect of safety instructions
@@ -85,7 +85,7 @@ However, these are **learned soft preferences, not architectural enforcement.** 
 When the model produces a probability distribution for the next token, several parameters control how the final token is selected:
 
 **Temperature** controls the "sharpness" of the probability distribution.
-- Temperature = 0 (or near 0): The model almost always picks the highest-probability token. Output is nearly deterministic. Good for tasks where consistency matters (data extraction, classification).
+- Temperature = 0: The model uses **greedy decoding** — it always selects the highest-probability token. The algorithm itself is deterministic, though practical implementations may still exhibit slight variations (see the note on non-determinism below). Good for tasks where consistency matters (data extraction, classification).
 - Temperature = 1: The model samples according to the natural probability distribution. Output is diverse but can be unpredictable.
 - Temperature > 1: The distribution is flattened, making unlikely tokens more probable. Output becomes creative but potentially incoherent.
 
@@ -97,7 +97,7 @@ When the model produces a probability distribution for the next token, several p
 Token probability distribution for next token:
 
 Temperature = 0.0              Temperature = 1.0
-(nearly deterministic)         (balanced)
+(greedy / deterministic)       (balanced)
 
  High |X                        High |
       |X                             |XX
@@ -175,9 +175,9 @@ What's the return policy for the Widget Pro?<|im_end|>
 The Widget Pro has a 30-day return policy...<|im_end|>
 ```
 
-The `<|im_start|>` and `<|im_end|>` are **special tokens** — single tokens added to the model's vocabulary specifically for this purpose. They do not appear in pre-training data as regular text. The role name (`system`, `user`, `assistant`) immediately follows the start token.
+The `<|im_start|>` and `<|im_end|>` are **special tokens** — single tokens added to the model's vocabulary specifically for this purpose. They are assigned unique token IDs that the standard tokenizer will not produce from regular text, so even if the character sequence `<|im_start|>` appeared in a document, it would be tokenized as separate sub-tokens rather than as the single special token. Chat-specific role tokens like these are introduced during the fine-tuning stage. The role name (`system`, `user`, `assistant`) immediately follows the start token.
 
-Different model providers use different template formats (Meta's Llama uses `<|start_header_id|>` and `<|eot_id|>`, Anthropic uses its own internal format), but the principle is the same: special delimiter tokens mark where one role ends and another begins.
+Different model providers use different template formats (Meta's Llama 3 uses `<|start_header_id|>`, `<|end_header_id|>`, and `<|eot_id|>`; Llama 2 used `[INST]` and `[/INST]` tags; Anthropic uses its own internal format), but the principle is the same: special delimiter tokens mark where one role ends and another begins.
 
 In agentic systems with tool use, the template adds a `tool` role:
 
@@ -438,7 +438,7 @@ Every guardrail exists to prevent or mitigate a specific failure mode. Understan
 
 **Why it happens:**
 - LLMs generate text by predicting likely next tokens, not by retrieving verified facts. The model produces what "sounds right" based on patterns in training data.
-- The model has no internal mechanism to distinguish between what it "knows" and what it is generating for the first time.
+- The model has no explicit internal mechanism to distinguish between recalling a well-supported fact and generating a plausible-sounding fabrication.
 - Training data may contain errors, outdated information, or contradictions.
 - The model is trained to be helpful, which creates pressure to provide an answer even when it should say "I don't know."
 
@@ -511,7 +511,7 @@ DIRECT INJECTION                INDIRECT INJECTION
 - **Output validation** — check that the model's response is consistent with its intended behavior
 - **LLM-as-judge** — use a separate model call to evaluate whether the response appears to have been influenced by injection
 
-**Severity:** High. Prompt injection can cause the model to bypass all other guardrails, leak system prompts, exfiltrate data, or produce harmful content.
+**Severity:** High. Prompt injection can cause the model to bypass instruction-level and system-prompt-level guardrails, leak system prompts, exfiltrate data, or produce harmful content. This is why defense-in-depth with multiple independent guardrail layers (including output filters and architectural controls that operate independently of the model) is essential.
 
 ### 1.2.3 Jailbreaking
 
@@ -948,7 +948,7 @@ The document should be useful to both engineering teams (who implement guardrail
 
 4. There are nine major failure modes: hallucination, prompt injection, jailbreaking, data leakage, toxic output, off-topic drift, over-reliance, cascading agentic failures, and identity/access failures. Each requires different guardrail strategies.
 
-5. Prompt injection is arguably the most important failure mode to understand because it can bypass other guardrails. Models learn an instruction hierarchy through training (system prompts carry authority over user input), but this is a learned soft preference, not an architectural enforcement. Because language is subjective and attention processes all context in parallel, the hierarchy can be circumvented — which is why system prompts help but are never sufficient alone.
+5. Prompt injection is arguably the most important failure mode to understand because it can bypass instruction-level and system-prompt-level guardrails. Models learn an instruction hierarchy through training (system prompts carry authority over user input), but this is a learned soft preference, not an architectural enforcement. Because language is subjective and attention processes all context in parallel, the hierarchy can be circumvented — which is why system prompts help but are never sufficient alone.
 
 6. Agentic systems dramatically expand the attack surface from "bad text" to "bad actions with real-world consequences."
 

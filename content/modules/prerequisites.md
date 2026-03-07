@@ -45,32 +45,35 @@ Large language models like GPT, Claude, Llama, and Gemini are all based on the *
 
 ### The Core Idea: Attention
 
-Before transformers, language models processed text sequentially — one word at a time, left to right. This made it hard to capture relationships between distant words. The transformer's breakthrough is **self-attention**: the ability to look at all words in the input simultaneously and determine which words are most relevant to each other.
+Before transformers, the dominant language models (RNNs and LSTMs) processed text sequentially — one token at a time — making it difficult to capture relationships between distant words and preventing parallelization during training. The transformer's breakthrough is **self-attention**: the ability to look at all parts of the input simultaneously and determine which parts are most relevant to each other.
 
 For example, in the sentence "The cat sat on the mat because it was tired," the model needs to understand that "it" refers to "the cat," not "the mat." The attention mechanism lets the model compute a relevance score between every pair of words, so when processing "it," the model attends strongly to "cat."
 
 ```
  "The  cat  sat  on  the  mat  because  it  was  tired"
                                          |
-                              attention scores:
-                         "cat" = 0.72  (strong)
-                         "mat" = 0.15  (weak)
-                         "sat" = 0.08
+                    attention scores (illustrative,
+                    from a single attention head):
+                         "cat" = 0.42  (strong)
+                         "mat" = 0.18  (moderate)
+                         "sat" = 0.09
                          ...
 
  The model determines "it" most likely refers to "cat"
- by computing these scores across all words in parallel.
+ by computing these scores across all tokens in parallel.
 ```
 
 This is important for guardrails because it means the model can be influenced by content **anywhere** in its input — a malicious instruction buried in the middle of a long document is attended to just as readily as text at the beginning.
 
 ### Layers of a Transformer
 
-A transformer stacks multiple layers, each containing two main components:
+A transformer stacks multiple layers. Each layer contains two main computational components, along with **residual connections** and **layer normalization** that enable stable training across many layers:
 
-**Self-attention:** computes which parts of the input are relevant to each other (as described above). In practice, models use **multi-head attention** — multiple attention computations running in parallel, each learning to focus on different types of relationships (one head might track grammar, another might track meaning, another might track references).
+**Self-attention:** computes which parts of the input are relevant to each other (as described above). In practice, models use **multi-head attention** — multiple attention computations running in parallel, each potentially learning to focus on different types of relationships (for example, some heads may track syntactic dependencies, while others track positional or semantic relationships).
 
-**Feed-forward network:** after attention determines which words are relevant, a feed-forward network processes that information to build more abstract representations. Think of attention as "gathering relevant context" and the feed-forward layer as "making sense of it."
+**Feed-forward network:** after attention determines which tokens are relevant, a feed-forward network processes that information to build more abstract representations. Think of attention as "gathering relevant context" and the feed-forward layer as "processing it further" — though this is a simplified mental model.
+
+**Residual connections** (also called skip connections) add the input of each sub-layer to its output, allowing information to flow directly through the network and preventing the signal from degrading across many layers. **Layer normalization** stabilizes the values flowing through the network, keeping training stable. Without these two components, training deep transformers (32-128+ layers) would be extremely difficult.
 
 ```
  Input Text (tokenized)
@@ -81,12 +84,16 @@ A transformer stacks multiple layers, each containing two main components:
  | (multi-head)         |   relate to each other?"
  +----------+----------+
             |
+       Add & Norm           Residual connection +
+            |                layer normalization
             v
  +---------------------+
- | Feed-Forward         |  "What does this pattern
- | Network              |   mean?"
+ | Feed-Forward         |  "Process this pattern
+ | Network              |   further"
  +----------+----------+
             |
+       Add & Norm           Residual connection +
+            |                layer normalization
             v
      (repeat 32-128x)      Stacking layers builds
             |               deeper understanding
@@ -104,10 +111,12 @@ What makes large language models "large" is the number of parameters (weights):
 
 | Model Size | Parameters | Rough Capability |
 |-----------|-----------|-----------------|
-| Small | 1-7 billion | Basic text completion, simple tasks |
-| Medium | 13-70 billion | Good instruction following, reasoning |
-| Large | 100+ billion | Complex reasoning, nuanced understanding |
-| Frontier | 200+ billion (est.) | State-of-the-art performance across tasks |
+| Small | 1-8 billion | Capable for focused tasks, code, structured outputs |
+| Medium | 8-70 billion | Strong instruction following, reasoning, multi-step tasks |
+| Large | 70+ billion | Complex reasoning, nuanced understanding |
+| Frontier | Varies (often MoE) | State-of-the-art performance across tasks |
+
+These categories are approximate and shift over time — training data quality, architecture innovations (such as Mixture-of-Experts, where only a fraction of parameters are active per inference), and post-training techniques can dramatically change capability at any given parameter count. A well-trained 8B model today can outperform a 100B+ model from a few years ago.
 
 More parameters means more capacity to learn patterns from training data. However, more parameters also means more capacity to memorize training data (relevant to data leakage) and more complex behaviors that are harder to predict (relevant to guardrails).
 
@@ -155,7 +164,7 @@ It is completing a pattern (a list of questions), not answering your question. I
 
 The base model is fine-tuned on curated datasets of conversations formatted in a **chat template** — the structured format with special tokens that marks role boundaries (covered in detail in Module 1, section 1.1.3).
 
-The training data for this stage contains thousands of examples where a system message sets rules and an assistant follows them:
+The training data for this stage contains hundreds of thousands to millions of curated examples, including conversations where a system message sets rules and an assistant follows them:
 
 ```
 <|im_start|>system
@@ -180,9 +189,9 @@ The instruction-tuned model is further refined using human preferences:
 1. The model generates multiple responses to the same prompt
 2. Human raters rank the responses (helpful, safe, accurate, etc.)
 3. A reward model is trained on these rankings
-4. The language model is trained to produce responses the reward model rates highly
+4. The language model is optimized — typically using an algorithm called **Proximal Policy Optimization (PPO)** — to produce responses the reward model rates highly, while staying close to its original behavior to prevent instability
 
-This is where the model learns safety behaviors — refusing harmful requests, being honest about uncertainty, following system prompt instructions more reliably. **Constitutional AI** (used by Anthropic) is a variation where the model evaluates its own responses against a set of principles rather than relying solely on human raters.
+This is where the model learns safety behaviors — refusing harmful requests, being honest about uncertainty, following system prompt instructions more reliably. **Constitutional AI** (used by Anthropic) is a variation where the model evaluates its own responses against a set of principles rather than relying solely on human raters. More recent approaches like **Direct Preference Optimization (DPO)** skip the separate reward model and optimize the language model directly on human preference data.
 
 After all three stages, the result is a chat model — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
 
@@ -193,7 +202,7 @@ After all three stages, the result is a chat model — the kind of model you int
 | Pre-training data | Model provider | No (unless you train from scratch) |
 | Model weights | Model provider | No (for API models), Yes (for open-weight models via fine-tuning) |
 | Instruction tuning | Model provider | No (for API models), Yes (for open-weight models) |
-| RLHF / safety training | Model provider | No |
+| RLHF / safety training | Model provider | No (for API models), Yes (for open-weight models via DPO or custom RLHF) |
 | System prompt | You (application developer) | Yes |
 | Input/output guardrails | You (application developer) | Yes |
 | Application architecture | You (application developer) | Yes |
@@ -217,7 +226,8 @@ These terms appear throughout the training modules. If any are unfamiliar, revie
 | **Fine-tuning** | Additional training on a specialized dataset to adapt the model's behavior |
 | **Instruction tuning** | Fine-tuning a base model on conversation data so it learns to follow instructions |
 | **Chat template** | Structured format with special tokens that marks role boundaries in conversations |
-| **RLHF** | Reinforcement Learning from Human Feedback; trains the model to prefer safe, helpful responses |
+| **RLHF** | Reinforcement Learning from Human Feedback; trains the model to prefer safe, helpful responses, typically using PPO |
+| **DPO** | Direct Preference Optimization; an alternative to RLHF that optimizes directly on preference data without a separate reward model |
 | **Constitutional AI** | Training approach where the model evaluates its own responses against defined principles |
 | **Inference** | Running a trained model to generate output (as opposed to training it) |
 | **Token** | The basic unit of text that LLMs process; roughly 3/4 of a word in English |
