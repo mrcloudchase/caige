@@ -17,7 +17,7 @@
 | Time limit | 120 minutes |
 | Passing score | 70% (53 of 75 scored questions) |
 | Delivery | Online proctored |
-| Prerequisites | None (training recommended but not required) |
+| Prerequisites | None required to sit for the exam; completion of the cAIge training program (including AI Foundations prerequisites) is strongly recommended |
 | Recertification | Every 3 years |
 | Languages | English (additional languages planned) |
 
@@ -308,7 +308,8 @@ Approximately **35%** of exam questions.
 ## Candidate Preparation Guide
 
 ### Recommended Experience
-While there are no formal prerequisites, candidates are most successful with:
+While there are no formal prerequisites to sit for the exam, the cAIge training program requires foundational knowledge of AI concepts (neural networks, transformer architecture, LLM training stages) covered in the AI Foundations prerequisites guide. Candidates are most successful with:
+- Completion of the cAIge training program, including the AI Foundations prerequisites
 - 1-2 years of experience working with AI/ML systems in any capacity
 - Basic understanding of software architecture and API design
 - Familiarity with at least one programming language

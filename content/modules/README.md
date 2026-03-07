@@ -19,14 +19,15 @@ The program is vendor-agnostic. It teaches concepts, patterns, and architectural
 
 ## Prerequisites
 
-No formal prerequisites are required. You will get the most from this training with:
+Before starting the training modules, you should have:
 
+- **AI Foundations knowledge** — Understanding of neural networks, the transformer architecture, and how LLMs are trained. If you need to build this foundation, complete the [Prerequisites: AI Foundations](prerequisites.md) guide before Module 1.
 - 1-2 years working with AI/ML systems in any capacity
 - Basic understanding of software architecture and API design
 - Familiarity with at least one programming language
 - Exposure to security concepts (you don't need to be a security specialist)
 
-**New to AI?** Start with the [Prerequisites: AI Foundations](prerequisites.md) guide. It covers neural networks, the transformer architecture, and how LLMs are trained — background knowledge that will help you understand Module 1. This content is not on the exam.
+The AI Foundations prerequisite content is not directly tested on the exam, but the concepts are assumed knowledge throughout the training program and exam domains. If you are already comfortable with how neural networks and LLMs work at a conceptual level, you can proceed directly to Module 1.
 
 ---
 
@@ -34,6 +35,7 @@ No formal prerequisites are required. You will get the most from this training w
 
 | Module | Domain | Weight | Estimated Time |
 |--------|--------|--------|----------------|
+| [Prerequisites: AI Foundations](prerequisites.md) | Foundational | — | 1-2 hours |
 | [Module 1: AI System Fundamentals & Failure Modes](module-1-ai-fundamentals.md) | Domain 1 | 15% | 3-4 hours |
 | [Module 2: Guardrail Architecture & Design](module-2-guardrail-architecture.md) | Domain 2 | 25% | 5-6 hours |
 | [Module 3: Guardrail Implementation](module-3-guardrail-implementation.md) | Domain 3 | 20% | 4-5 hours |
@@ -41,17 +43,18 @@ No formal prerequisites are required. You will get the most from this training w
 | [Module 5: Testing & Red Teaming](module-5-testing-red-teaming.md) | Domain 5 | 15% | 3-4 hours |
 | [Module 6: Operations & Observability](module-6-operations-observability.md) | Domain 6 | 10% | 2-3 hours |
 
-**Total estimated study time:** 20-26 hours
+**Total estimated study time:** 21-28 hours (including prerequisites)
 
 ---
 
 ## How to Use This Training
 
-1. **Study in order.** Modules build on each other. Module 1 establishes foundational concepts used throughout the rest of the program.
-2. **Read actively.** Don't skim. The exam tests applied understanding, not memorization. When you encounter a concept, think about how you'd apply it in your own work.
-3. **Answer the review questions.** Each module ends with practice questions modeled on the exam format (multiple choice, multiple select, and scenario-based). Try to answer before checking the explanations.
-4. **Build something.** The best preparation combines this training with hands-on experience. Set up a test environment and implement the guardrails discussed in each module.
-5. **Review the competency matrix.** After completing all modules, review the [competency matrix](../competency-matrix.md) and honestly assess whether you can demonstrate each listed skill. Focus additional study on gaps.
+1. **Start with the prerequisites.** Complete the [AI Foundations prerequisites](prerequisites.md) first, or verify you can define all terms in its Key Vocabulary section. Modules assume this foundational knowledge.
+2. **Study in order.** Modules build on each other. Module 1 establishes foundational concepts used throughout the rest of the program.
+3. **Read actively.** Don't skim. The exam tests applied understanding, not memorization. When you encounter a concept, think about how you'd apply it in your own work.
+4. **Answer the review questions.** Each module ends with practice questions modeled on the exam format (multiple choice, multiple select, and scenario-based). Try to answer before checking the explanations.
+5. **Build something.** The best preparation combines this training with hands-on experience. Set up a test environment and implement the guardrails discussed in each module.
+6. **Review the competency matrix.** After completing all modules, review the [competency matrix](../competency-matrix.md) and honestly assess whether you can demonstrate each listed skill. Focus additional study on gaps.
 
 ---
 
@@ -71,6 +74,7 @@ No formal prerequisites are required. You will get the most from this training w
 | Questions | 75 scored + 5 unscored pilot questions |
 | Time | 120 minutes |
 | Passing score | 70% (53 of 75) |
+| Prerequisites | None required to sit for the exam; training program completion (including AI Foundations prerequisites) strongly recommended |
 | Delivery | Online proctored |
 | Recertification | Every 3 years |
 

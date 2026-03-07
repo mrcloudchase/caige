@@ -19,6 +19,10 @@ A Certified AI Guardrail Engineer works across all three areas. The cAIge compet
 
 A cAIge holder is qualified to design, implement, test, and maintain guardrail systems for AI-powered applications across any technology stack.
 
+### Assumed Foundational Knowledge
+
+The six domains below assume foundational understanding of AI concepts: neural network basics, the transformer architecture, how LLMs are trained (pre-training, instruction tuning, RLHF), tokenization, and context windows. This foundational knowledge is covered in the AI Foundations prerequisites guide included with the cAIge training program and is not tested as a separate domain, but is assumed throughout all six domains.
+
 ---
 
 ## Domain Breakdown and Weights

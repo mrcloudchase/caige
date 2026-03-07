@@ -1,6 +1,8 @@
 # Prerequisites: AI Foundations
 
-**This content is not on the exam.** It provides background knowledge that will help you understand Module 1 and the rest of the training program. If you are already familiar with how neural networks and language models work at a high level, you can skip this and go directly to Module 1.
+**This is required foundational knowledge for the training program.** The concepts covered here — neural networks, the transformer architecture, and how LLMs are trained — are assumed throughout Modules 1-6. If you are already familiar with these topics at a high level, you may skip ahead to Module 1, but make sure you can define the terms in the Key Vocabulary section at the end of this guide before proceeding.
+
+**Note:** This prerequisite content is not directly tested on the exam, but the concepts are assumed knowledge throughout the exam domains.
 
 ---
 

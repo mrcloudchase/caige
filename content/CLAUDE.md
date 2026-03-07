@@ -7,6 +7,7 @@ Also refer to the root [AGENTS.md](../AGENTS.md) for project-wide context.
 ## Content Structure
 
 - `modules/README.md` — Training program overview (landing page for the training nav)
+- `modules/prerequisites.md` — Required AI Foundations prerequisite knowledge (not directly tested on exam, but assumed throughout)
 - `modules/module-{1-6}-*.md` — Six training modules, one per exam domain
 - `competency-matrix.md` — Exhaustive knowledge areas and skills per domain
 - `exam-blueprint.md` — Exam structure, question types, detailed objectives, scoring methodology
