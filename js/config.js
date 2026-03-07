@@ -8,6 +8,7 @@ export const SITE = {
   ],
   programs: [
     { label: 'Overview', path: 'content/modules/README.md' },
+    { label: 'Prerequisites', path: 'content/modules/prerequisites.md' },
     { label: 'Competency Matrix', path: 'content/competency-matrix.md' },
     { label: 'Exam Blueprint', path: 'content/exam-blueprint.md' },
   ],
