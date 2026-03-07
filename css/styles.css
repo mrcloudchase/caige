@@ -122,15 +122,3 @@ a:hover { opacity: 0.85; }
     flex-wrap: wrap;
 }
 
-/* ── Cards ── */
-.card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-}
-
-.card:hover {
-    border-color: rgba(108, 159, 255, 0.3);
-    box-shadow: 0 0 24px rgba(108, 159, 255, 0.06);
-}

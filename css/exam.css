@@ -1,6 +1,4 @@
 body { min-height: 100vh; }
-a:hover { text-decoration: none; }
-
 .header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -435,7 +433,6 @@ a:hover { text-decoration: none; }
 .domain-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 32px;
 }
 
 .domain-table th,
@@ -578,8 +575,3 @@ a:hover { text-decoration: none; }
   .side-panel-toggle { display: none; }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

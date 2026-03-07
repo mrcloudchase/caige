@@ -77,7 +77,7 @@ export function nextQuestion() {
   }
 }
 
-export function goToQuestion(idx) {
+function goToQuestion(idx) {
   state.currentIndex = idx;
   renderQuestion();
   scrollToTop();
