@@ -38,6 +38,37 @@ Why tokens matter for guardrails:
 - Safety instructions placed at the beginning of the context may have less influence as the conversation grows
 - Attackers can use long conversations to dilute safety instructions
 
+```
+┌───────────────────────────────────────────────────┐
+│              CONTEXT WINDOW (e.g. 128k tokens)    │
+├───────────────────────────────────────────────────┤
+│ ┌───────────────────────────────────────────────┐ │
+│ │  System Prompt + Safety Instructions          │ │
+│ │  (500 - 2,000 tokens)                         │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  Few-Shot Examples / Guardrail Examples        │ │
+│ │  (500 - 1,000 tokens)                         │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  Retrieved Documents (RAG)                    │ │
+│ │  (2,000 - 10,000 tokens)                      │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  Conversation History                         │ │
+│ │  (grows over time -- can push out above)      │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  Current User Message                         │ │
+│ └───────────────────────────────────────────────┘ │
+│ ┌───────────────────────────────────────────────┐ │
+│ │  Model Response (generated here)              │ │
+│ └───────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────┘
+  As conversation grows, earlier content is pushed
+  out -- including safety instructions at the top.
+```
+
 **Attention** is the mechanism that allows the model to determine which parts of the context are most relevant to generating the next token. The model does not process the context window linearly — it attends to all parts of the input in parallel when generating output. This has two important implications for guardrails:
 
 First, the model can be influenced by content *anywhere* in the context — retrieved documents, earlier conversation turns, tool results, or injected instructions. This is why indirect prompt injection works: malicious instructions embedded in retrieved content are attended to alongside legitimate system instructions.
@@ -60,6 +91,39 @@ When the model produces a probability distribution for the next token, several p
 **Top-k sampling** limits the model to choosing from only the k most probable next tokens. If k=50, the model will only consider the top 50 candidates and redistribute their probabilities.
 
 **Top-p (nucleus) sampling** limits the model to the smallest set of tokens whose cumulative probability exceeds p. If p=0.9, the model considers tokens until their probabilities sum to 90%, then samples from only that set.
+
+```
+Token probability distribution for next token:
+
+Temperature = 0.0              Temperature = 1.0
+(nearly deterministic)         (balanced)
+
+ High |X                        High |
+      |X                             |XX
+      |X                             |XXX
+      |X                             |XXXX
+      |X                             |XXXXXX
+  Low |X . . . . . . . .        Low  |XXXXXXXXX . .
+      +--+-+-+-+-+-+-+-+--           +--+-+-+-+-+-+-+-+--
+       A B C D E F G H I              A B C D E F G H I
+       ^                              ^         ^
+       always picked                  usually   sometimes
+
+
+Temperature = 2.0
+(creative / chaotic)
+
+ High |
+      |XX
+      |XXXX
+      |XXXXXX
+      |XXXXXXXXX
+  Low |XXXXXXXXXXXXX . .
+      +--+-+-+-+-+-+-+-+--
+       A B C D E F G H I
+              ^
+       any token could be picked
+```
 
 **Why this matters for guardrails:**
 - Even at temperature 0, LLM output is not perfectly deterministic across all implementations. Hardware floating-point differences and batching can produce slight variations.
@@ -106,6 +170,39 @@ Embeddings are the foundation of **Retrieval-Augmented Generation (RAG)**, a com
 4. The system finds the document chunks whose vectors are most similar to the question vector
 5. Those chunks are included in the LLM's context as supporting information
 6. The LLM generates an answer grounded in the retrieved content
+
+```
+  Documents                           User Query
+     |                                    |
+     v                                    v
+ +----------+                       +-----------+
+ | Chunk &  |                       | Embed     |
+ | Embed    |                       | Query     |
+ +----+-----+                       +-----+-----+
+      |                                   |
+      v                                   |
+ +------------+     similarity search     |
+ | Vector DB  |<--------------------------+
+ +-----+------+
+       | top-k chunks
+       v
+ +--------------+  <-- GUARDRAIL: Access control
+ | Relevance &  |  <-- GUARDRAIL: Relevance filter
+ | Filtering    |  <-- GUARDRAIL: Injection scan
+ +------+-------+
+        | filtered chunks
+        v
+ +----------------------------------+
+ | LLM Context                     |
+ | [System Prompt] + [Chunks] +    |
+ | [User Query]                    |
+ +---------------+-----------------+
+                 |
+                 v
+ +--------------+   <-- GUARDRAIL: Groundedness check
+ |   Response   |   <-- GUARDRAIL: Citation verification
+ +--------------+
+```
 
 Guardrail implications of RAG:
 - Retrieved documents can contain **indirect prompt injections** — malicious instructions embedded in documents that the model reads and follows
@@ -157,6 +254,42 @@ Agentic guardrails must address:
 - **How do you audit** what the agent did and why?
 - **What tool servers** does the agent connect to, and how much do you trust them?
 
+```
+                  +------------------+
+                  |   User Request   |
+                  +--------+---------+
+                           |
+                           v
+            +--------------+---------------+
+       +--->|    Agent Reasoning Loop      |
+       |    +--------------+---------------+
+       |                   |
+       |                   v
+       |    +--------------+---------------+
+       |    |  Decide: which tool to use?  | <-- GUARDRAIL: tool policy
+       |    +--------------+---------------+
+       |                   |
+       |                   v
+       |    +--------------+---------------+
+       |    |  Execute tool call           | <-- GUARDRAIL: approval gate
+       |    +--------------+---------------+     scope limit
+       |                   |                     identity check
+       |                   v
+       |    +--------------+---------------+
+       |    |  Observe result              | <-- GUARDRAIL: validate result
+       |    +--------------+---------------+
+       |                   |
+       |          +--------+--------+
+       |          | More steps?     |
+       +-- Yes ---+                 |
+                  +--------+--------+
+                           | No
+                           v
+                  +------------------+
+                  |    Response      | <-- GUARDRAIL: output check
+                  +------------------+
+```
+
 ### 1.1.7 Model-Level Safety vs. Application-Level Guardrails
 
 This distinction is critical and appears frequently on the exam.
@@ -182,6 +315,45 @@ This distinction is critical and appears frequently on the exam.
 - Model-level safety can change when you update to a new model version. Application-level guardrails are under your control and remain consistent.
 
 Think of it like a building's security: model-level safety is the lock on the front door (provided by the building manufacturer). Application-level guardrails are the security cameras, access cards, and security guards you install yourself. You need both, and you should never rely solely on the lock.
+
+```
+              +----------------------+
+              |     User Input       |
+              +----------+-----------+
+                         |
+  +-- APPLICATION-LEVEL (you control) --------+
+  |  +---------------------------------------+ |
+  |  |  Input Guardrails                     | |
+  |  |  * Prompt injection detection         | |
+  |  |  * Topic / intent classification      | |
+  |  |  * PII scanning                       | |
+  |  |  * Rate limiting                      | |
+  |  +-------------------+-------------------+ |
+  +------------------------+-------------------+
+                           |
+  +-- MODEL-LEVEL (provider controls) --------+
+  |  +---------------------------------------+ |
+  |  |  LLM with Safety Training             | |
+  |  |  * RLHF alignment                     | |
+  |  |  * Constitutional AI principles       | |
+  |  |  * Safety fine-tuning                 | |
+  |  +-------------------+-------------------+ |
+  +------------------------+-------------------+
+                           |
+  +-- APPLICATION-LEVEL (you control) --------+
+  |  +---------------------------------------+ |
+  |  |  Output Guardrails                    | |
+  |  |  * Content filtering / toxicity       | |
+  |  |  * PII redaction                      | |
+  |  |  * Groundedness checking              | |
+  |  |  * Structured output validation       | |
+  |  +-------------------+-------------------+ |
+  +------------------------+-------------------+
+                           |
+              +------------+-----------+
+              |     User Response      |
+              +------------------------+
+```
 
 ---
 
@@ -235,6 +407,35 @@ The Widget Pro features a 10-inch display...
 - At the attention level, the model processes all content in the context window in parallel — system prompts, user messages, retrieved documents, and tool results all pass through the same attention mechanism.
 - Through training on chat templates, models learn an instruction hierarchy: system messages carry authority, user messages are requests, tool results are data. But this is a **learned behavioral preference**, not a hard architectural boundary. It can be circumvented because language is subjective and the hierarchy is enforced statistically, not structurally.
 - An attacker exploits this by crafting input that the model interprets as having equal or greater authority than the system prompt — through role-play, encoding tricks, or instructions embedded in data the model is trained to attend to (like retrieved documents).
+
+```
+DIRECT INJECTION                INDIRECT INJECTION
+
+ +----------+                    +----------+
+ | Attacker |                    |   User   | (may be innocent)
+ +----+-----+                    +----+-----+
+      | malicious                     | normal
+      | prompt                        | query
+      v                               v
+ +----------+                    +----------+     +----------+
+ |          |                    |   RAG    |---->| Vector   |
+ |   LLM    |                    | Retrieval|     |   DB     |
+ |          |                    +----+-----+     +-----+----+
+ +----------+                         |                 |
+                                      |  +----------+   |
+                                      +<-| Poisoned |<--+
+                                      |  |   Doc    |
+                                      |  +----------+
+                                      |       ^
+                                      v       |
+                                 +----------+ |
+                                 |   LLM    | Attacker placed
+                                 +----------+ malicious instructions
+                                               in the document
+
+  The attacker IS the user.      The attacker poisons the data.
+  Attack is in the prompt.       Attack is in retrieved content.
+```
 
 **Guardrail strategies:**
 - **Input validation** — scan user input for injection patterns before it reaches the model
@@ -395,6 +596,32 @@ Example scenario:
 4. Agent sends a confirmation email to the wrong customer, revealing the new address (step 3 failure, caused by step 2)
 5. Agent marks the task as complete (masking all failures)
 
+```
+ +-------------------------+
+ | 1. Retrieve customer    |
+ |    record               |---- WRONG RECORD (initial error)
+ +------------+------------+
+              | bad data flows down
+              v
+ +-------------------------+
+ | 2. Update address       |---- WRONG CUSTOMER UPDATED
+ +------------+------------+
+              | error compounds
+              v
+ +-------------------------+
+ | 3. Send confirmation    |---- PII SENT TO WRONG PERSON
+ |    email                |
+ +------------+------------+
+              | error invisible
+              v
+ +-------------------------+
+ | 4. Mark task complete   |---- FAILURE MASKED
+ +-------------------------+
+
+ Each step trusts the output of the previous step.
+ No intermediate validation = undetected cascade.
+```
+
 **Why it happens:**
 - Each step in an agentic workflow takes the output of the previous step as input
 - Agents typically do not verify intermediate results
@@ -409,6 +636,49 @@ Example scenario:
 - **Observation logging** — recording the agent's reasoning at each step for audit
 
 **Severity:** High to critical. Unlike a bad text response (which can be ignored), agentic failures produce real-world actions that may be difficult or impossible to reverse.
+
+### 1.2.10 Identity and Access Failures
+
+**What it is:** The AI system fails to properly enforce identity boundaries, leading to unauthorized access to data or capabilities. This includes:
+- **Cross-tenant data leakage** — one user's data, conversation history, or context appearing in another user's AI responses
+- **Privilege escalation** — a user manipulating the AI into performing actions beyond their authorization level, or an agent acting with more permissions than the invoking user holds
+- **Impersonation through prompt manipulation** — crafting prompts that cause the AI to act as if it were a different user or role, bypassing access controls
+- **Session confusion** — conversation history or context from one user session bleeding into another due to poor isolation
+
+**Why it happens:**
+- AI systems often sit on top of existing identity infrastructure but introduce new ways to bypass it. A user who cannot access a database directly might trick an AI agent into querying it on their behalf.
+- In multi-tenant systems, shared model infrastructure (context caches, conversation stores, retrieval indices) can leak data between tenants if isolation is not enforced at every layer.
+- Agentic systems raise the question of **identity delegation** — when an agent calls a tool or API, whose credentials does it use? If the agent has its own service account with broad permissions, any user can potentially access anything the agent can access.
+- Models do not inherently understand authorization. A system prompt saying "only show data the user is authorized to see" is a guideline the model may not follow correctly, especially under prompt manipulation.
+
+```
+ WRONG (shared service account)     RIGHT (delegated identity)
+
+ User A --+                         User A --+
+ User B --+---> Agent               User B --+---> Agent
+ User C --+       |                 User C --+       |
+                  | uses                             | uses invoking
+                  | service-admin                    | user's own
+                  | credentials                     | credentials
+                  v                                  v
+           +-----------+                      +-----------+
+           | Tool /API |                      | Tool /API |
+           | full admin|                      | user-scoped|
+           |  access   |                      |  access   |
+           +-----------+                      +-----------+
+
+           Any user gets                      Each user gets
+           admin access                       only their access
+```
+
+**Guardrail strategies:**
+- **Enforce access controls in code, not in prompts** — never rely on the model to filter data by permission. Apply access controls at the data layer (database queries, API calls, retrieval filters) before data enters the model's context.
+- **Session isolation** — ensure strict separation of conversation history, context, and cached data between users and tenants
+- **Identity-scoped tool access** — when an agent calls tools, it should use the invoking user's credentials and permissions, not a privileged service account
+- **Authorization validation at each step** — in agentic workflows, verify the user is authorized for each action before the agent executes it
+- **Audit logging of identity context** — log which user identity was associated with each AI interaction for forensic analysis
+
+**Severity:** High to critical. Identity failures can expose sensitive data across organizational boundaries, violate regulatory requirements (HIPAA, GDPR), and enable unauthorized actions in production systems. In multi-tenant SaaS applications, a single cross-tenant leak can be a breach-level incident.
 
 ---
 
@@ -551,6 +821,39 @@ A trust boundary is a line in your system architecture where the level of trust 
 
 Drawing trust boundaries helps you identify where guardrails are needed. A general rule: **every time data crosses a trust boundary, apply a guardrail.**
 
+```
+  UNTRUSTED                                     TRUSTED
+  (external)                                    (your system)
+                    TRUST BOUNDARY
+ +------------+          |          +---------------------+
+ |   User     |----- input ------->| Input Guardrails    |
+ |   Input    |          |         | (validate, classify)|
+ +------------+          |         +----------+----------+
+                         |                    |
+ +------------+          |                    v
+ | Retrieved  |----- content ----->+---------+-----------+
+ |   Docs     |          |        |                      |
+ +------------+          |        |        LLM           |
+                         |        |                      |
+                         |        +----------+-----------+
+                         |                   |
+                         |          TRUST BOUNDARY
+                         |                   |
+                         |        +----------+-----------+
+                         |        | Output Guardrails    |
+                         |        | (filter, redact,     |
+                         |        |  ground-check)       |
+                         |        +----------+-----------+
+                         |                   |
+                         |          TRUST BOUNDARY
+                         |                   |
+ +------------+          |        +----------+-----------+
+ | External   |<---- tool call ---|  Agent Decision      |
+ | Tool / API |          |        |  (policy check       |
+ |            |----- result ----->|   before execution)  |
+ +------------+          |        +----------------------+
+```
+
 ### 1.3.7 Documenting Threat Models
 
 A useful threat model document includes:
@@ -575,7 +878,7 @@ The document should be useful to both engineering teams (who implement guardrail
 
 3. Model-level safety (training) and application-level guardrails (your code) serve different purposes. You need both, and you control only the latter.
 
-4. There are eight major failure modes: hallucination, prompt injection, jailbreaking, data leakage, toxic output, off-topic drift, over-reliance, and cascading agentic failures. Each requires different guardrail strategies.
+4. There are nine major failure modes: hallucination, prompt injection, jailbreaking, data leakage, toxic output, off-topic drift, over-reliance, cascading agentic failures, and identity/access failures. Each requires different guardrail strategies.
 
 5. Prompt injection is arguably the most important failure mode to understand because it can bypass other guardrails. Models learn an instruction hierarchy through training (system prompts carry authority over user input), but this is a learned soft preference, not an architectural enforcement. Because language is subjective and attention processes all context in parallel, the hierarchy can be circumvented — which is why system prompts help but are never sufficient alone.
 
@@ -745,3 +1048,21 @@ D. Implementing a chatbot persona with a friendly name
 
 **Answer: B**
 In a financial services context with company filings, access control on the retrieval layer is critical. Different analysts may have access to different companies or confidentiality levels, and retrieving unauthorized filings would be a data governance violation. The proposed strategy covers injection (1), PII (2), and hallucination (3), but misses retrieval-level access control — a key RAG-specific guardrail. A profanity filter (A) is low-priority for an internal analyst tool. Emoji detection (C) and persona naming (D) are not meaningful security controls.
+
+---
+
+### Question 11 (Scenario-Based)
+
+A SaaS company deploys an AI agent that helps employees manage cloud infrastructure. The agent can list servers, check logs, and restart services. It authenticates to the cloud provider using a service account with full administrative access. Each employee logs in with their own credentials, but the agent uses the shared service account for all tool calls.
+
+A junior developer with read-only cloud permissions asks the agent to restart a production database server. The agent completes the action successfully.
+
+What failure mode does this represent, and what is the MOST effective mitigation?
+
+A. Cascading failure — add step-by-step validation to verify each action before proceeding
+B. Over-reliance — require the developer to manually confirm they have permission before the agent acts
+C. Identity and access failure — the agent should use the invoking user's credentials and permissions when calling tools, not a privileged service account
+D. Prompt injection — add input validation to detect unauthorized action requests
+
+**Answer: C**
+This is an identity and access failure caused by improper identity delegation. The agent acts under a privileged service account rather than the invoking user's permissions, allowing the junior developer to perform actions they are not authorized to do. The fix is to scope the agent's tool access to the invoking user's credentials — the agent should never have more access than the user it is acting on behalf of. Manual confirmation (B) shifts the responsibility to the user rather than enforcing it architecturally. Input validation (D) would not solve the underlying permission model problem.
