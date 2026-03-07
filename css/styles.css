@@ -55,6 +55,47 @@ a:hover { opacity: 0.85; }
 
 .logo .ai { color: var(--accent); }
 
+/* ── Header ── */
+header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(15, 17, 23, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-inner nav {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.header-inner nav a {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.header-inner nav a:hover { color: var(--text); opacity: 1; }
+
+@media (max-width: 600px) {
+    .header-inner { padding: 0 16px; }
+    .header-inner nav { gap: 20px; }
+}
+
 /* ── Buttons ── */
 .btn {
     display: inline-flex;

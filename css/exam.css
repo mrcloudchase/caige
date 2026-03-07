@@ -1,17 +1,4 @@
-body { min-height: 100vh; }
-.header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.logo span { font-weight: 400; }
+body { min-height: 100vh; padding-top: 64px; }
 
 .timer {
   font-size: 1.25rem;

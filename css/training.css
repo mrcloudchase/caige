@@ -1,4 +1,4 @@
-body { line-height: 1.7; }
+body { line-height: 1.7; padding-top: 64px; }
 
 .layout { display: flex; min-height: 100vh; }
 
@@ -9,9 +9,9 @@ body { line-height: 1.7; }
     border-right: 1px solid var(--border);
     padding: 24px 0;
     position: fixed;
-    top: 0; left: 0; bottom: 0;
+    top: 64px; left: 0; bottom: 0;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 90;
     transition: transform 0.3s;
 }
 
@@ -107,31 +107,11 @@ body { line-height: 1.7; }
 
 .loading { text-align: center; padding: 64px; color: var(--text-muted); }
 
-/* ── Top Bar ── */
-.top-bar {
-    position: fixed;
-    top: 0; right: 0;
-    z-index: 150;
-    padding: 12px 24px;
-    display: flex;
-    gap: 16px;
-}
-
-.top-bar-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 500;
-    transition: color 0.15s;
-}
-
-.top-bar-link:hover { color: var(--accent); opacity: 1; }
-
 /* ── Mobile ── */
 .menu-toggle {
     display: none;
     position: fixed;
-    top: 16px; left: 16px;
+    top: 80px; left: 16px;
     z-index: 200;
     background: var(--surface);
     border: 1px solid var(--border);

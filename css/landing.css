@@ -1,39 +1,3 @@
-/* ── Header ── */
-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(15, 17, 23, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-}
-
-.header-inner {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-nav {
-    display: flex;
-    gap: 32px;
-    align-items: center;
-}
-
-nav a {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-nav a:hover { color: var(--text); opacity: 1; }
-
 /* ── Sections ── */
 section {
     max-width: 1120px;
@@ -317,8 +281,6 @@ footer {
     .hero { padding-top: 128px; padding-bottom: 64px; }
     section { padding: 64px 20px; }
     .domains-grid { grid-template-columns: 1fr; }
-    .header-inner { padding: 0 16px; }
-    nav { gap: 20px; }
     .btn { padding: 12px 24px; font-size: 0.9rem; }
     .cta-box { padding: 48px 24px; }
     .footer-inner { flex-direction: column; gap: 12px; }
