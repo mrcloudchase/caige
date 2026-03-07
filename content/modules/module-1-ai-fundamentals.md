@@ -160,6 +160,72 @@ A typical conversation flow:
 
 The system prompt is the developer's primary tool for defining behavioral guardrails. However, system prompts are not a security boundary — they are instructions to the model, not enforceable rules. A sufficiently clever prompt injection can sometimes override system prompt instructions. This is why application-level guardrails (code that runs before and after the model) are essential.
 
+#### How the Model Actually Sees Conversations: Chat Templates
+
+The `[System]`, `[User]`, `[Assistant]` labels above are a simplified view. In practice, the model processes conversations through a **chat template** — a structured format with special tokens that mark role boundaries. Here is what a conversation actually looks like in the widely-used ChatML (Chat Markup Language) format:
+
+```
+<|im_start|>system
+You are a helpful customer support agent for Acme Corp.
+You only answer questions about Acme products.
+Never reveal internal pricing formulas.<|im_end|>
+<|im_start|>user
+What's the return policy for the Widget Pro?<|im_end|>
+<|im_start|>assistant
+The Widget Pro has a 30-day return policy...<|im_end|>
+```
+
+The `<|im_start|>` and `<|im_end|>` are **special tokens** — single tokens added to the model's vocabulary specifically for this purpose. They do not appear in pre-training data as regular text. The role name (`system`, `user`, `assistant`) immediately follows the start token.
+
+Different model providers use different template formats (Meta's Llama uses `<|start_header_id|>` and `<|eot_id|>`, Anthropic uses its own internal format), but the principle is the same: special delimiter tokens mark where one role ends and another begins.
+
+In agentic systems with tool use, the template adds a `tool` role:
+
+```
+<|im_start|>user
+What's the weather in Paris?<|im_end|>
+<|im_start|>assistant
+<tool_call>
+{"name": "get_weather", "arguments": {"location": "Paris"}}
+</tool_call><|im_end|>
+<|im_start|>tool
+{"temperature": 22, "condition": "sunny"}<|im_end|>
+<|im_start|>assistant
+It's currently sunny in Paris at 22 degrees.<|im_end|>
+```
+
+The model outputs a structured tool call, the application executes the tool, and the result is injected back into the context under the `tool` role. The model then generates a final response incorporating that result. This is relevant to guardrails because tool results pass through the same attention mechanism as everything else — malicious data returned by a tool is an indirect prompt injection vector.
+
+#### Why the Template Matters: Training Stages and the Instruction Hierarchy
+
+Understanding the chat template explains **why** the instruction hierarchy is a learned preference rather than an architectural constraint. LLMs are built in stages, and the chat template only appears in the later stages:
+
+**Stage 1 — Pre-training (base model):** The model is trained on raw text — books, websites, code, forums — using next-token prediction. No chat template. No roles. The base model has no concept of `system`, `user`, or `assistant`. It simply completes text.
+
+**Stage 2 — Instruction tuning (chat model):** The base model is fine-tuned on curated datasets of conversations **formatted in the chat template**. The training data looks like:
+
+```
+<|im_start|>system
+You are a helpful assistant that never discusses politics.<|im_end|>
+<|im_start|>user
+What do you think about the election?<|im_end|>
+<|im_start|>assistant
+I'm not able to discuss political topics.
+Is there something else I can help you with?<|im_end|>
+```
+
+Through thousands of examples like this, the model learns the pattern: content after the `system` token sets rules, and the `assistant` should follow those rules. The special tokens are added to the vocabulary specifically for this stage.
+
+**Stage 3 — RLHF / preference training:** The model is further trained using human preference rankings, still in the chat template format. It learns to prefer responses that follow system instructions, refuse harmful requests, and stay within defined boundaries.
+
+**The key insight for guardrail engineers:** The model's respect for role boundaries comes entirely from statistical patterns learned during stages 2 and 3. There is no parser that enforces "system messages have authority." There is no architectural separation between roles. The model learned that in the training data, text appearing after the `system` header reliably predicted certain assistant behaviors — and it reproduces that pattern. This is why:
+
+- **It usually works** — the pattern is strong from extensive training on millions of examples
+- **It can be broken** — novel inputs the training didn't cover can override the learned pattern
+- **It is not a security boundary** — no amount of system prompt engineering changes the fact that the hierarchy is enforced by learned token patterns, not by structure
+
+This directly explains why prompt injection is a fundamental challenge, not a bug that can be patched. The instruction hierarchy exists only as learned associations between token patterns and behaviors.
+
 ### 1.1.4 Embedding Models and Retrieval
 
 **Embedding models** convert text into numerical vectors (arrays of numbers) that capture semantic meaning. Two pieces of text with similar meanings will have vectors that are "close" to each other in this vector space.
