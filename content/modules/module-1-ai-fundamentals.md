@@ -34,9 +34,9 @@ Why tokens matter for guardrails:
 - Some attack techniques exploit token boundaries — for example, splitting a forbidden word across tokens to bypass keyword filters.
 
 **The context window** is the model's working memory. It includes everything fed into the model for a single inference call. A typical context window ranges from 4,000 to 200,000+ tokens depending on the model. Once the context window is full, content must be dropped or summarized. This is important for guardrails because:
-- System prompt instructions can be "pushed out" of the context window in long conversations
-- Safety instructions placed at the beginning of the context may have less influence as the conversation grows
-- Attackers can use long conversations to dilute safety instructions
+- As conversations grow longer, the system prompt's influence is **diluted** — it becomes a smaller fraction of the total context, and the model may pay less attention to it relative to recent conversation turns
+- In applications that manually manage context (rather than using chat APIs that automatically preserve the system message), safety instructions can be literally truncated when the window fills up
+- Attackers can exploit this by using long conversations to weaken the effect of safety instructions
 
 ```
 ┌───────────────────────────────────────────────────┐
@@ -56,7 +56,7 @@ Why tokens matter for guardrails:
 │ └───────────────────────────────────────────────┘ │
 │ ┌───────────────────────────────────────────────┐ │
 │ │  Conversation History                         │ │
-│ │  (grows over time -- can push out above)      │ │
+│ │  (grows over time -- dilutes content above)   │ │
 │ └───────────────────────────────────────────────┘ │
 │ ┌───────────────────────────────────────────────┐ │
 │ │  Current User Message                         │ │
@@ -65,8 +65,9 @@ Why tokens matter for guardrails:
 │ │  Model Response (generated here)              │ │
 │ └───────────────────────────────────────────────┘ │
 └───────────────────────────────────────────────────┘
-  As conversation grows, earlier content is pushed
-  out -- including safety instructions at the top.
+  As conversation grows, the system prompt becomes a
+  smaller fraction of context -- diluting its influence.
+  In manual context management, it can be truncated entirely.
 ```
 
 **Attention** is the mechanism that allows the model to determine which parts of the context are most relevant to generating the next token. The model does not process the context window linearly — it attends to all parts of the input in parallel when generating output. This has two important implications for guardrails:
