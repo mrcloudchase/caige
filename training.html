@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cAIge - Certified AI Guardrail Engineer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-hover: #222632;
+            --border: #2a2e3a;
+            --text: #e1e4eb;
+            --text-muted: #8b90a0;
+            --accent: #6c9fff;
+            --accent-dim: #4a7ad4;
+            --green: #4ade80;
+            --yellow: #fbbf24;
+            --code-bg: #141620;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .layout { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 300px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .sidebar-header h1 span { color: var(--accent); }
+        .sidebar-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+        .nav-section {
+            padding: 8px 24px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px 24px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+
+        .nav-item.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(108, 159, 255, 0.08);
+        }
+
+        .nav-weight { font-size: 11px; color: var(--text-muted); float: right; margin-top: 2px; }
+
+        .main { margin-left: 300px; flex: 1; max-width: 900px; padding: 48px 64px; }
+
+        .content h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .content h2 { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        .content h3 { font-size: 18px; font-weight: 600; margin-top: 36px; margin-bottom: 12px; color: var(--accent); }
+        .content h4 { font-size: 15px; font-weight: 600; margin-top: 24px; margin-bottom: 8px; }
+        .content p { margin-bottom: 16px; color: var(--text); }
+        .content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
+        .content li { margin-bottom: 6px; }
+        .content strong { color: #fff; }
+
+        .content code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            border: 1px solid var(--border);
+        }
+
+        .content pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .content pre code { background: none; padding: 0; border: none; font-size: 13px; }
+
+        .content table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px; }
+        .content th { background: var(--surface); text-align: left; padding: 10px 14px; font-weight: 600; border: 1px solid var(--border); font-size: 13px; }
+        .content td { padding: 10px 14px; border: 1px solid var(--border); }
+        .content tr:hover td { background: rgba(108, 159, 255, 0.04); }
+
+        .content blockquote {
+            border-left: 3px solid var(--accent);
+            padding: 12px 20px;
+            margin-bottom: 16px;
+            background: rgba(108, 159, 255, 0.06);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .content blockquote p:last-child { margin-bottom: 0; }
+        .content hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+        .loading { text-align: center; padding: 64px; color: var(--text-muted); }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px; left: 16px;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 48px 24px; }
+            .menu-toggle { display: block; }
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 0; right: 0;
+            z-index: 150;
+            padding: 12px 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .top-bar-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .top-bar-link:hover { color: var(--accent); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="top-bar-link">Home</a>
+        <a href="exam.html" class="top-bar-link">Take Exam</a>
+    </div>
+
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>c<span>AI</span>ge</h1>
+                <p>Certified AI Guardrail Engineer</p>
+            </div>
+
+            <div class="nav-section">Program</div>
+            <a class="nav-item active" data-page="training/README.md">Overview</a>
+            <a class="nav-item" data-page="competency-matrix.md">Competency Matrix</a>
+            <a class="nav-item" data-page="exam-blueprint.md">Exam Blueprint</a>
+
+            <div class="nav-section">Training Modules</div>
+            <a class="nav-item" data-page="training/module-1-ai-fundamentals.md">
+                1. AI Fundamentals & Failure Modes
+                <span class="nav-weight">15%</span>
+            </a>
+            <a class="nav-item" data-page="training/module-2-guardrail-architecture.md">
+                2. Guardrail Architecture & Design
+                <span class="nav-weight">25%</span>
+            </a>
+            <a class="nav-item" data-page="training/module-3-guardrail-implementation.md">
+                3. Guardrail Implementation
+                <span class="nav-weight">20%</span>
+            </a>
+            <a class="nav-item" data-page="training/module-4-policy-compliance.md">
+                4. Policy, Compliance & Governance
+                <span class="nav-weight">15%</span>
+            </a>
+            <a class="nav-item" data-page="training/module-5-testing-red-teaming.md">
+                5. Testing & Red Teaming
+                <span class="nav-weight">15%</span>
+            </a>
+            <a class="nav-item" data-page="training/module-6-operations-observability.md">
+                6. Operations & Observability
+                <span class="nav-weight">10%</span>
+            </a>
+        </nav>
+
+        <main class="main">
+            <div class="content" id="content">
+                <div class="loading">Loading...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Minimal markdown parser
+        function renderMarkdown(md) {
+            let html = '';
+            const lines = md.split('\n');
+            let i = 0;
+            let inCodeBlock = false;
+            let codeContent = '';
+            let inTable = false;
+            let tableRows = [];
+            let inList = false;
+            let listType = 'ul';
+            let listItems = [];
+
+            function flushList() {
+                if (!inList) return '';
+                inList = false;
+                const tag = listType;
+                const result = `<${tag}>${listItems.map(item => `<li>${inlineFormat(item)}</li>`).join('')}</${tag}>`;
+                listItems = [];
+                return result;
+            }
+
+            function flushTable() {
+                if (!inTable) return '';
+                inTable = false;
+                if (tableRows.length < 2) return '';
+                const headers = tableRows[0];
+                const rows = tableRows.slice(2);
+                let result = '<table><thead><tr>';
+                headers.forEach(h => { result += `<th>${inlineFormat(h.trim())}</th>`; });
+                result += '</tr></thead><tbody>';
+                rows.forEach(row => {
+                    result += '<tr>';
+                    row.forEach((cell, ci) => {
+                        result += `<td>${inlineFormat(cell.trim())}</td>`;
+                    });
+                    result += '</tr>';
+                });
+                result += '</tbody></table>';
+                tableRows = [];
+                return result;
+            }
+
+            function inlineFormat(text) {
+                text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+                text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:var(--accent)">$1</a>');
+                return text;
+            }
+
+            while (i < lines.length) {
+                const line = lines[i];
+
+                if (line.trim().startsWith('```')) {
+                    if (inCodeBlock) {
+                        html += flushList();
+                        html += `<pre><code>${codeContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
+                        codeContent = '';
+                        inCodeBlock = false;
+                    } else {
+                        html += flushList();
+                        html += flushTable();
+                        inCodeBlock = true;
+                    }
+                    i++;
+                    continue;
+                }
+
+                if (inCodeBlock) { codeContent += line + '\n'; i++; continue; }
+
+                if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+                    html += flushList();
+                    if (!inTable) inTable = true;
+                    const cells = line.split('|').slice(1, -1);
+                    tableRows.push(cells);
+                    i++;
+                    continue;
+                } else if (inTable) {
+                    html += flushTable();
+                }
+
+                const headerMatch = line.match(/^(#{1,4})\s+(.+)/);
+                if (headerMatch) {
+                    html += flushList();
+                    const level = headerMatch[1].length;
+                    html += `<h${level}>${inlineFormat(headerMatch[2])}</h${level}>`;
+                    i++;
+                    continue;
+                }
+
+                if (line.trim() === '---' || line.trim() === '***') {
+                    html += flushList();
+                    html += '<hr>';
+                    i++;
+                    continue;
+                }
+
+                if (line.trim().startsWith('> ')) {
+                    html += flushList();
+                    let bqContent = '';
+                    while (i < lines.length && lines[i].trim().startsWith('> ')) {
+                        bqContent += lines[i].trim().substring(2) + '\n';
+                        i++;
+                    }
+                    while (i < lines.length && lines[i].trim() !== '' && !lines[i].trim().startsWith('#') && !lines[i].trim().startsWith('> ')) {
+                        if (lines[i].trim().startsWith('|')) break;
+                        bqContent += lines[i].trim() + '\n';
+                        i++;
+                    }
+                    html += `<blockquote>${bqContent.split('\n').filter(l => l).map(l => `<p>${inlineFormat(l)}</p>`).join('')}</blockquote>`;
+                    continue;
+                }
+
+                if (line.match(/^\s*[-*]\s+/)) {
+                    if (!inList || listType !== 'ul') { html += flushList(); inList = true; listType = 'ul'; }
+                    listItems.push(line.replace(/^\s*[-*]\s+/, ''));
+                    i++;
+                    continue;
+                }
+
+                if (line.match(/^\s*\d+\.\s+/)) {
+                    if (!inList || listType !== 'ol') { html += flushList(); inList = true; listType = 'ol'; }
+                    listItems.push(line.replace(/^\s*\d+\.\s+/, ''));
+                    i++;
+                    continue;
+                }
+
+                if (line.trim() === '') { html += flushList(); i++; continue; }
+
+                html += flushList();
+                let para = line;
+                while (i + 1 < lines.length && lines[i + 1].trim() !== '' &&
+                       !lines[i + 1].match(/^#{1,4}\s/) &&
+                       !lines[i + 1].trim().startsWith('```') &&
+                       !lines[i + 1].trim().startsWith('|') &&
+                       !lines[i + 1].trim().startsWith('> ') &&
+                       !lines[i + 1].match(/^\s*[-*]\s+/) &&
+                       !lines[i + 1].match(/^\s*\d+\.\s+/) &&
+                       lines[i + 1].trim() !== '---') {
+                    i++;
+                    para += ' ' + lines[i];
+                }
+                html += `<p>${inlineFormat(para)}</p>`;
+                i++;
+            }
+
+            html += flushList();
+            html += flushTable();
+            return html;
+        }
+
+        const contentEl = document.getElementById('content');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        async function loadPage(path) {
+            contentEl.innerHTML = '<div class="loading">Loading...</div>';
+            try {
+                const resp = await fetch(path);
+                if (!resp.ok) throw new Error('File not found');
+                const md = await resp.text();
+                contentEl.innerHTML = renderMarkdown(md);
+                window.scrollTo(0, 0);
+            } catch (e) {
+                contentEl.innerHTML = `<p>Could not load ${path}.</p>`;
+            }
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                loadPage(item.dataset.page);
+                document.querySelector('.sidebar').classList.remove('open');
+            });
+        });
+
+        loadPage('training/README.md');
+    </script>
+</body>
+</html>

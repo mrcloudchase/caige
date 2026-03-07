@@ -1,394 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cAIge - Certified AI Guardrail Engineer</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cAIge — Certified AI Guardrail Engineer</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2e3a;
+      --text: #e1e4eb;
+      --text-muted: #8b90a0;
+      --accent: #6c9fff;
+      --green: #4ade80;
+    }
 
-        :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface-hover: #222632;
-            --border: #2a2e3a;
-            --text: #e1e4eb;
-            --text-muted: #8b90a0;
-            --accent: #6c9fff;
-            --accent-dim: #4a7ad4;
-            --green: #4ade80;
-            --yellow: #fbbf24;
-            --code-bg: #141620;
-        }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-        }
+    html {
+      scroll-behavior: smooth;
+    }
 
-        .layout { display: flex; min-height: 100vh; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        .sidebar {
-            width: 300px;
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: 24px 0;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            overflow-y: auto;
-            z-index: 100;
-            transition: transform 0.3s;
-        }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
 
-        .sidebar-header {
-            padding: 0 24px 24px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 16px;
-        }
+    a:hover {
+      opacity: 0.85;
+    }
 
-        .sidebar-header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-        .sidebar-header h1 span { color: var(--accent); }
-        .sidebar-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    /* ── Header ── */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(15, 17, 23, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
 
-        .nav-section {
-            padding: 8px 24px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
+    .header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .nav-item {
-            display: block;
-            padding: 8px 24px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.15s;
-            border-left: 3px solid transparent;
-        }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
 
-        .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+    .logo .ai {
+      color: var(--accent);
+    }
 
-        .nav-item.active {
-            color: var(--accent);
-            border-left-color: var(--accent);
-            background: rgba(108, 159, 255, 0.08);
-        }
+    nav {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
 
-        .nav-weight { font-size: 11px; color: var(--text-muted); float: right; margin-top: 2px; }
+    nav a {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
 
-        .main { margin-left: 300px; flex: 1; max-width: 900px; padding: 48px 64px; }
+    nav a:hover {
+      color: var(--text);
+      opacity: 1;
+    }
 
-        .content h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
-        .content h2 { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-        .content h3 { font-size: 18px; font-weight: 600; margin-top: 36px; margin-bottom: 12px; color: var(--accent); }
-        .content h4 { font-size: 15px; font-weight: 600; margin-top: 24px; margin-bottom: 8px; }
-        .content p { margin-bottom: 16px; color: var(--text); }
-        .content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
-        .content li { margin-bottom: 6px; }
-        .content strong { color: #fff; }
+    /* ── Sections ── */
+    section {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 96px 24px;
+    }
 
-        .content code {
-            background: var(--code-bg);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            border: 1px solid var(--border);
-        }
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
 
-        .content pre {
-            background: var(--code-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            font-size: 13px;
-            line-height: 1.5;
-        }
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
 
-        .content pre code { background: none; padding: 0; border: none; font-size: 13px; }
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      line-height: 1.7;
+    }
 
-        .content table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px; }
-        .content th { background: var(--surface); text-align: left; padding: 10px 14px; font-weight: 600; border: 1px solid var(--border); font-size: 13px; }
-        .content td { padding: 10px 14px; border: 1px solid var(--border); }
-        .content tr:hover td { background: rgba(108, 159, 255, 0.04); }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      max-width: 1120px;
+      margin: 0 auto;
+    }
 
-        .content blockquote {
-            border-left: 3px solid var(--accent);
-            padding: 12px 20px;
-            margin-bottom: 16px;
-            background: rgba(108, 159, 255, 0.06);
-            border-radius: 0 6px 6px 0;
-        }
+    /* ── Hero ── */
+    .hero {
+      padding-top: 160px;
+      padding-bottom: 96px;
+      text-align: center;
+    }
 
-        .content blockquote p:last-child { margin-bottom: 0; }
-        .content hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      color: var(--green);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+    }
 
-        .loading { text-align: center; padding: 64px; color: var(--text-muted); }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
 
-        .menu-toggle {
-            display: none;
-            position: fixed;
-            top: 16px; left: 16px;
-            z-index: 200;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 18px;
-        }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
 
-        @media (max-width: 900px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-            .main { margin-left: 0; padding: 48px 24px; }
-            .menu-toggle { display: block; }
-        }
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-    </style>
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      opacity: 1;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0f1117;
+      box-shadow: 0 0 20px rgba(108, 159, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(108, 159, 255, 0.35);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(108, 159, 255, 0.08);
+    }
+
+    /* ── What Is Section ── */
+    .what-is .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .what-is .content p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .what-is .highlight-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+    }
+
+    .what-is .highlight-box h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .pillar-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pillar-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .pillar-marker {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-top: 7px;
+    }
+
+    /* ── Domains Grid ── */
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .domain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .domain-card:hover {
+      border-color: rgba(108, 159, 255, 0.3);
+      box-shadow: 0 0 24px rgba(108, 159, 255, 0.06);
+    }
+
+    .domain-weight {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .domain-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .domain-bar {
+      margin-top: 16px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .domain-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    /* ── How It Works ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      position: relative;
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(108, 159, 255, 0.1);
+      border: 1px solid rgba(108, 159, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .step h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* ── Exam Details ── */
+    .exam-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .exam-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .exam-item-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .exam-item-label {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      text-align: center;
+    }
+
+    .cta-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 64px 40px;
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 32px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .footer-logo .ai {
+      color: var(--accent);
+    }
+
+    .footer-copy {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .domains-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .exam-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .what-is .content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero {
+        padding-top: 128px;
+        padding-bottom: 64px;
+      }
+
+      section {
+        padding: 64px 20px;
+      }
+
+      .domains-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner {
+        padding: 0 16px;
+      }
+
+      nav {
+        gap: 20px;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        font-size: 0.9rem;
+      }
+
+      .cta-box {
+        padding: 48px 24px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .exam-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
 
-    <div class="layout">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h1>c<span>AI</span>ge</h1>
-                <p>Certified AI Guardrail Engineer</p>
-            </div>
-
-            <div class="nav-section">Program</div>
-            <a class="nav-item active" data-page="training/README.md">Overview</a>
-            <a class="nav-item" data-page="competency-matrix.md">Competency Matrix</a>
-            <a class="nav-item" data-page="exam-blueprint.md">Exam Blueprint</a>
-
-            <div class="nav-section">Training Modules</div>
-            <a class="nav-item" data-page="training/module-1-ai-fundamentals.md">
-                1. AI Fundamentals & Failure Modes
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="training/module-2-guardrail-architecture.md">
-                2. Guardrail Architecture & Design
-                <span class="nav-weight">25%</span>
-            </a>
-            <a class="nav-item" data-page="training/module-3-guardrail-implementation.md">
-                3. Guardrail Implementation
-                <span class="nav-weight">20%</span>
-            </a>
-            <a class="nav-item" data-page="training/module-4-policy-compliance.md">
-                4. Policy, Compliance & Governance
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="training/module-5-testing-red-teaming.md">
-                5. Testing & Red Teaming
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="training/module-6-operations-observability.md">
-                6. Operations & Observability
-                <span class="nav-weight">10%</span>
-            </a>
-        </nav>
-
-        <main class="main">
-            <div class="content" id="content">
-                <div class="loading">Loading...</div>
-            </div>
-        </main>
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">c<span class="ai">AI</span>ge</div>
+      <nav>
+        <a href="training.html">Training</a>
+        <a href="exam.html">Exam</a>
+      </nav>
     </div>
+  </header>
 
-    <script>
-        // Minimal markdown parser
-        function renderMarkdown(md) {
-            let html = '';
-            const lines = md.split('\n');
-            let i = 0;
-            let inCodeBlock = false;
-            let codeContent = '';
-            let inTable = false;
-            let tableRows = [];
-            let inList = false;
-            let listType = 'ul';
-            let listItems = [];
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">Free during launch</div>
+    <h1>Certified AI<br>Guardrail Engineer</h1>
+    <p>The vendor-agnostic certification for engineers who design, implement, and maintain AI safety systems. Prove your expertise across content safety, security, and operational guardrails.</p>
+    <div class="btn-group">
+      <a href="training.html" class="btn btn-primary">Start Training</a>
+      <a href="exam.html" class="btn btn-secondary">Take Exam</a>
+    </div>
+  </section>
 
-            function flushList() {
-                if (!inList) return '';
-                inList = false;
-                const tag = listType;
-                const result = `<${tag}>${listItems.map(item => `<li>${inlineFormat(item)}</li>`).join('')}</${tag}>`;
-                listItems = [];
-                return result;
-            }
+  <hr class="divider">
 
-            function flushTable() {
-                if (!inTable) return '';
-                inTable = false;
-                if (tableRows.length < 2) return '';
-                const headers = tableRows[0];
-                const rows = tableRows.slice(2);
-                let result = '<table><thead><tr>';
-                headers.forEach(h => { result += `<th>${inlineFormat(h.trim())}</th>`; });
-                result += '</tr></thead><tbody>';
-                rows.forEach(row => {
-                    result += '<tr>';
-                    row.forEach((cell, ci) => {
-                        result += `<td>${inlineFormat(cell.trim())}</td>`;
-                    });
-                    result += '</tr>';
-                });
-                result += '</tbody></table>';
-                tableRows = [];
-                return result;
-            }
+  <!-- What is a Guardrail Engineer? -->
+  <section class="what-is">
+    <div class="section-label">The Role</div>
+    <div class="section-title">What is a Guardrail Engineer?</div>
+    <div class="content" style="margin-top: 32px;">
+      <div>
+        <p>AI guardrails prevent AI systems from being used in ways they shouldn't. They enforce boundaries around what models can say, do, and access &mdash; spanning content safety, security, and operational reliability.</p>
+        <p style="margin-top: 16px;">A guardrail engineer works across all three of these pillars, designing and maintaining the systems that keep AI safe and trustworthy in production. It is a discipline that combines security engineering, ML operations, and policy expertise into a single, critical function.</p>
+      </div>
+      <div class="highlight-box">
+        <h3>Three Pillars of AI Guardrails</h3>
+        <ul class="pillar-list">
+          <li>
+            <span class="pillar-marker"></span>
+            <span><strong style="color: var(--text);">Content Safety</strong> &mdash; Preventing harmful, biased, or policy-violating outputs from reaching users</span>
+          </li>
+          <li>
+            <span class="pillar-marker"></span>
+            <span><strong style="color: var(--text);">Security</strong> &mdash; Defending against prompt injection, data exfiltration, and adversarial attacks</span>
+          </li>
+          <li>
+            <span class="pillar-marker"></span>
+            <span><strong style="color: var(--text);">Operational Safety</strong> &mdash; Ensuring reliability, observability, and graceful failure in production systems</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-            function inlineFormat(text) {
-                text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-                text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-                text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-                text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:var(--accent)">$1</a>');
-                return text;
-            }
+  <hr class="divider">
 
-            while (i < lines.length) {
-                const line = lines[i];
+  <!-- Six Domains -->
+  <section>
+    <div class="section-label">Exam Domains</div>
+    <div class="section-title">Six Domains of Expertise</div>
+    <div class="section-subtitle">The cAIge certification validates competency across six core domains, weighted by their importance in real-world guardrail engineering.</div>
+    <div class="domains-grid">
+      <div class="domain-card">
+        <div class="domain-weight">15%</div>
+        <h3>AI Fundamentals &amp; Failure Modes</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 60%;"></div></div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-weight">25%</div>
+        <h3>Guardrail Architecture &amp; Design</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 100%;"></div></div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-weight">20%</div>
+        <h3>Guardrail Implementation</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 80%;"></div></div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-weight">15%</div>
+        <h3>Policy, Compliance &amp; Governance</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 60%;"></div></div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-weight">15%</div>
+        <h3>Testing &amp; Red Teaming</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 60%;"></div></div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-weight">10%</div>
+        <h3>Operations &amp; Observability</h3>
+        <div class="domain-bar"><div class="domain-bar-fill" style="width: 40%;"></div></div>
+      </div>
+    </div>
+  </section>
 
-                if (line.trim().startsWith('```')) {
-                    if (inCodeBlock) {
-                        html += flushList();
-                        html += `<pre><code>${codeContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`;
-                        codeContent = '';
-                        inCodeBlock = false;
-                    } else {
-                        html += flushList();
-                        html += flushTable();
-                        inCodeBlock = true;
-                    }
-                    i++;
-                    continue;
-                }
+  <hr class="divider">
 
-                if (inCodeBlock) { codeContent += line + '\n'; i++; continue; }
+  <!-- How It Works -->
+  <section>
+    <div class="section-label">Process</div>
+    <div class="section-title">How It Works</div>
+    <div class="section-subtitle">Three steps from start to certified. No prerequisites, no vendor lock-in.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Study</h3>
+        <p>Work through six modules of free, text-based training material covering every domain on the exam. Study at your own pace.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Exam</h3>
+        <p>75 scored questions in 120 minutes. Multiple choice, multiple select, and scenario-based questions. You need 70% to pass.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Certify</h3>
+        <p>Pass the exam and receive your Certified AI Guardrail Engineer certificate. Valid for three years with straightforward recertification.</p>
+      </div>
+    </div>
+  </section>
 
-                if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
-                    html += flushList();
-                    if (!inTable) inTable = true;
-                    const cells = line.split('|').slice(1, -1);
-                    tableRows.push(cells);
-                    i++;
-                    continue;
-                } else if (inTable) {
-                    html += flushTable();
-                }
+  <hr class="divider">
 
-                const headerMatch = line.match(/^(#{1,4})\s+(.+)/);
-                if (headerMatch) {
-                    html += flushList();
-                    const level = headerMatch[1].length;
-                    html += `<h${level}>${inlineFormat(headerMatch[2])}</h${level}>`;
-                    i++;
-                    continue;
-                }
+  <!-- Exam Details -->
+  <section>
+    <div class="section-label">Specifications</div>
+    <div class="section-title">Exam Details</div>
+    <div class="section-subtitle">Everything you need to know about the cAIge certification exam at a glance.</div>
+    <div class="exam-grid">
+      <div class="exam-item">
+        <div class="exam-item-value">75</div>
+        <div class="exam-item-label">Scored questions, plus 5 unscored pilot questions for future exam development</div>
+      </div>
+      <div class="exam-item">
+        <div class="exam-item-value">120 min</div>
+        <div class="exam-item-label">Total exam duration &mdash; approximately 90 seconds per question</div>
+      </div>
+      <div class="exam-item">
+        <div class="exam-item-value">70%</div>
+        <div class="exam-item-label">Passing score required to earn your certification</div>
+      </div>
+      <div class="exam-item">
+        <div class="exam-item-value">3 types</div>
+        <div class="exam-item-label">Multiple choice, multiple select, and scenario-based question formats</div>
+      </div>
+      <div class="exam-item">
+        <div class="exam-item-value">3 years</div>
+        <div class="exam-item-label">Certification validity period before recertification is required</div>
+      </div>
+      <div class="exam-item">
+        <div class="exam-item-value">Vendor-agnostic</div>
+        <div class="exam-item-label">No specific tools, platforms, or cloud providers required</div>
+      </div>
+    </div>
+  </section>
 
-                if (line.trim() === '---' || line.trim() === '***') {
-                    html += flushList();
-                    html += '<hr>';
-                    i++;
-                    continue;
-                }
+  <hr class="divider">
 
-                if (line.trim().startsWith('> ')) {
-                    html += flushList();
-                    let bqContent = '';
-                    while (i < lines.length && lines[i].trim().startsWith('> ')) {
-                        bqContent += lines[i].trim().substring(2) + '\n';
-                        i++;
-                    }
-                    while (i < lines.length && lines[i].trim() !== '' && !lines[i].trim().startsWith('#') && !lines[i].trim().startsWith('> ')) {
-                        if (lines[i].trim().startsWith('|')) break;
-                        bqContent += lines[i].trim() + '\n';
-                        i++;
-                    }
-                    html += `<blockquote>${bqContent.split('\n').filter(l => l).map(l => `<p>${inlineFormat(l)}</p>`).join('')}</blockquote>`;
-                    continue;
-                }
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <h2>Ready to get certified?</h2>
+      <p>Start with the free training material or jump straight to the exam.</p>
+      <div class="btn-group">
+        <a href="training.html" class="btn btn-primary">Start Training</a>
+        <a href="exam.html" class="btn btn-secondary">Take Exam</a>
+      </div>
+    </div>
+  </section>
 
-                if (line.match(/^\s*[-*]\s+/)) {
-                    if (!inList || listType !== 'ul') { html += flushList(); inList = true; listType = 'ul'; }
-                    listItems.push(line.replace(/^\s*[-*]\s+/, ''));
-                    i++;
-                    continue;
-                }
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">c<span class="ai">AI</span>ge</div>
+      <div class="footer-copy">&copy; 2026 cAIge. All rights reserved.</div>
+    </div>
+  </footer>
 
-                if (line.match(/^\s*\d+\.\s+/)) {
-                    if (!inList || listType !== 'ol') { html += flushList(); inList = true; listType = 'ol'; }
-                    listItems.push(line.replace(/^\s*\d+\.\s+/, ''));
-                    i++;
-                    continue;
-                }
-
-                if (line.trim() === '') { html += flushList(); i++; continue; }
-
-                html += flushList();
-                let para = line;
-                while (i + 1 < lines.length && lines[i + 1].trim() !== '' &&
-                       !lines[i + 1].match(/^#{1,4}\s/) &&
-                       !lines[i + 1].trim().startsWith('```') &&
-                       !lines[i + 1].trim().startsWith('|') &&
-                       !lines[i + 1].trim().startsWith('> ') &&
-                       !lines[i + 1].match(/^\s*[-*]\s+/) &&
-                       !lines[i + 1].match(/^\s*\d+\.\s+/) &&
-                       lines[i + 1].trim() !== '---') {
-                    i++;
-                    para += ' ' + lines[i];
-                }
-                html += `<p>${inlineFormat(para)}</p>`;
-                i++;
-            }
-
-            html += flushList();
-            html += flushTable();
-            return html;
-        }
-
-        const contentEl = document.getElementById('content');
-        const navItems = document.querySelectorAll('.nav-item');
-
-        async function loadPage(path) {
-            contentEl.innerHTML = '<div class="loading">Loading...</div>';
-            try {
-                const resp = await fetch(path);
-                if (!resp.ok) throw new Error('File not found');
-                const md = await resp.text();
-                contentEl.innerHTML = renderMarkdown(md);
-                window.scrollTo(0, 0);
-            } catch (e) {
-                contentEl.innerHTML = `<p>Could not load ${path}. Make sure you are running a local server (see open-site.command).</p>`;
-            }
-        }
-
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(n => n.classList.remove('active'));
-                item.classList.add('active');
-                loadPage(item.dataset.page);
-                document.querySelector('.sidebar').classList.remove('open');
-            });
-        });
-
-        loadPage('training/README.md');
-    </script>
 </body>
 </html>
