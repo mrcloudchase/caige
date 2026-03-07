@@ -35,7 +35,7 @@ The AI Foundations prerequisite content is not directly tested on the exam, but 
 
 | Module | Domain | Weight | Estimated Time |
 |--------|--------|--------|----------------|
-| [Prerequisites: AI Foundations](prerequisites.md) | Foundational | — | 1-2 hours |
+| [Prerequisites: AI Foundations](prerequisites.md) | Foundational | — | 2-3 hours |
 | [Module 1: AI System Fundamentals & Failure Modes](module-1-ai-fundamentals.md) | Domain 1 | 15% | 3-4 hours |
 | [Module 2: Guardrail Architecture & Design](module-2-guardrail-architecture.md) | Domain 2 | 25% | 5-6 hours |
 | [Module 3: Guardrail Implementation](module-3-guardrail-implementation.md) | Domain 3 | 20% | 4-5 hours |
@@ -43,7 +43,7 @@ The AI Foundations prerequisite content is not directly tested on the exam, but 
 | [Module 5: Testing & Red Teaming](module-5-testing-red-teaming.md) | Domain 5 | 15% | 3-4 hours |
 | [Module 6: Operations & Observability](module-6-operations-observability.md) | Domain 6 | 10% | 2-3 hours |
 
-**Total estimated study time:** 21-28 hours (including prerequisites)
+**Total estimated study time:** 22-29 hours (including prerequisites)
 
 ---
 
