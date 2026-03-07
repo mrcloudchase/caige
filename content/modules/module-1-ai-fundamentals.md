@@ -564,28 +564,7 @@ Examples:
 
 **Severity:** Potentially very high. Over-reliance compounds every other failure mode — a hallucination only causes harm if someone acts on it without verification.
 
-### 1.2.8 Recognizing Novel Failure Patterns
-
-The eight failure modes above cover the well-known categories, but AI systems can fail in ways that don't fit neatly into any of them. A cAIge holder must be able to identify and categorize new failure patterns as they emerge.
-
-**How to recognize a novel failure:**
-- The system produces an undesirable outcome, but it doesn't match the definitions of hallucination, injection, jailbreaking, data leakage, toxicity, drift, over-reliance, or cascading failure
-- The failure involves an interaction between multiple components that wasn't anticipated (e.g., a guardrail and a model update interacting to create a new bypass path)
-- The failure emerges only at scale or in specific user populations that weren't represented in testing
-
-**Framework for analyzing novel failures:**
-1. **Describe the observable behavior** — What exactly happened? What was the output or action?
-2. **Identify the root cause** — Was it a model behavior, a guardrail gap, an architectural issue, or an environmental factor?
-3. **Determine the trigger** — What input or condition caused this? Is it reproducible?
-4. **Assess the scope** — Is this a single-user edge case or a systemic vulnerability?
-5. **Classify it** — Does it extend an existing category (e.g., a new form of injection) or require a new one?
-6. **Define the guardrail response** — What would prevent or mitigate this failure?
-
-**Example of an emerging failure pattern:** An AI system uses a RAG pipeline with a summarization step. The summarization model occasionally introduces subtle inaccuracies that the main model then treats as source material, generating confident but wrong answers. This isn't pure hallucination (the main model is grounded in its sources) and it isn't retrieval failure (the correct documents were retrieved). It's a novel category: **intermediate transformation error**, where data corruption occurs between retrieval and generation. Recognizing it requires tracing the full data path rather than checking individual components.
-
-The key skill is maintaining curiosity about unexpected behaviors rather than forcing them into existing categories. When something doesn't fit, investigate rather than dismiss.
-
-### 1.2.9 Cascading Failures in Agentic Systems
+### 1.2.8 Cascading Failures in Agentic Systems
 
 **What it is:** In agentic systems, one failure compounds through subsequent steps. A wrong tool call produces bad data, which informs a bad decision, which triggers another wrong action.
 
@@ -637,7 +616,7 @@ Example scenario:
 
 **Severity:** High to critical. Unlike a bad text response (which can be ignored), agentic failures produce real-world actions that may be difficult or impossible to reverse.
 
-### 1.2.10 Identity and Access Failures
+### 1.2.9 Identity and Access Failures
 
 **What it is:** The AI system fails to properly enforce identity boundaries, leading to unauthorized access to data or capabilities. This includes:
 - **Cross-tenant data leakage** — one user's data, conversation history, or context appearing in another user's AI responses
@@ -679,6 +658,27 @@ Example scenario:
 - **Audit logging of identity context** — log which user identity was associated with each AI interaction for forensic analysis
 
 **Severity:** High to critical. Identity failures can expose sensitive data across organizational boundaries, violate regulatory requirements (HIPAA, GDPR), and enable unauthorized actions in production systems. In multi-tenant SaaS applications, a single cross-tenant leak can be a breach-level incident.
+
+### 1.2.10 Recognizing Novel Failure Patterns
+
+The nine failure modes above cover the well-known categories, but AI systems can fail in ways that don't fit neatly into any of them. A cAIge holder must be able to identify and categorize new failure patterns as they emerge.
+
+**How to recognize a novel failure:**
+- The system produces an undesirable outcome, but it doesn't match the definitions of hallucination, injection, jailbreaking, data leakage, toxicity, drift, over-reliance, cascading failure, or identity/access failure
+- The failure involves an interaction between multiple components that wasn't anticipated (e.g., a guardrail and a model update interacting to create a new bypass path)
+- The failure emerges only at scale or in specific user populations that weren't represented in testing
+
+**Framework for analyzing novel failures:**
+1. **Describe the observable behavior** — What exactly happened? What was the output or action?
+2. **Identify the root cause** — Was it a model behavior, a guardrail gap, an architectural issue, or an environmental factor?
+3. **Determine the trigger** — What input or condition caused this? Is it reproducible?
+4. **Assess the scope** — Is this a single-user edge case or a systemic vulnerability?
+5. **Classify it** — Does it extend an existing category (e.g., a new form of injection) or require a new one?
+6. **Define the guardrail response** — What would prevent or mitigate this failure?
+
+**Example of an emerging failure pattern:** An AI system uses a RAG pipeline with a summarization step. The summarization model occasionally introduces subtle inaccuracies that the main model then treats as source material, generating confident but wrong answers. This isn't pure hallucination (the main model is grounded in its sources) and it isn't retrieval failure (the correct documents were retrieved). It's a novel category: **intermediate transformation error**, where data corruption occurs between retrieval and generation. Recognizing it requires tracing the full data path rather than checking individual components.
+
+The key skill is maintaining curiosity about unexpected behaviors rather than forcing them into existing categories. When something doesn't fit, investigate rather than dismiss.
 
 ---
 
@@ -804,6 +804,7 @@ For each identified threat, assess:
 | Off-topic drift | High | Low | Medium | P3 |
 | Training data poisoning | Low | High | Medium | P3 |
 | Cascading agent failure | Medium | High | High | P1 |
+| Identity/access failure | Medium | High | High | P1 |
 
 ### 1.3.6 Trust Boundaries
 
