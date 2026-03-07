@@ -9,11 +9,7 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <a href="index.html" class="logo">cAIge <span>| Exam</span></a>
-  <div id="timer-display" class="timer" style="display:none;">120:00</div>
-</div>
+<div id="site-header"></div>
 
 <!-- INTRO SCREEN -->
 <div id="intro-screen">
@@ -62,7 +58,7 @@
         <div class="name-error" id="name-error">Please enter your name to begin the exam.</div>
       </div>
 
-      <button class="btn btn-primary" onclick="startExam()">Begin Exam</button>
+      <button class="btn btn-primary" id="start-btn">Begin Exam</button>
     </div>
   </div>
 </div>
@@ -79,18 +75,18 @@
         <div class="question-text" id="question-text"></div>
         <ul class="options-list" id="options-list"></ul>
         <div class="question-actions">
-          <button class="flag-btn" id="flag-btn" onclick="toggleFlag()">
+          <button class="flag-btn" id="flag-btn">
             <span class="flag-icon"></span>
             <span id="flag-text">Flag for Review</span>
           </button>
           <div class="nav-buttons">
-            <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">Previous</button>
-            <button class="btn btn-secondary" id="next-btn" onclick="nextQuestion()">Next</button>
+            <button class="btn btn-secondary" id="prev-btn">Previous</button>
+            <button class="btn btn-secondary" id="next-btn">Next</button>
           </div>
         </div>
       </div>
       <div class="side-panel" id="side-panel">
-        <div class="side-panel-toggle" onclick="togglePalette()"></div>
+        <div class="side-panel-toggle"></div>
         <div class="palette-card">
           <h3>Question Palette</h3>
           <div class="palette-grid" id="palette-grid"></div>
@@ -101,7 +97,7 @@
           </div>
         </div>
         <div class="submit-section">
-          <button class="btn btn-danger" onclick="confirmSubmit()">Submit Exam</button>
+          <button class="btn btn-danger" id="submit-btn">Submit Exam</button>
         </div>
       </div>
     </div>
@@ -140,12 +136,17 @@
     <h3>Submit Exam?</h3>
     <p id="confirm-msg">Are you sure you want to submit your exam? This action cannot be undone.</p>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="submitExam()">Submit</button>
+      <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="confirm-btn">Submit</button>
     </div>
   </div>
 </div>
 
-<script src="js/exam.js"></script>
+<script type="module">
+  import { SiteHeader } from './js/components/site-header.js';
+  document.getElementById('site-header').outerHTML = SiteHeader({ variant: 'exam' });
+</script>
+<script type="module" src="js/exam/index.js"></script>
+
 </body>
 </html>

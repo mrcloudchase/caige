@@ -8,52 +8,11 @@
     <link rel="stylesheet" href="css/training.css">
 </head>
 <body>
-    <div class="top-bar">
-        <a href="index.html" class="top-bar-link">Home</a>
-        <a href="exam.html" class="top-bar-link">Take Exam</a>
-    </div>
-
-    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+    <div id="site-header"></div>
+    <button class="menu-toggle">&#9776;</button>
 
     <div class="layout">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h1>c<span>AI</span>ge</h1>
-                <p>Certified AI Guardrail Engineer</p>
-            </div>
-
-            <div class="nav-section">Program</div>
-            <a class="nav-item active" data-page="content/modules/README.md">Overview</a>
-            <a class="nav-item" data-page="content/competency-matrix.md">Competency Matrix</a>
-            <a class="nav-item" data-page="content/exam-blueprint.md">Exam Blueprint</a>
-
-            <div class="nav-section">Training Modules</div>
-            <a class="nav-item" data-page="content/modules/module-1-ai-fundamentals.md">
-                1. AI Fundamentals & Failure Modes
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="content/modules/module-2-guardrail-architecture.md">
-                2. Guardrail Architecture & Design
-                <span class="nav-weight">25%</span>
-            </a>
-            <a class="nav-item" data-page="content/modules/module-3-guardrail-implementation.md">
-                3. Guardrail Implementation
-                <span class="nav-weight">20%</span>
-            </a>
-            <a class="nav-item" data-page="content/modules/module-4-policy-compliance.md">
-                4. Policy, Compliance & Governance
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="content/modules/module-5-testing-red-teaming.md">
-                5. Testing & Red Teaming
-                <span class="nav-weight">15%</span>
-            </a>
-            <a class="nav-item" data-page="content/modules/module-6-operations-observability.md">
-                6. Operations & Observability
-                <span class="nav-weight">10%</span>
-            </a>
-        </nav>
-
+        <div id="training-nav"></div>
         <main class="main">
             <div class="content" id="content">
                 <div class="loading">Loading...</div>
@@ -61,7 +20,14 @@
         </main>
     </div>
 
-    <script src="js/markdown.js"></script>
-    <script src="js/training.js"></script>
+    <script type="module">
+        import { SiteHeader } from './js/components/site-header.js';
+        import { TrainingNav } from './js/components/training-nav.js';
+        import { initTraining } from './js/training.js';
+
+        document.getElementById('site-header').outerHTML = SiteHeader({ variant: 'training' });
+        document.getElementById('training-nav').outerHTML = TrainingNav();
+        initTraining();
+    </script>
 </body>
 </html>

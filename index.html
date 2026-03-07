@@ -9,15 +9,7 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-inner">
-      <div class="logo">c<span class="ai">AI</span>ge</div>
-      <nav>
-        <a href="training.html">Training</a>
-        <a href="exam.html">Exam</a>
-      </nav>
-    </div>
-  </header>
+  <div id="site-header"></div>
 
   <section class="hero">
     <div class="hero-badge">Free during launch</div>
@@ -34,7 +26,7 @@
   <section class="what-is">
     <div class="section-label">The Role</div>
     <div class="section-title">What is a Guardrail Engineer?</div>
-    <div class="what-is-grid" style="margin-top: 32px;">
+    <div class="what-is-grid">
       <div>
         <p>AI guardrails prevent AI systems from being used in ways they shouldn't. They enforce boundaries around what models can say, do, and access &mdash; spanning content safety, security, and operational reliability.</p>
         <p style="margin-top: 16px;">A guardrail engineer works across all three of these pillars, designing and maintaining the systems that keep AI safe and trustworthy in production. It is a discipline that combines security engineering, ML operations, and policy expertise into a single, critical function.</p>
@@ -171,12 +163,14 @@
     </div>
   </section>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="logo">c<span class="ai">AI</span>ge</div>
-      <div class="footer-copy">&copy; 2026 cAIge. All rights reserved.</div>
-    </div>
-  </footer>
+  <div id="site-footer"></div>
+
+  <script type="module">
+    import { SiteHeader } from './js/components/site-header.js';
+    import { SiteFooter } from './js/components/site-footer.js';
+    document.getElementById('site-header').outerHTML = SiteHeader({ variant: 'landing' });
+    document.getElementById('site-footer').outerHTML = SiteFooter();
+  </script>
 
 </body>
 </html>

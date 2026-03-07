@@ -1,4 +1,4 @@
-function renderMarkdown(md) {
+export function renderMarkdown(md) {
     let html = '';
     const lines = md.split('\n');
     let i = 0;
