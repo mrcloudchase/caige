@@ -4,51 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>cAIge — Certified AI Guardrail Engineer</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2e3a;
-      --text: #e1e4eb;
-      --text-muted: #8b90a0;
-      --accent: #6c9fff;
-      --green: #4ade80;
-    }
-
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      transition: opacity 0.2s ease;
-    }
-
-    a:hover {
-      opacity: 0.85;
-    }
-
     /* ── Header ── */
     header {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 100;
       background: rgba(15, 17, 23, 0.92);
       backdrop-filter: blur(12px);
@@ -66,17 +27,6 @@
       justify-content: space-between;
     }
 
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .logo .ai {
-      color: var(--accent);
-    }
-
     nav {
       display: flex;
       gap: 32px;
@@ -90,10 +40,7 @@
       transition: color 0.2s ease;
     }
 
-    nav a:hover {
-      color: var(--text);
-      opacity: 1;
-    }
+    nav a:hover { color: var(--text); opacity: 1; }
 
     /* ── Sections ── */
     section {
@@ -168,52 +115,7 @@
       line-height: 1.7;
     }
 
-    .btn-group {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 14px 28px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
-      border: none;
-      text-decoration: none;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      opacity: 1;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #0f1117;
-      box-shadow: 0 0 20px rgba(108, 159, 255, 0.2);
-    }
-
-    .btn-primary:hover {
-      box-shadow: 0 0 30px rgba(108, 159, 255, 0.35);
-    }
-
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 20px rgba(108, 159, 255, 0.08);
-    }
+    .btn { padding: 14px 28px; }
 
     /* ── What Is Section ── */
     .what-is .content {
@@ -229,14 +131,14 @@
       line-height: 1.8;
     }
 
-    .what-is .highlight-box {
+    .highlight-box {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 32px;
     }
 
-    .what-is .highlight-box h3 {
+    .highlight-box h3 {
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 16px;
@@ -294,7 +196,6 @@
       font-weight: 700;
       color: var(--accent);
       margin-bottom: 10px;
-      letter-spacing: 0.02em;
     }
 
     .domain-card h3 {
@@ -316,10 +217,9 @@
       height: 100%;
       background: var(--accent);
       border-radius: 2px;
-      transition: width 0.6s ease;
     }
 
-    /* ── How It Works ── */
+    /* ── Steps ── */
     .steps {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -332,7 +232,6 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 32px;
-      position: relative;
     }
 
     .step-number {
@@ -350,17 +249,8 @@
       margin-bottom: 20px;
     }
 
-    .step h3 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .step p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
+    .step h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; }
+    .step p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
 
     /* ── Exam Details ── */
     .exam-grid {
@@ -385,7 +275,6 @@
       font-weight: 800;
       color: var(--accent);
       white-space: nowrap;
-      letter-spacing: -0.02em;
     }
 
     .exam-item-label {
@@ -394,10 +283,8 @@
       line-height: 1.4;
     }
 
-    /* ── CTA Section ── */
-    .cta-section {
-      text-align: center;
-    }
+    /* ── CTA ── */
+    .cta-section { text-align: center; }
 
     .cta-box {
       background: var(--surface);
@@ -406,24 +293,13 @@
       padding: 64px 40px;
     }
 
-    .cta-box h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-    }
-
-    .cta-box p {
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      margin-bottom: 32px;
-    }
+    .cta-box h2 { font-size: 2rem; font-weight: 700; margin-bottom: 16px; }
+    .cta-box p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 32px; }
 
     /* ── Footer ── */
     footer {
       border-top: 1px solid var(--border);
       padding: 32px 24px;
-      text-align: center;
     }
 
     .footer-inner {
@@ -434,88 +310,31 @@
       justify-content: space-between;
     }
 
-    .footer-logo {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .footer-logo .ai {
-      color: var(--accent);
-    }
-
-    .footer-copy {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
+    .footer-copy { font-size: 0.85rem; color: var(--text-muted); }
 
     /* ── Responsive ── */
     @media (max-width: 900px) {
-      .domains-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .steps {
-        grid-template-columns: 1fr;
-      }
-
-      .exam-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .what-is .content {
-        grid-template-columns: 1fr;
-        gap: 32px;
-      }
+      .domains-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: 1fr; }
+      .exam-grid { grid-template-columns: 1fr; }
+      .what-is .content { grid-template-columns: 1fr; gap: 32px; }
     }
 
     @media (max-width: 600px) {
-      .hero {
-        padding-top: 128px;
-        padding-bottom: 64px;
-      }
-
-      section {
-        padding: 64px 20px;
-      }
-
-      .domains-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .header-inner {
-        padding: 0 16px;
-      }
-
-      nav {
-        gap: 20px;
-      }
-
-      .btn {
-        padding: 12px 24px;
-        font-size: 0.9rem;
-      }
-
-      .cta-box {
-        padding: 48px 24px;
-      }
-
-      .footer-inner {
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .exam-item {
-        flex-direction: column;
-        text-align: center;
-        gap: 8px;
-      }
+      .hero { padding-top: 128px; padding-bottom: 64px; }
+      section { padding: 64px 20px; }
+      .domains-grid { grid-template-columns: 1fr; }
+      .header-inner { padding: 0 16px; }
+      nav { gap: 20px; }
+      .btn { padding: 12px 24px; font-size: 0.9rem; }
+      .cta-box { padding: 48px 24px; }
+      .footer-inner { flex-direction: column; gap: 12px; }
+      .exam-item { flex-direction: column; text-align: center; gap: 8px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header>
     <div class="header-inner">
       <div class="logo">c<span class="ai">AI</span>ge</div>
@@ -526,7 +345,6 @@
     </div>
   </header>
 
-  <!-- Hero -->
   <section class="hero">
     <div class="hero-badge">Free during launch</div>
     <h1>Certified AI<br>Guardrail Engineer</h1>
@@ -539,7 +357,6 @@
 
   <hr class="divider">
 
-  <!-- What is a Guardrail Engineer? -->
   <section class="what-is">
     <div class="section-label">The Role</div>
     <div class="section-title">What is a Guardrail Engineer?</div>
@@ -570,7 +387,6 @@
 
   <hr class="divider">
 
-  <!-- Six Domains -->
   <section>
     <div class="section-label">Exam Domains</div>
     <div class="section-title">Six Domains of Expertise</div>
@@ -611,7 +427,6 @@
 
   <hr class="divider">
 
-  <!-- How It Works -->
   <section>
     <div class="section-label">Process</div>
     <div class="section-title">How It Works</div>
@@ -637,7 +452,6 @@
 
   <hr class="divider">
 
-  <!-- Exam Details -->
   <section>
     <div class="section-label">Specifications</div>
     <div class="section-title">Exam Details</div>
@@ -672,7 +486,6 @@
 
   <hr class="divider">
 
-  <!-- CTA -->
   <section class="cta-section">
     <div class="cta-box">
       <h2>Ready to get certified?</h2>
@@ -684,10 +497,9 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-inner">
-      <div class="footer-logo">c<span class="ai">AI</span>ge</div>
+      <div class="logo">c<span class="ai">AI</span>ge</div>
       <div class="footer-copy">&copy; 2026 cAIge. All rights reserved.</div>
     </div>
   </footer>

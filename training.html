@@ -3,30 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>cAIge - Certified AI Guardrail Engineer</title>
+    <title>cAIge - Training</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface-hover: #222632;
-            --border: #2a2e3a;
-            --text: #e1e4eb;
-            --text-muted: #8b90a0;
-            --accent: #6c9fff;
-            --accent-dim: #4a7ad4;
-            --green: #4ade80;
-            --yellow: #fbbf24;
-            --code-bg: #141620;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.7;
-        }
+        body { line-height: 1.7; }
 
         .layout { display: flex; min-height: 100vh; }
 
@@ -72,7 +52,7 @@
             border-left: 3px solid transparent;
         }
 
-        .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+        .nav-item:hover { background: var(--surface-hover); color: var(--text); opacity: 1; }
 
         .nav-item.active {
             color: var(--accent);
@@ -84,6 +64,7 @@
 
         .main { margin-left: 300px; flex: 1; max-width: 900px; padding: 48px 64px; }
 
+        /* ── Markdown Content ── */
         .content h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
         .content h2 { font-size: 24px; font-weight: 600; margin-top: 48px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
         .content h3 { font-size: 18px; font-weight: 600; margin-top: 36px; margin-bottom: 12px; color: var(--accent); }
@@ -133,6 +114,27 @@
 
         .loading { text-align: center; padding: 64px; color: var(--text-muted); }
 
+        /* ── Top Bar ── */
+        .top-bar {
+            position: fixed;
+            top: 0; right: 0;
+            z-index: 150;
+            padding: 12px 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .top-bar-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .top-bar-link:hover { color: var(--accent); opacity: 1; }
+
+        /* ── Mobile ── */
         .menu-toggle {
             display: none;
             position: fixed;
@@ -153,30 +155,6 @@
             .main { margin-left: 0; padding: 48px 24px; }
             .menu-toggle { display: block; }
         }
-
-        .top-bar {
-            position: fixed;
-            top: 0; right: 0;
-            z-index: 150;
-            padding: 12px 24px;
-            display: flex;
-            gap: 16px;
-        }
-
-        .top-bar-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: color 0.15s;
-        }
-
-        .top-bar-link:hover { color: var(--accent); }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -234,7 +212,6 @@
     </div>
 
     <script>
-        // Minimal markdown parser
         function renderMarkdown(md) {
             let html = '';
             const lines = md.split('\n');
