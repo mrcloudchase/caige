@@ -26,6 +26,8 @@ No formal prerequisites are required. You will get the most from this training w
 - Familiarity with at least one programming language
 - Exposure to security concepts (you don't need to be a security specialist)
 
+**New to AI?** Start with the [Prerequisites: AI Foundations](prerequisites.md) guide. It covers neural networks, the transformer architecture, and how LLMs are trained — background knowledge that will help you understand Module 1. This content is not on the exam.
+
 ---
 
 ## Training Modules
