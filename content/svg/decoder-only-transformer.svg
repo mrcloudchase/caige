@@ -26,7 +26,7 @@
 <text x="370" y="217" fill="#8b90a0" font-size="9">itself and previous tokens</text>
 <!-- Add & Norm 1 -->
 <line x1="200" y1="232" x2="200" y2="258" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#dt-a)"/>
-<text x="200" y="252" fill="#8b90a0" font-size="9" text-anchor="middle">Add & Normalize</text>
+<text x="200" y="252" fill="#8b90a0" font-size="9" text-anchor="middle">Add &amp; Normalize</text>
 <!-- Feed-Forward -->
 <rect x="55" y="264" width="290" height="48" rx="5" fill="#1a1d27" stroke="#2a2e3a" stroke-width="1.5"/>
 <text x="200" y="285" fill="#e1e4eb" font-size="13" text-anchor="middle" font-weight="600">Feed-Forward Network</text>
@@ -35,7 +35,7 @@
 <text x="370" y="297" fill="#8b90a0" font-size="9">representation further</text>
 <!-- Add & Norm 2 -->
 <line x1="200" y1="312" x2="200" y2="338" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#dt-a)"/>
-<text x="200" y="332" fill="#8b90a0" font-size="9" text-anchor="middle">Add & Normalize</text>
+<text x="200" y="332" fill="#8b90a0" font-size="9" text-anchor="middle">Add &amp; Normalize</text>
 <!-- Residual connection arrows (left side) -->
 <path d="M50,208 L40,208 L40,252 L55,252" fill="none" stroke="#6c9fff" stroke-width="0.8" opacity="0.5" marker-end="url(#dt-a)"/>
 <path d="M50,288 L40,288 L40,332 L55,332" fill="none" stroke="#6c9fff" stroke-width="0.8" opacity="0.5" marker-end="url(#dt-a)"/>
