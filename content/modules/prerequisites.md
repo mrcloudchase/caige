@@ -16,24 +16,36 @@ A neural network is a program that learns patterns from data. Instead of being e
 
 At its core, a neural network is a series of mathematical operations organized into **layers**:
 
-```
- Input            Hidden Layers           Output
- (data)          (learned patterns)      (prediction)
-
- +---+          +---+    +---+          +---+
- | x |--------->| h |--->| h |--------->| y |
- +---+     +--->| h |    | h |-+   +--->| y |
- +---+     |    | h |--->| h | +-->|    +---+
- | x |-----+--->| h |    | h |    +|
- +---+          +---+    +---+     |
- +---+                             |    +---+
- | x |-----------------------------+--->| y |
- +---+                                  +---+
-
- Each connection has a "weight" -- a number
- that determines how much influence one node
- has on the next. Learning = adjusting weights.
-```
+<svg viewBox="0 0 600 240" style="max-width:600px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<g stroke="#2a2e3a" stroke-width="0.8" opacity="0.5">
+<line x1="80" y1="70" x2="212" y2="55"/><line x1="80" y1="70" x2="212" y2="110"/><line x1="80" y1="70" x2="212" y2="165"/>
+<line x1="80" y1="120" x2="212" y2="55"/><line x1="80" y1="120" x2="212" y2="110"/><line x1="80" y1="120" x2="212" y2="165"/>
+<line x1="80" y1="170" x2="212" y2="55"/><line x1="80" y1="170" x2="212" y2="110"/><line x1="80" y1="170" x2="212" y2="165"/>
+<line x1="248" y1="55" x2="332" y2="55"/><line x1="248" y1="55" x2="332" y2="110"/><line x1="248" y1="55" x2="332" y2="165"/>
+<line x1="248" y1="110" x2="332" y2="55"/><line x1="248" y1="110" x2="332" y2="110"/><line x1="248" y1="110" x2="332" y2="165"/>
+<line x1="248" y1="165" x2="332" y2="55"/><line x1="248" y1="165" x2="332" y2="110"/><line x1="248" y1="165" x2="332" y2="165"/>
+<line x1="368" y1="55" x2="500" y2="70"/><line x1="368" y1="55" x2="500" y2="120"/><line x1="368" y1="55" x2="500" y2="170"/>
+<line x1="368" y1="110" x2="500" y2="70"/><line x1="368" y1="110" x2="500" y2="120"/><line x1="368" y1="110" x2="500" y2="170"/>
+<line x1="368" y1="165" x2="500" y2="70"/><line x1="368" y1="165" x2="500" y2="120"/><line x1="368" y1="165" x2="500" y2="170"/>
+</g>
+<g fill="#1a1d27" stroke-width="1.5">
+<g stroke="#6c9fff"><circle cx="60" cy="70" r="20"/><circle cx="60" cy="120" r="20"/><circle cx="60" cy="170" r="20"/></g>
+<g stroke="#2a2e3a"><circle cx="230" cy="55" r="17"/><circle cx="230" cy="110" r="17"/><circle cx="230" cy="165" r="17"/><circle cx="350" cy="55" r="17"/><circle cx="350" cy="110" r="17"/><circle cx="350" cy="165" r="17"/></g>
+<g stroke="#4ade80"><circle cx="520" cy="70" r="20"/><circle cx="520" cy="120" r="20"/><circle cx="520" cy="170" r="20"/></g>
+</g>
+<g font-family="'Courier New',monospace" font-size="13" text-anchor="middle">
+<g fill="#6c9fff"><text x="60" y="75">x</text><text x="60" y="125">x</text><text x="60" y="175">x</text></g>
+<g fill="#8b90a0" font-size="12"><text x="230" y="60">h</text><text x="230" y="115">h</text><text x="230" y="170">h</text><text x="350" y="60">h</text><text x="350" y="115">h</text><text x="350" y="170">h</text></g>
+<g fill="#4ade80"><text x="520" y="75">y</text><text x="520" y="125">y</text><text x="520" y="175">y</text></g>
+</g>
+<g font-family="system-ui,sans-serif" font-size="11" fill="#8b90a0" text-anchor="middle">
+<text x="60" y="20">Input</text><text x="60" y="33" font-size="10">(data)</text>
+<text x="290" y="20">Hidden Layers</text><text x="290" y="33" font-size="10">(learned patterns)</text>
+<text x="520" y="20">Output</text><text x="520" y="33" font-size="10">(prediction)</text>
+<text x="300" y="218">Each connection has a "weight" — a number that determines how much</text>
+<text x="300" y="234">influence one node has on the next. Learning = adjusting weights.</text>
+</g>
+</svg>
 
 - **Input layer:** receives data (text, numbers, pixels)
 - **Hidden layers:** where the network learns intermediate patterns — simple patterns in early layers (edges in images, common word pairs in text), complex patterns in later layers (faces, sentence meaning)
@@ -118,19 +130,26 @@ Token IDs are integers — they are lookup indices, not something the model can 
 
 The embedding layer is a large table of learned vectors — one vector per token in the vocabulary. When the model receives a token ID, it looks up the corresponding row in this table and retrieves a dense vector (typically 768 to 12,288 numbers, depending on model size). This vector is the token's **embedding** — a learned representation that captures semantic and syntactic properties of that token.
 
-```
- Token IDs:    [464,     3857,    3332   ]
-               |         |        |
-               v         v        v
- Embedding    [0.12,   [-0.34,  [0.78,
- lookup:       0.87,    0.56,    0.23,
-               -0.23,   0.91,   -0.45,
-               ...]     ...]     ...]
-
- Each token ID is replaced by a dense vector
- of hundreds or thousands of numbers.
- These vectors are what the transformer processes.
-```
+<svg viewBox="0 0 500 200" style="max-width:500px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="el-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="'Courier New',monospace" text-anchor="middle">
+<g fill="#6c9fff" font-size="14"><text x="100" y="24">464</text><text x="250" y="24">3857</text><text x="400" y="24">3332</text></g>
+</g>
+<g stroke="#8b90a0" stroke-width="1.5">
+<line x1="100" y1="32" x2="100" y2="58" marker-end="url(#el-a)"/><line x1="250" y1="32" x2="250" y2="58" marker-end="url(#el-a)"/><line x1="400" y1="32" x2="400" y2="58" marker-end="url(#el-a)"/>
+</g>
+<g fill="#1a1d27" stroke="#2a2e3a" stroke-width="1"><rect x="50" y="64" width="100" height="72" rx="4"/><rect x="200" y="64" width="100" height="72" rx="4"/><rect x="350" y="64" width="100" height="72" rx="4"/></g>
+<g font-family="'Courier New',monospace" font-size="11" text-anchor="middle">
+<g fill="#e1e4eb"><text x="100" y="84">0.12</text><text x="100" y="98">0.87</text><text x="100" y="112">-0.23</text><text x="250" y="84">-0.34</text><text x="250" y="98">0.56</text><text x="250" y="112">0.91</text><text x="400" y="84">0.78</text><text x="400" y="98">0.23</text><text x="400" y="112">-0.45</text></g>
+<g fill="#8b90a0"><text x="100" y="128">...</text><text x="250" y="128">...</text><text x="400" y="128">...</text></g>
+</g>
+<text x="20" y="100" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">Embedding</text>
+<text x="20" y="113" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">lookup</text>
+<g font-family="system-ui,sans-serif" font-size="11" fill="#8b90a0" text-anchor="middle">
+<text x="250" y="165">Each token ID is replaced by a dense vector of hundreds or thousands of numbers.</text>
+<text x="250" y="181">These vectors are what the transformer processes.</text>
+</g>
+</svg>
 
 These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity appears throughout AI systems wherever similarity between texts needs to be measured.
 
@@ -140,29 +159,42 @@ The LLM's embedding layer converts individual tokens into vectors. Later, in Par
 
 The transformer processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
 
-```
- Embedding:  [vec for "The"]  [vec for "cat"]  [vec for "sat"]
-                  +                +                +
- Position:     [pos 1]          [pos 2]          [pos 3]
-                  =                =                =
- Input:      [combined]        [combined]        [combined]
-```
+<svg viewBox="0 0 520 110" style="max-width:520px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<g font-family="'Courier New',monospace" font-size="12" text-anchor="middle">
+<text x="55" y="18" fill="#8b90a0" text-anchor="end">Embedding:</text>
+<text x="170" y="18" fill="#e1e4eb">[vec for "The"]</text><text x="310" y="18" fill="#e1e4eb">[vec for "cat"]</text><text x="450" y="18" fill="#e1e4eb">[vec for "sat"]</text>
+<text x="170" y="40" fill="#6c9fff" font-size="14">+</text><text x="310" y="40" fill="#6c9fff" font-size="14">+</text><text x="450" y="40" fill="#6c9fff" font-size="14">+</text>
+<text x="55" y="58" fill="#8b90a0" text-anchor="end">Position:</text>
+<text x="170" y="58" fill="#e1e4eb">[pos 1]</text><text x="310" y="58" fill="#e1e4eb">[pos 2]</text><text x="450" y="58" fill="#e1e4eb">[pos 3]</text>
+<text x="170" y="78" fill="#6c9fff" font-size="14">=</text><text x="310" y="78" fill="#6c9fff" font-size="14">=</text><text x="450" y="78" fill="#6c9fff" font-size="14">=</text>
+<text x="55" y="100" fill="#8b90a0" text-anchor="end">Input:</text>
+<text x="170" y="100" fill="#4ade80">[combined]</text><text x="310" y="100" fill="#4ade80">[combined]</text><text x="450" y="100" fill="#4ade80">[combined]</text>
+</g>
+</svg>
 
 The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
 
 The complete pipeline from text to transformer input is:
 
-```
- "The cat sat" --> tokenize --> [464, 3857, 3332]
-                                  |
-                         embedding lookup
-                                  |
-                   [vec_464, vec_3857, vec_3332]
-                                  |
-                      + positional encoding
-                                  |
-                      [input to transformer]
-```
+<svg viewBox="0 0 420 280" style="max-width:420px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pl-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="'Courier New',monospace" text-anchor="middle">
+<rect x="110" y="8" width="200" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="210" y="28" fill="#e1e4eb" font-size="13">"The cat sat"</text>
+<line x1="210" y1="38" x2="210" y2="58" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="54" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">tokenize</text>
+<rect x="85" y="62" width="250" height="30" rx="4" fill="#1a1d27" stroke="#6c9fff" stroke-width="1"/>
+<text x="210" y="82" fill="#6c9fff" font-size="13">[464, 3857, 3332]</text>
+<line x1="210" y1="92" x2="210" y2="112" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="108" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">embedding lookup</text>
+<rect x="45" y="116" width="330" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="210" y="136" fill="#e1e4eb" font-size="12">[vec_464, vec_3857, vec_3332]</text>
+<line x1="210" y1="146" x2="210" y2="166" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="162" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">+ positional encoding</text>
+<rect x="80" y="170" width="260" height="30" rx="4" fill="#1a1d27" stroke="#4ade80" stroke-width="1"/>
+<text x="210" y="190" fill="#4ade80" font-size="12">[input to transformer]</text>
+</g>
+</svg>
 
 ### 2.4 The Transformer: Processing Context
 
@@ -174,19 +206,23 @@ Before transformers, the dominant language models (RNNs and LSTMs) processed tex
 
 For example, in the sentence "The cat sat on the mat because it was tired," the model needs to understand that "it" refers to "the cat," not "the mat." The attention mechanism lets the model compute a relevance score between every pair of tokens, so when processing "it," the model attends strongly to "cat."
 
-```
- "The  cat  sat  on  the  mat  because  it  was  tired"
-                                        |
-                   attention scores (illustrative,
-                   from a single attention head):
-                        "cat" = 0.42  (strong)
-                        "mat" = 0.18  (moderate)
-                        "sat" = 0.09
-                        ...
-
- The model determines "it" most likely refers to "cat"
- by computing these scores across all tokens in parallel.
-```
+<svg viewBox="0 0 620 180" style="max-width:620px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<g font-family="'Courier New',monospace" font-size="13" text-anchor="middle">
+<text x="30" y="28" fill="#8b90a0">The</text><text x="80" y="28" fill="#6c9fff">cat</text><text x="130" y="28" fill="#8b90a0">sat</text><text x="175" y="28" fill="#8b90a0">on</text><text x="215" y="28" fill="#8b90a0">the</text><text x="260" y="28" fill="#8b90a0">mat</text><text x="325" y="28" fill="#8b90a0">because</text><text x="400" y="28" fill="#fbbf24">it</text><text x="445" y="28" fill="#8b90a0">was</text><text x="500" y="28" fill="#8b90a0">tired</text>
+</g>
+<line x1="400" y1="36" x2="80" y2="36" stroke="#6c9fff" stroke-width="2.5" opacity="0.7"/>
+<line x1="400" y1="38" x2="260" y2="38" stroke="#6c9fff" stroke-width="1.5" opacity="0.4"/>
+<line x1="400" y1="40" x2="130" y2="40" stroke="#6c9fff" stroke-width="0.8" opacity="0.25"/>
+<circle cx="80" cy="36" r="3" fill="#6c9fff" opacity="0.7"/><circle cx="260" cy="38" r="2.5" fill="#6c9fff" opacity="0.4"/><circle cx="130" cy="40" r="2" fill="#6c9fff" opacity="0.25"/>
+<g font-family="system-ui,sans-serif" font-size="11" fill="#8b90a0">
+<text x="430" y="65">Attention scores from "it":</text>
+<text x="445" y="82" fill="#6c9fff">"cat" = 0.42</text><text x="540" y="82" fill="#8b90a0" font-size="10">(strong)</text>
+<text x="445" y="97" fill="#e1e4eb">"mat" = 0.18</text><text x="540" y="97" fill="#8b90a0" font-size="10">(moderate)</text>
+<text x="445" y="112" fill="#e1e4eb">"sat" = 0.09</text>
+<text x="445" y="127" fill="#8b90a0">...</text>
+<text x="310" y="165" text-anchor="middle">The model determines "it" most likely refers to "cat" by computing these scores across all tokens in parallel.</text>
+</g>
+</svg>
 
 #### Layers of a Transformer
 
@@ -198,41 +234,47 @@ A transformer stacks multiple layers. Each layer contains two main computational
 
 **Residual connections** (also called skip connections) add the input of each sub-layer to its output, allowing information to flow directly through the network and preventing the signal from degrading across many layers. **Layer normalization** stabilizes the values flowing through the network, keeping training stable. Without these two components, training deep transformers (32-128+ layers) would be extremely difficult.
 
-```
- Embedding Vectors (+ positional encoding)
-       |
-       v
- +---------------------+
- | Self-Attention       |  "Which parts of the input
- | (multi-head)         |   relate to each other?"
- +----------+----------+
-            |
-       Add & Norm           Residual connection +
-            |                layer normalization
-            v
- +---------------------+
- | Feed-Forward         |  "Process this pattern
- | Network              |   further"
- +----------+----------+
-            |
-       Add & Norm           Residual connection +
-            |                layer normalization
-            v
-     (repeat 32-128x)      Stacking layers builds
-            |               deeper understanding
-            v
- +---------------------+
- | Output Linear Layer  |  Projects hidden states to
- | (unembedding)        |   vocabulary-sized logits
- +----------+----------+
-            |
-        softmax
-            |
-            v
- +---------------------+
- | Output Probabilities |  "What token comes next?"
- +---------------------+
-```
+<svg viewBox="0 0 520 520" style="max-width:520px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="tf-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="system-ui,sans-serif">
+<text x="175" y="18" fill="#8b90a0" font-size="12" text-anchor="middle">Embedding Vectors (+ positional encoding)</text>
+<line x1="175" y1="24" x2="175" y2="42" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<rect x="60" y="48" width="230" height="42" rx="5" fill="#1a1d27" stroke="#6c9fff" stroke-width="1.5"/>
+<text x="175" y="67" fill="#6c9fff" font-size="13" text-anchor="middle" font-weight="600">Self-Attention</text>
+<text x="175" y="82" fill="#6c9fff" font-size="11" text-anchor="middle">(multi-head)</text>
+<text x="310" y="67" fill="#8b90a0" font-size="10">"Which parts of the input</text>
+<text x="310" y="80" fill="#8b90a0" font-size="10">relate to each other?"</text>
+<line x1="175" y1="90" x2="175" y2="108" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<text x="175" y="106" fill="#8b90a0" font-size="10" text-anchor="middle">Add & Norm</text>
+<text x="310" y="106" fill="#8b90a0" font-size="10">Residual + layer norm</text>
+<line x1="175" y1="112" x2="175" y2="130" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<rect x="60" y="136" width="230" height="42" rx="5" fill="#1a1d27" stroke="#2a2e3a" stroke-width="1.5"/>
+<text x="175" y="155" fill="#e1e4eb" font-size="13" text-anchor="middle" font-weight="600">Feed-Forward Network</text>
+<text x="175" y="170" fill="#8b90a0" font-size="11" text-anchor="middle">(per token)</text>
+<text x="310" y="155" fill="#8b90a0" font-size="10">"Process this pattern</text>
+<text x="310" y="168" fill="#8b90a0" font-size="10">further"</text>
+<line x1="175" y1="178" x2="175" y2="196" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<text x="175" y="194" fill="#8b90a0" font-size="10" text-anchor="middle">Add & Norm</text>
+<text x="310" y="194" fill="#8b90a0" font-size="10">Residual + layer norm</text>
+<line x1="175" y1="200" x2="175" y2="218" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<rect x="100" y="222" width="150" height="28" rx="14" fill="none" stroke="#8b90a0" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="175" y="241" fill="#8b90a0" font-size="11" text-anchor="middle">repeat 32-128x</text>
+<text x="310" y="241" fill="#8b90a0" font-size="10">Stacking layers builds</text>
+<text x="310" y="254" fill="#8b90a0" font-size="10">deeper understanding</text>
+<line x1="175" y1="250" x2="175" y2="280" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<rect x="50" y="286" width="250" height="42" rx="5" fill="#1a1d27" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="175" y="305" fill="#fbbf24" font-size="13" text-anchor="middle" font-weight="600">Output Linear Layer</text>
+<text x="175" y="320" fill="#fbbf24" font-size="11" text-anchor="middle">(unembedding)</text>
+<text x="310" y="305" fill="#8b90a0" font-size="10">Projects hidden states to</text>
+<text x="310" y="318" fill="#8b90a0" font-size="10">vocabulary-sized logits</text>
+<line x1="175" y1="328" x2="175" y2="352" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<text x="175" y="366" fill="#8b90a0" font-size="12" text-anchor="middle">softmax</text>
+<line x1="175" y1="372" x2="175" y2="396" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tf-a)"/>
+<rect x="50" y="402" width="250" height="36" rx="5" fill="#1a1d27" stroke="#4ade80" stroke-width="1.5"/>
+<text x="175" y="425" fill="#4ade80" font-size="13" text-anchor="middle" font-weight="600">Output Probabilities</text>
+<text x="310" y="425" fill="#8b90a0" font-size="10">"What token comes next?"</text>
+</g>
+</svg>
 
 Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patterns (grammar, common phrases). Later layers capture complex patterns (reasoning, context, intent). After the final transformer layer, a linear output layer (sometimes called the unembedding layer) projects the hidden state vectors to a vocabulary-sized set of logits — raw numerical scores for every token in the vocabulary. These logits are converted into a probability distribution using a mathematical function called softmax. The result is the model's prediction: a probability for every possible next token.
 
@@ -242,19 +284,27 @@ Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patter
 
 The transformer processes its input and produces a probability distribution over the vocabulary — but that is just one prediction. LLMs generate text one token at a time in an **autoregressive** loop: each generated token is appended to the input, and the entire model runs again to predict the next token.
 
-```
- Step 1: Input  = "The capital of France is"
-         Model predicts -> " Paris"
-         Append token
-
- Step 2: Input  = "The capital of France is Paris"
-         Model predicts -> "."
-         Append token
-
- Step 3: Input  = "The capital of France is Paris."
-         Model predicts -> [EOS]
-         Stop -- end of sequence token reached
-```
+<svg viewBox="0 0 520 230" style="max-width:520px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="gl-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="'Courier New',monospace" font-size="12">
+<text x="20" y="22" fill="#8b90a0" font-family="system-ui,sans-serif" font-weight="600">Step 1</text>
+<rect x="80" y="6" width="320" height="28" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="90" y="25" fill="#e1e4eb">"The capital of France is"</text>
+<line x1="400" y1="20" x2="430" y2="20" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#gl-a)"/>
+<text x="440" y="25" fill="#4ade80">" Paris"</text>
+<text x="20" y="92" fill="#8b90a0" font-family="system-ui,sans-serif" font-weight="600">Step 2</text>
+<rect x="80" y="76" width="320" height="28" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="90" y="95" fill="#e1e4eb">"The capital of France is</text><text x="342" y="95" fill="#4ade80">Paris</text><text x="377" y="95" fill="#e1e4eb">"</text>
+<line x1="400" y1="90" x2="430" y2="90" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#gl-a)"/>
+<text x="440" y="95" fill="#4ade80">"."</text>
+<text x="20" y="162" fill="#8b90a0" font-family="system-ui,sans-serif" font-weight="600">Step 3</text>
+<rect x="80" y="146" width="320" height="28" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="90" y="165" fill="#e1e4eb">"The capital of France is Paris</text><text x="374" y="165" fill="#4ade80">.</text><text x="382" y="165" fill="#e1e4eb">"</text>
+<line x1="400" y1="160" x2="430" y2="160" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#gl-a)"/>
+<text x="440" y="165" fill="#f87171">[EOS]</text>
+<text x="260" y="210" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">Stop — end of sequence token reached</text>
+</g>
+</svg>
 
 Some model APIs expose **log probabilities** (the logarithm of the token probabilities) for each generated token, which can serve as a confidence signal — low log probabilities across a response suggest the model is uncertain about its output. The question is: which token do you actually select from the probability distribution at each step?
 
@@ -538,16 +588,18 @@ The risks above apply to a single model in a conversation. But modern AI applica
 
 In Part 2, you learned that the LLM's embedding layer converts individual tokens into vectors. A different type of model — an **embedding model** — converts entire passages of text into a single vector that captures the passage's semantic meaning. Texts with similar meanings produce vectors that are close together in mathematical space (measured by cosine similarity). This enables **semantic search**: instead of matching keywords, you can find documents that are conceptually related to a query.
 
-```
- "How do I reset my password?"
-       |
-       v
- Embedding model
-       |
-       v
- [0.23, -0.41, 0.87, 0.12, ...]   (vector with hundreds
-                                     of dimensions)
-```
+<svg viewBox="0 0 420 180" style="max-width:420px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="em-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<rect x="60" y="8" width="300" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="210" y="28" fill="#e1e4eb" font-family="'Courier New',monospace" font-size="12" text-anchor="middle">"How do I reset my password?"</text>
+<line x1="210" y1="38" x2="210" y2="60" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#em-a)"/>
+<rect x="100" y="66" width="220" height="30" rx="4" fill="#1a1d27" stroke="#6c9fff" stroke-width="1.5"/>
+<text x="210" y="86" fill="#6c9fff" font-family="system-ui,sans-serif" font-size="13" text-anchor="middle" font-weight="600">Embedding Model</text>
+<line x1="210" y1="96" x2="210" y2="118" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#em-a)"/>
+<rect x="50" y="124" width="320" height="30" rx="4" fill="#1a1d27" stroke="#4ade80" stroke-width="1"/>
+<text x="210" y="144" fill="#4ade80" font-family="'Courier New',monospace" font-size="11" text-anchor="middle">[0.23, -0.41, 0.87, 0.12, ...]</text>
+<text x="210" y="172" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10" text-anchor="middle">(vector with hundreds of dimensions)</text>
+</svg>
 
 These vectors are stored in a **vector database** and indexed for fast similarity search.
 
@@ -555,27 +607,31 @@ These vectors are stored in a **vector database** and indexed for fast similarit
 
 **RAG** is the pattern of retrieving relevant documents and including them in the model's context window before generating a response. It allows the model to answer questions using information that was not in its training data.
 
-```
- User query: "What is our refund policy?"
-       |
-       v
- 1. Embed the query into a vector
-       |
-       v
- 2. Search vector database for similar documents
-       |
-       v
- 3. Retrieve top matching chunks
-    (e.g., "Refunds are available within 30 days...")
-       |
-       v
- 4. Include retrieved chunks in the context window
-    alongside the system prompt and user query
-       |
-       v
- 5. Model generates a response grounded in
-    the retrieved documents
-```
+<svg viewBox="0 0 460 370" style="max-width:460px;width:100%;display:block;margin:1.5rem auto" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="rg-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="system-ui,sans-serif" text-anchor="middle">
+<rect x="80" y="8" width="300" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="230" y="28" fill="#e1e4eb" font-family="'Courier New',monospace" font-size="12">"What is our refund policy?"</text>
+<line x1="230" y1="38" x2="230" y2="56" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#rg-a)"/>
+<rect x="80" y="62" width="300" height="28" rx="4" fill="#1a1d27" stroke="#6c9fff" stroke-width="1"/>
+<text x="230" y="81" fill="#6c9fff" font-size="12">1. Embed the query into a vector</text>
+<line x1="230" y1="90" x2="230" y2="108" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#rg-a)"/>
+<rect x="60" y="114" width="340" height="28" rx="4" fill="#1a1d27" stroke="#6c9fff" stroke-width="1"/>
+<text x="230" y="133" fill="#6c9fff" font-size="12">2. Search vector database for similar documents</text>
+<line x1="230" y1="142" x2="230" y2="160" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#rg-a)"/>
+<rect x="80" y="166" width="300" height="40" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="230" y="183" fill="#e1e4eb" font-size="12">3. Retrieve top matching chunks</text>
+<text x="230" y="199" fill="#8b90a0" font-size="10">("Refunds are available within 30 days...")</text>
+<line x1="230" y1="206" x2="230" y2="224" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#rg-a)"/>
+<rect x="50" y="230" width="360" height="40" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="230" y="247" fill="#e1e4eb" font-size="12">4. Include chunks in context window</text>
+<text x="230" y="263" fill="#8b90a0" font-size="10">alongside system prompt and user query</text>
+<line x1="230" y1="270" x2="230" y2="288" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#rg-a)"/>
+<rect x="60" y="294" width="340" height="40" rx="4" fill="#1a1d27" stroke="#4ade80" stroke-width="1.5"/>
+<text x="230" y="311" fill="#4ade80" font-size="12" font-weight="600">5. Model generates a response</text>
+<text x="230" y="327" fill="#4ade80" font-size="10">grounded in the retrieved documents</text>
+</g>
+</svg>
 
 RAG reduces hallucination by giving the model real source material to reference, but it introduces new risks. The retrieved documents are untrusted input — they may have been written by anyone, may contain outdated information, or may have been deliberately crafted to manipulate the model. If the retrieval system does not enforce access controls, the model may retrieve and expose documents the current user is not authorized to see.
 

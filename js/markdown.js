@@ -69,6 +69,23 @@ export function renderMarkdown(md) {
 
         if (inCodeBlock) { codeContent += line + '\n'; i++; continue; }
 
+        if (line.trim().startsWith('<svg')) {
+            html += flushList();
+            html += flushTable();
+            let svgContent = line + '\n';
+            i++;
+            while (i < lines.length && !lines[i].includes('</svg>')) {
+                svgContent += lines[i] + '\n';
+                i++;
+            }
+            if (i < lines.length) {
+                svgContent += lines[i];
+                i++;
+            }
+            html += svgContent;
+            continue;
+        }
+
         if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
             html += flushList();
             if (!inTable) inTable = true;
@@ -137,7 +154,8 @@ export function renderMarkdown(md) {
                !lines[i + 1].trim().startsWith('> ') &&
                !lines[i + 1].match(/^\s*[-*]\s+/) &&
                !lines[i + 1].match(/^\s*\d+\.\s+/) &&
-               lines[i + 1].trim() !== '---') {
+               lines[i + 1].trim() !== '---' &&
+               !lines[i + 1].trim().startsWith('<svg')) {
             i++;
             para += ' ' + lines[i];
         }
