@@ -77,6 +77,8 @@ The transformer solved both problems with a single mechanism: **self-attention**
 
 The original transformer described in "Attention Is All You Need" had two halves: an **encoder** and a **decoder**.
 
+![Original transformer architecture from Attention Is All You Need](content/svg/original-transformer.svg)
+
 - The **encoder** reads an entire input sequence and builds a rich internal representation of it. It processes all input tokens in parallel, and each token can attend to every other token in the input (full bidirectional attention). The encoder's job is understanding — it creates a contextual representation of the input.
 - The **decoder** generates output one token at a time, attending both to the encoder's representation of the input and to the tokens it has already generated. The decoder uses **masked self-attention** (also called causal attention) — each token can only attend to tokens that came before it, not tokens that come after. This is because during generation, future tokens do not exist yet.
 

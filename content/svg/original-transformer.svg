@@ -1,0 +1,168 @@
+<svg viewBox="0 0 700 740" width="700" height="740" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ot-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker>
+<marker id="ot-b" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6c9fff"/></marker>
+<marker id="ot-c" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#f4a752"/></marker>
+</defs>
+<g font-family="system-ui,sans-serif">
+
+<!-- ═══ TITLE ═══ -->
+<text x="350" y="22" fill="#e1e4eb" font-size="15" text-anchor="middle" font-weight="600">The Original Transformer (2017)</text>
+<text x="350" y="38" fill="#8b90a0" font-size="10" text-anchor="middle">"Attention Is All You Need" &#8212; Vaswani et al.</text>
+
+<!-- ═══ OUTPUT SECTION (top) ═══ -->
+<text x="485" y="62" fill="#8b90a0" font-size="11" text-anchor="middle">Output</text>
+<text x="485" y="74" fill="#8b90a0" font-size="11" text-anchor="middle">Probabilities</text>
+<line x1="485" y1="94" x2="485" y2="80" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Softmax -->
+<rect x="418" y="94" width="134" height="26" rx="4" fill="#1a1d27" stroke="#4ade80" stroke-width="1.5"/>
+<text x="485" y="112" fill="#4ade80" font-size="11" text-anchor="middle" font-weight="600">Softmax</text>
+<line x1="485" y1="136" x2="485" y2="120" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Linear -->
+<rect x="418" y="136" width="134" height="28" rx="4" fill="#1a1d27" stroke="#c4b5fd" stroke-width="1.5"/>
+<text x="485" y="155" fill="#c4b5fd" font-size="11" text-anchor="middle" font-weight="600">Linear</text>
+
+<!-- Arrow from decoder block to Linear -->
+<line x1="485" y1="200" x2="485" y2="164" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- ═══ ENCODER BLOCK (left) ═══ -->
+<rect x="96" y="362" width="188" height="228" rx="8" fill="none" stroke="#8b90a0" stroke-width="1.5" stroke-dasharray="6,4"/>
+<text x="76" y="480" fill="#8b90a0" font-size="13" text-anchor="middle" font-weight="600">N&#215;</text>
+<text x="190" y="355" fill="#8b90a0" font-size="11" text-anchor="middle" font-weight="600">Encoder</text>
+
+<!-- Encoder: Multi-Head Attention -->
+<rect x="108" y="530" width="164" height="48" rx="5" fill="#1a1d27" stroke="#f4a752" stroke-width="1.5"/>
+<text x="190" y="552" fill="#f4a752" font-size="11" text-anchor="middle" font-weight="600">Multi-Head</text>
+<text x="190" y="568" fill="#f4a752" font-size="11" text-anchor="middle" font-weight="600">Attention</text>
+
+<!-- Three Q,K,V arrows into encoder attention -->
+<line x1="160" y1="588" x2="160" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+<line x1="190" y1="588" x2="190" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+<line x1="220" y1="588" x2="220" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+
+<!-- Encoder: Add & Norm 1 -->
+<rect x="108" y="478" width="164" height="26" rx="4" fill="#1a1d27" stroke="#d4c878" stroke-width="1.5"/>
+<text x="190" y="496" fill="#e1e4eb" font-size="10" text-anchor="middle">Add &amp; Norm</text>
+<line x1="190" y1="530" x2="190" y2="504" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Encoder residual 1 -->
+<path d="M108,554 L88,554 L88,491 L108,491" fill="none" stroke="#6c9fff" stroke-width="1" opacity="0.5" marker-end="url(#ot-b)"/>
+
+<!-- Encoder: Feed Forward -->
+<rect x="108" y="416" width="164" height="40" rx="5" fill="#1a1d27" stroke="#6cb4ee" stroke-width="1.5"/>
+<text x="190" y="434" fill="#6cb4ee" font-size="11" text-anchor="middle" font-weight="600">Feed</text>
+<text x="190" y="450" fill="#6cb4ee" font-size="11" text-anchor="middle" font-weight="600">Forward</text>
+<line x1="190" y1="478" x2="190" y2="456" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Encoder: Add & Norm 2 -->
+<rect x="108" y="374" width="164" height="26" rx="4" fill="#1a1d27" stroke="#d4c878" stroke-width="1.5"/>
+<text x="190" y="392" fill="#e1e4eb" font-size="10" text-anchor="middle">Add &amp; Norm</text>
+<line x1="190" y1="416" x2="190" y2="400" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Encoder residual 2 -->
+<path d="M108,436 L88,436 L88,387 L108,387" fill="none" stroke="#6c9fff" stroke-width="1" opacity="0.5" marker-end="url(#ot-b)"/>
+
+<!-- ═══ DECODER BLOCK (right) ═══ -->
+<rect x="391" y="200" width="188" height="390" rx="8" fill="none" stroke="#8b90a0" stroke-width="1.5" stroke-dasharray="6,4"/>
+<text x="597" y="400" fill="#8b90a0" font-size="13" text-anchor="middle" font-weight="600">N&#215;</text>
+<text x="485" y="193" fill="#8b90a0" font-size="11" text-anchor="middle" font-weight="600">Decoder</text>
+
+<!-- Decoder: Masked Multi-Head Attention -->
+<rect x="403" y="530" width="164" height="48" rx="5" fill="#1a1d27" stroke="#f4a752" stroke-width="1.5"/>
+<text x="485" y="548" fill="#f4a752" font-size="10" text-anchor="middle" font-weight="600">Masked</text>
+<text x="485" y="562" fill="#f4a752" font-size="10" text-anchor="middle" font-weight="600">Multi-Head Attention</text>
+
+<!-- Three Q,K,V arrows into decoder masked attention -->
+<line x1="455" y1="588" x2="455" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+<line x1="485" y1="588" x2="485" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+<line x1="515" y1="588" x2="515" y2="578" stroke="#8b90a0" stroke-width="1" marker-end="url(#ot-a)"/>
+
+<!-- Decoder: Add & Norm 1 -->
+<rect x="403" y="478" width="164" height="26" rx="4" fill="#1a1d27" stroke="#d4c878" stroke-width="1.5"/>
+<text x="485" y="496" fill="#e1e4eb" font-size="10" text-anchor="middle">Add &amp; Norm</text>
+<line x1="485" y1="530" x2="485" y2="504" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Decoder residual 1 -->
+<path d="M567,554 L587,554 L587,491 L567,491" fill="none" stroke="#6c9fff" stroke-width="1" opacity="0.5" marker-end="url(#ot-b)"/>
+
+<!-- Decoder: Multi-Head Attention (cross-attention) -->
+<rect x="403" y="416" width="164" height="40" rx="5" fill="#1a1d27" stroke="#f4a752" stroke-width="1.5"/>
+<text x="485" y="434" fill="#f4a752" font-size="11" text-anchor="middle" font-weight="600">Multi-Head</text>
+<text x="485" y="450" fill="#f4a752" font-size="11" text-anchor="middle" font-weight="600">Attention</text>
+<line x1="485" y1="478" x2="485" y2="456" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Decoder: Add & Norm 2 -->
+<rect x="403" y="370" width="164" height="26" rx="4" fill="#1a1d27" stroke="#d4c878" stroke-width="1.5"/>
+<text x="485" y="388" fill="#e1e4eb" font-size="10" text-anchor="middle">Add &amp; Norm</text>
+<line x1="485" y1="416" x2="485" y2="396" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Decoder residual 2 -->
+<path d="M567,436 L587,436 L587,383 L567,383" fill="none" stroke="#6c9fff" stroke-width="1" opacity="0.5" marker-end="url(#ot-b)"/>
+
+<!-- Decoder: Feed Forward -->
+<rect x="403" y="308" width="164" height="40" rx="5" fill="#1a1d27" stroke="#6cb4ee" stroke-width="1.5"/>
+<text x="485" y="326" fill="#6cb4ee" font-size="11" text-anchor="middle" font-weight="600">Feed</text>
+<text x="485" y="342" fill="#6cb4ee" font-size="11" text-anchor="middle" font-weight="600">Forward</text>
+<line x1="485" y1="370" x2="485" y2="348" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Decoder: Add & Norm 3 -->
+<rect x="403" y="262" width="164" height="26" rx="4" fill="#1a1d27" stroke="#d4c878" stroke-width="1.5"/>
+<text x="485" y="280" fill="#e1e4eb" font-size="10" text-anchor="middle">Add &amp; Norm</text>
+<line x1="485" y1="308" x2="485" y2="288" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Decoder residual 3 -->
+<path d="M567,324 L587,324 L587,275 L567,275" fill="none" stroke="#6c9fff" stroke-width="1" opacity="0.5" marker-end="url(#ot-b)"/>
+
+<!-- Arrow from decoder top to Linear -->
+<line x1="485" y1="262" x2="485" y2="240" stroke="#8b90a0" stroke-width="1" stroke-dasharray="3,3"/>
+
+<!-- ═══ CROSS-ATTENTION ARROWS (encoder → decoder) ═══ -->
+<path d="M272,387 L340,387 L340,452" fill="none" stroke="#f4a752" stroke-width="1.5"/>
+<line x1="340" y1="430" x2="403" y2="430" stroke="#f4a752" stroke-width="1.5" marker-end="url(#ot-c)"/>
+<line x1="340" y1="450" x2="403" y2="450" stroke="#f4a752" stroke-width="1.5" marker-end="url(#ot-c)"/>
+
+<!-- ═══ BOTTOM SECTION ═══ -->
+
+<!-- Arrows from blocks down to (+) circles -->
+<line x1="190" y1="604" x2="190" y2="590" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+<line x1="485" y1="604" x2="485" y2="590" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- (+) circles for positional encoding -->
+<circle cx="190" cy="618" r="13" fill="#1a1d27" stroke="#8b90a0" stroke-width="1.5"/>
+<text x="190" y="623" fill="#e1e4eb" font-size="14" text-anchor="middle" font-weight="600">+</text>
+<circle cx="485" cy="618" r="13" fill="#1a1d27" stroke="#8b90a0" stroke-width="1.5"/>
+<text x="485" y="623" fill="#e1e4eb" font-size="14" text-anchor="middle" font-weight="600">+</text>
+
+<!-- Positional Encoding labels -->
+<text x="97" y="612" fill="#8b90a0" font-size="9" text-anchor="end">Positional</text>
+<text x="97" y="623" fill="#8b90a0" font-size="9" text-anchor="end">Encoding</text>
+<text x="568" y="612" fill="#8b90a0" font-size="9" text-anchor="start">Positional</text>
+<text x="568" y="623" fill="#8b90a0" font-size="9" text-anchor="start">Encoding</text>
+
+<!-- Arrows from embeddings up to (+) circles -->
+<line x1="190" y1="648" x2="190" y2="631" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+<line x1="485" y1="648" x2="485" y2="631" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Input Embedding -->
+<rect x="113" y="648" width="154" height="34" rx="4" fill="#1a1d27" stroke="#e8a0bf" stroke-width="1.5"/>
+<text x="190" y="662" fill="#e8a0bf" font-size="11" text-anchor="middle" font-weight="600">Input</text>
+<text x="190" y="676" fill="#e8a0bf" font-size="11" text-anchor="middle" font-weight="600">Embedding</text>
+
+<!-- Output Embedding -->
+<rect x="408" y="648" width="154" height="34" rx="4" fill="#1a1d27" stroke="#e8a0bf" stroke-width="1.5"/>
+<text x="485" y="662" fill="#e8a0bf" font-size="11" text-anchor="middle" font-weight="600">Output</text>
+<text x="485" y="676" fill="#e8a0bf" font-size="11" text-anchor="middle" font-weight="600">Embedding</text>
+
+<!-- Arrows from labels up to embeddings -->
+<line x1="190" y1="700" x2="190" y2="682" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+<line x1="485" y1="700" x2="485" y2="682" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ot-a)"/>
+
+<!-- Input / Output labels -->
+<text x="190" y="716" fill="#8b90a0" font-size="12" text-anchor="middle">Inputs</text>
+<text x="485" y="716" fill="#8b90a0" font-size="12" text-anchor="middle">Outputs</text>
+<text x="485" y="730" fill="#8b90a0" font-size="10" text-anchor="middle">(shifted right)</text>
+
+</g>
+</svg>
