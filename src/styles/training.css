@@ -57,6 +57,28 @@ body { line-height: 1.7; padding-top: 64px; }
 
 .nav-weight { font-size: 11px; color: var(--color-text-muted); }
 
+/* Module expand indicator */
+.nav-module.expanded { font-weight: 600; }
+
+/* Sub-items (sections within a module) */
+.nav-sub-items {
+  border-left: 1px solid var(--color-border);
+  margin-left: 26px;
+}
+
+.nav-sub-item {
+  padding: 6px 16px 6px 16px;
+  font-size: 13px;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+}
+
+.nav-sub-item.active {
+  border-left-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(108, 159, 255, 0.08);
+}
+
 .training-main { margin-left: 300px; flex: 1; max-width: 900px; padding: 48px 64px; }
 
 /* Markdown Content */

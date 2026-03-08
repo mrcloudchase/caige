@@ -1,0 +1,63 @@
+---
+import { getCollection, render } from 'astro:content';
+import TrainingLayout from '../../../../layouts/TrainingLayout.astro';
+
+export async function getStaticPaths() {
+  const allSections = (await getCollection('sections')).sort(
+    (a, b) => a.data.moduleOrder - b.data.moduleOrder || a.data.sectionOrder - b.data.sectionOrder
+  );
+  const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+
+  return allSections.map((entry, i) => {
+    // Prev: previous section, or module landing if first section
+    let prev = null;
+    if (i > 0 && allSections[i - 1].data.module === entry.data.module) {
+      prev = {
+        title: allSections[i - 1].data.title,
+        href: `/training/module/${entry.data.module}/${allSections[i - 1].data.slug}`,
+      };
+    } else {
+      prev = {
+        title: modules.find(m => m.data.slug === entry.data.module)?.data.title ?? entry.data.module,
+        href: `/training/module/${entry.data.module}`,
+      };
+    }
+
+    // Next: next section in same module, or next module landing, or null
+    let next = null;
+    if (i + 1 < allSections.length && allSections[i + 1].data.module === entry.data.module) {
+      next = {
+        title: allSections[i + 1].data.title,
+        href: `/training/module/${entry.data.module}/${allSections[i + 1].data.slug}`,
+      };
+    } else {
+      // Find next module
+      const currentModuleOrder = entry.data.moduleOrder;
+      const nextModule = modules.find(m => m.data.order === currentModuleOrder + 1);
+      if (nextModule) {
+        next = {
+          title: nextModule.data.title,
+          href: `/training/module/${nextModule.data.slug}`,
+        };
+      }
+    }
+
+    return {
+      params: { module: entry.data.module, section: entry.data.slug },
+      props: { entry, prev, next },
+    };
+  });
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<TrainingLayout
+  title={entry.data.title}
+  currentPath={`/training/module/${entry.data.module}/${entry.data.slug}`}
+  prev={prev}
+  next={next}
+>
+  <Content />
+</TrainingLayout>

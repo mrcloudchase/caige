@@ -9,10 +9,17 @@ const { currentPath } = Astro.props;
 
 const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
 const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+const allSections = (await getCollection('sections')).sort(
+  (a, b) => a.data.moduleOrder - b.data.moduleOrder || a.data.sectionOrder - b.data.sectionOrder
+);
 
-function isActive(slug: string, type: 'program' | 'module') {
-  const href = type === 'program' ? `/training/${slug}` : `/training/module/${slug}`;
+function isActive(href: string) {
   return currentPath === href || currentPath === `${href}/`;
+}
+
+// Determine which module is currently active (either its landing page or one of its sections)
+function isModuleExpanded(moduleSlug: string) {
+  return currentPath.startsWith(`/training/module/${moduleSlug}`);
 }
 ---
 
@@ -25,7 +32,7 @@ function isActive(slug: string, type: 'program' | 'module') {
   <div class="nav-section">Program</div>
   {programs.map((p) => (
     <a
-      class:list={['nav-item', { active: isActive(p.data.slug, 'program') }]}
+      class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
       href={`/training/${p.data.slug}`}
     >
       {p.data.title}
@@ -33,13 +40,36 @@ function isActive(slug: string, type: 'program' | 'module') {
   ))}
 
   <div class="nav-section">Training Modules</div>
-  {modules.map((m) => (
-    <a
-      class:list={['nav-item', { active: isActive(m.data.slug, 'module') }]}
-      href={`/training/module/${m.data.slug}`}
-    >
-      <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
-      <span class="nav-weight">{m.data.weight ?? '—'}</span>
-    </a>
-  ))}
+  {modules.map((m) => {
+    const moduleHref = `/training/module/${m.data.slug}`;
+    const expanded = isModuleExpanded(m.data.slug);
+    const moduleSections = allSections.filter(s => s.data.module === m.data.slug);
+
+    return (
+      <>
+        <a
+          class:list={['nav-item', 'nav-module', { active: isActive(moduleHref), expanded }]}
+          href={moduleHref}
+        >
+          <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
+          <span class="nav-weight">{m.data.weight ?? '—'}</span>
+        </a>
+        {expanded && (
+          <div class="nav-sub-items">
+            {moduleSections.map((s) => {
+              const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
+              return (
+                <a
+                  class:list={['nav-item', 'nav-sub-item', { active: isActive(sectionHref) }]}
+                  href={sectionHref}
+                >
+                  {s.data.title}
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </>
+    );
+  })}
 </nav>

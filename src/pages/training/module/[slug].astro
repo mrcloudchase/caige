@@ -5,33 +5,113 @@ import TrainingLayout from '../../../layouts/TrainingLayout.astro';
 export async function getStaticPaths() {
   const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
   const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
+  const allSections = await getCollection('sections');
 
   return modules.map((entry, i) => {
-    const prev = i > 0
-      ? { title: modules[i - 1].data.title, href: `/training/module/${modules[i - 1].data.slug}` }
-      : programs.length > 0
-        ? { title: programs[programs.length - 1].data.title, href: `/training/${programs[programs.length - 1].data.slug}` }
+    // Prev: last section of previous module, or last program page
+    let prev = null;
+    if (i > 0) {
+      const prevModule = modules[i - 1];
+      const prevModuleSections = allSections
+        .filter(s => s.data.module === prevModule.data.slug)
+        .sort((a, b) => a.data.sectionOrder - b.data.sectionOrder);
+      if (prevModuleSections.length > 0) {
+        const lastSection = prevModuleSections[prevModuleSections.length - 1];
+        prev = { title: lastSection.data.title, href: `/training/module/${prevModule.data.slug}/${lastSection.data.slug}` };
+      } else {
+        prev = { title: prevModule.data.title, href: `/training/module/${prevModule.data.slug}` };
+      }
+    } else if (programs.length > 0) {
+      prev = { title: programs[programs.length - 1].data.title, href: `/training/${programs[programs.length - 1].data.slug}` };
+    }
+
+    // Next: first section of this module
+    const sections = allSections
+      .filter(s => s.data.module === entry.data.slug)
+      .sort((a, b) => a.data.sectionOrder - b.data.sectionOrder);
+
+    const next = sections.length > 0
+      ? { title: sections[0].data.title, href: `/training/module/${entry.data.slug}/${sections[0].data.slug}` }
+      : i < modules.length - 1
+        ? { title: modules[i + 1].data.title, href: `/training/module/${modules[i + 1].data.slug}` }
         : null;
-    const next = i < modules.length - 1
-      ? { title: modules[i + 1].data.title, href: `/training/module/${modules[i + 1].data.slug}` }
-      : null;
 
     return {
       params: { slug: entry.data.slug },
-      props: { entry, prev, next },
+      props: { entry, prev, next, sections },
     };
   });
 }
 
-const { entry, prev, next } = Astro.props;
+const { entry, prev, next, sections } = Astro.props;
 const { Content } = await render(entry);
+const moduleSlug = entry.data.slug;
+const moduleOrder = entry.data.order;
 ---
 
 <TrainingLayout
   title={entry.data.title}
-  currentPath={`/training/module/${entry.data.slug}`}
+  currentPath={`/training/module/${moduleSlug}`}
   prev={prev}
   next={next}
 >
   <Content />
+
+  <div class="section-tiles">
+    {sections.map((s, i) => (
+      <a href={`/training/module/${moduleSlug}/${s.data.slug}`} class="section-tile">
+        <span class="section-tile-number">
+          {moduleOrder === 0
+            ? `Part ${i + 1}`
+            : s.data.slug === 'learning-objectives' ? ''
+            : s.data.slug === 'key-takeaways' ? ''
+            : s.data.slug === 'review-questions' ? ''
+            : `${moduleOrder}.${i}`}
+        </span>
+        <span class="section-tile-title">{s.data.title}</span>
+      </a>
+    ))}
+  </div>
 </TrainingLayout>
+
+<style>
+  .section-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .section-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .section-tile:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px rgba(108, 159, 255, 0.08);
+    opacity: 1;
+  }
+
+  .section-tile-number {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .section-tile-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+</style>

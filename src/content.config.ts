@@ -14,6 +14,26 @@ const modules = defineCollection({
   }),
 });
 
+const sections = defineCollection({
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/sections',
+    generateId: ({ entry }) => {
+      // Use full path without extension as ID to avoid duplicates
+      // e.g. "ai-fundamentals/learning-objectives.md" -> "ai-fundamentals/learning-objectives"
+      return entry.replace(/\.md$/, '');
+    },
+  }),
+  schema: z.object({
+    title: z.string(),
+    slug: z.string(),
+    module: z.string(),
+    moduleOrder: z.number(),
+    sectionOrder: z.number(),
+    description: z.string(),
+  }),
+});
+
 const programs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/programs' }),
   schema: z.object({
@@ -24,4 +44,4 @@ const programs = defineCollection({
   }),
 });
 
-export const collections = { modules, programs };
+export const collections = { modules, sections, programs };
