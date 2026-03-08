@@ -17,8 +17,7 @@ function isActive(href: string) {
   return currentPath === href || currentPath === `${href}/`;
 }
 
-// Determine which module is currently active (either its landing page or one of its sections)
-function isModuleExpanded(moduleSlug: string) {
+function isInModule(moduleSlug: string) {
   return currentPath.startsWith(`/training/module/${moduleSlug}`);
 }
 ---
@@ -42,34 +41,55 @@ function isModuleExpanded(moduleSlug: string) {
   <div class="nav-section">Training Modules</div>
   {modules.map((m) => {
     const moduleHref = `/training/module/${m.data.slug}`;
-    const expanded = isModuleExpanded(m.data.slug);
+    const inModule = isInModule(m.data.slug);
     const moduleSections = allSections.filter(s => s.data.module === m.data.slug);
 
     return (
-      <>
-        <a
-          class:list={['nav-item', 'nav-module', { active: isActive(moduleHref), expanded }]}
-          href={moduleHref}
-        >
-          <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
-          <span class="nav-weight">{m.data.weight ?? '—'}</span>
-        </a>
-        {expanded && (
-          <div class="nav-sub-items">
-            {moduleSections.map((s) => {
-              const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
-              return (
-                <a
-                  class:list={['nav-item', 'nav-sub-item', { active: isActive(sectionHref) }]}
-                  href={sectionHref}
-                >
-                  {s.data.title}
-                </a>
-              );
-            })}
+      <div class="nav-module-group" data-module={m.data.slug}>
+        <div class:list={['nav-item', 'nav-module', { active: isActive(moduleHref), expanded: inModule }]}>
+          <a href={moduleHref} class="nav-module-link">
+            <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
+          </a>
+          <div class="nav-module-right">
+            <span class="nav-weight">{m.data.weight ?? '—'}</span>
+            <button class="nav-toggle" aria-label="Toggle sections" aria-expanded={inModule ? 'true' : 'false'}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
-        )}
-      </>
+        </div>
+        <div class:list={['nav-sub-items', { collapsed: !inModule }]}>
+          {moduleSections.map((s) => {
+            const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
+            return (
+              <a
+                class:list={['nav-item', 'nav-sub-item', { active: isActive(sectionHref) }]}
+                href={sectionHref}
+              >
+                {s.data.title}
+              </a>
+            );
+          })}
+        </div>
+      </div>
     );
   })}
 </nav>
+
+<script>
+  document.querySelectorAll('.nav-toggle').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const group = (btn as HTMLElement).closest('.nav-module-group')!;
+      const subItems = group.querySelector('.nav-sub-items')!;
+      const navModule = group.querySelector('.nav-module')!;
+      const isCollapsed = subItems.classList.contains('collapsed');
+
+      subItems.classList.toggle('collapsed');
+      navModule.classList.toggle('expanded', isCollapsed);
+      btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+    });
+  });
+</script>
