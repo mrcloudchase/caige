@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+export async function getStaticPaths() {
+  const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
+  const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+
+  return programs.map((entry, i) => {
+    const prev = i > 0
+      ? { title: programs[i - 1].data.title, href: `/training/${programs[i - 1].data.slug}` }
+      : null;
+    const next = i < programs.length - 1
+      ? { title: programs[i + 1].data.title, href: `/training/${programs[i + 1].data.slug}` }
+      : modules.length > 0
+        ? { title: modules[0].data.title, href: `/training/module/${modules[0].data.slug}` }
+        : null;
+
+    return {
+      params: { slug: entry.data.slug },
+      props: { entry, prev, next },
+    };
+  });
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<TrainingLayout
+  title={entry.data.title}
+  currentPath={`/training/${entry.data.slug}`}
+  prev={prev}
+  next={next}
+>
+  <Content />
+</TrainingLayout>

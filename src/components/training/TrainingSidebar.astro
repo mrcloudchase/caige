@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
+const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+
+function isActive(slug: string, type: 'program' | 'module') {
+  const href = type === 'program' ? `/training/${slug}` : `/training/module/${slug}`;
+  return currentPath === href || currentPath === `${href}/`;
+}
+---
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>c<span>AI</span>ge</h1>
+    <p>Certified AI Guardrail Engineer</p>
+  </div>
+
+  <div class="nav-section">Program</div>
+  {programs.map((p) => (
+    <a
+      class:list={['nav-item', { active: isActive(p.data.slug, 'program') }]}
+      href={`/training/${p.data.slug}`}
+    >
+      {p.data.title}
+    </a>
+  ))}
+
+  <div class="nav-section">Training Modules</div>
+  {modules.map((m) => (
+    <a
+      class:list={['nav-item', { active: isActive(m.data.slug, 'module') }]}
+      href={`/training/module/${m.data.slug}`}
+    >
+      <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
+      <span class="nav-weight">{m.data.weight ?? '—'}</span>
+    </a>
+  ))}
+</nav>

@@ -4,11 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-cAIge (Certified AI Guardrail Engineer) — a vendor-agnostic AI certification platform at caigeai.dev. Static site deployed via GitHub Pages from the `mrcloudchase/caige` repo.
+cAIge (Certified AI Guardrail Engineer) — a vendor-agnostic AI certification platform at caige.org. Built with Astro, React islands, Tailwind CSS 4, and TypeScript. Deployed via GitHub Actions to GitHub Pages from the `mrcloudchase/caige` repo.
 
 ## Development
 
-No build step, no package manager, no tests, no linter. To serve locally, double-click `open-site.command` — it starts a Python HTTP server on port 8000 and opens the browser. Verify changes across the three pages: `index.html`, `training.html`, `exam.html`.
+```bash
+npm install          # install dependencies
+npm run dev          # start dev server (localhost:4321)
+npm run build        # production build -> dist/
+npm run preview      # preview production build
+```
+
+Node 22 (see `.nvmrc`). No test framework currently.
 
 ## Git
 
@@ -16,43 +23,99 @@ Never include "Co-Authored-By" or any AI attribution in commit messages.
 
 ## Architecture
 
-Static site using component-based vanilla JS (ES modules). Three thin HTML shells mount JS components at load time. Designed for eventual React/Next.js migration.
+Astro static site with React islands for the exam engine. Content collections for training material. Zero client-side JS on content pages — React only loads on `/exam`.
 
-### Data flow
+### Directory Structure
 
-- `js/config.js` is the single source of truth — site name, nav links, training module list. All components read from it.
-- `content/question-bank.json` holds exam questions organized by domain with a `domainDistribution` config that controls how many questions are selected per domain.
-- Training content lives in `content/modules/*.md` and `content/*.md` as Markdown files, fetched at runtime and rendered client-side by `js/markdown.js`.
-
-### Component pattern
-
-Components are pure functions that return HTML strings. They are inserted via `outerHTML` replacement of placeholder `<div>` elements:
-
-```js
-document.getElementById('site-header').outerHTML = SiteHeader({ variant: 'landing' });
+```
+src/
+  pages/              — Astro page routes
+    index.astro       — Landing page
+    exam.astro        — Exam page (loads React ExamApp)
+    training/
+      index.astro     — Redirects to /training/overview
+      [slug].astro    — Program pages (overview, competency-matrix, exam-blueprint)
+      module/
+        [slug].astro  — Module pages (prerequisites, ai-fundamentals, etc.)
+  layouts/
+    BaseLayout.astro  — HTML shell, head, Header, optional Footer
+    TrainingLayout.astro — BaseLayout + sidebar + prev/next nav
+  components/
+    Header.astro      — Site header with nav links and optional timer
+    Footer.astro      — Site footer
+    training/
+      TrainingSidebar.astro — Sidebar nav querying content collections
+      PrevNext.astro   — Prev/next module navigation
+    exam/              — React components (client:load island)
+      ExamApp.tsx      — Top-level exam orchestrator
+      types.ts         — TypeScript interfaces
+      useExamState.ts  — useReducer hook for exam state
+      questionBank.ts  — Fetch and select questions
+      certificate.ts   — Canvas PNG certificate generator
+      (+ IntroScreen, ExamScreen, QuestionPanel, OptionItem,
+         SidePanel, PaletteBox, ResultsScreen, ConfirmModal, Timer)
+  content/
+    modules/           — 7 markdown files with Zod-validated frontmatter
+    programs/          — 3 markdown files (overview, competency-matrix, exam-blueprint)
+  content.config.ts    — Zod schemas for modules and programs collections
+  styles/
+    global.css         — Tailwind 4 import + theme tokens + shared styles
+    landing.css        — Landing page styles
+    training.css       — Training page + prose content styles
+    exam.css           — Exam engine styles
+public/
+  CNAME               — caige.org
+  svg/                 — 14 SVG diagrams
+  data/
+    question-bank.json — Exam questions
 ```
 
-`SiteHeader` has three variants (`landing`, `training`, `exam`) producing different markup for each page. `SiteFooter` is only used on the landing page.
+### Data Flow
 
-### Exam modules (`js/exam/`)
+- Content collections (`src/content/`) are the source of truth for training content. Frontmatter defines metadata (title, slug, order, domain, weight).
+- `src/content.config.ts` defines Zod schemas validated at build time.
+- `public/data/question-bank.json` holds exam questions, fetched at runtime by the React exam engine.
+- Theme tokens defined as CSS custom properties in `src/styles/global.css`.
 
-Eight ES modules with strict separation:
-- `state.js` — shared mutable state object (single instance, imported by all other exam modules)
-- `question-bank.js` — fetches and caches `question-bank.json`, selects questions per domain distribution
-- `index.js` — orchestrator: prepares exam (shuffles questions AND options), wires all event listeners, manages screen transitions via DOM `style.display`
-- `ui.js` — renders current question, palette, handles navigation
-- `scoring.js` — computes results and renders the results screen
-- `certificate.js` — generates a PNG certificate on a canvas element
-- `timer.js` — countdown timer with warning/critical CSS classes
-- `utils.js` — `shuffle()` and `escapeHTML()` helpers
+### Content Collections
 
-### CSS split
+Two collections defined in `src/content.config.ts`:
+- **modules**: 7 files (prerequisites + 6 domain modules). Schema: title, slug, order, description, domain?, weight?, studyTime?
+- **programs**: 3 files (overview, competency-matrix, exam-blueprint). Schema: title, slug, order, description
 
-Each HTML page loads `css/styles.css` (shared reset, variables, buttons, logo) plus one page-specific file (`landing.css`, `training.css`, or `exam.css`). CSS variables are defined in `:root` in `styles.css`.
+Pages use `getCollection()` and `render()` from `astro:content` to query and render entries.
+
+### Exam Engine
+
+React island loaded only on `/exam` via `client:load`. State managed via `useReducer` in `useExamState.ts`. Key flow:
+1. IntroScreen: name input → load question bank → prepare (shuffle questions + options, remap correct indices)
+2. ExamScreen: question panel + side palette, timer countdown via useEffect
+3. Submit: confirm modal → score computation → ResultsScreen with domain breakdown
+4. Certificate: canvas-based PNG generation for passing scores
+
+### URL Structure
+
+```
+/                                         → Landing page
+/training                                 → Redirects to /training/overview
+/training/overview                        → Program overview
+/training/competency-matrix               → Competency matrix
+/training/exam-blueprint                  → Exam blueprint
+/training/module/prerequisites            → Prerequisites
+/training/module/ai-fundamentals          → Module 1
+/training/module/guardrail-architecture   → Module 2
+/training/module/guardrail-implementation → Module 3
+/training/module/policy-compliance        → Module 4
+/training/module/testing-red-teaming      → Module 5
+/training/module/operations-observability → Module 6
+/exam                                     → Exam engine
+```
 
 ## Conventions
 
-- No inline `onclick` handlers — all event binding in JS
-- No inline styles except rare one-offs in HTML (e.g., domain bar widths)
-- Question options are shuffled per exam attempt; `correct` indices are remapped accordingly in `index.js`
-- Exam has 75 scored + 5 pilot questions, 120 min, 70% pass threshold — these numbers appear in both HTML and JS
+- No inline `onclick` handlers — React event handlers in components
+- Content pages are static HTML with zero client JS
+- Exam options are shuffled per attempt; `correct` indices are remapped
+- Exam: 75 scored + 5 pilot questions, 120 min, 70% pass threshold
+- CSS custom properties use `--color-*` prefix (e.g., `--color-accent`, `--color-bg`)
+- SVG images referenced in markdown use absolute paths (`/svg/filename.svg`)
