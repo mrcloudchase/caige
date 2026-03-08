@@ -277,6 +277,23 @@ This is where the model learns safety behaviors — refusing harmful requests, b
 
 After all three stages, the result is a chat model — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
 
+### Stage 4: Reinforcement Learning for Reasoning
+
+The most recent evolution in LLM training adds a fourth stage: reinforcement learning specifically for reasoning capabilities. Where RLHF (Stage 3) trains the model to be safe and helpful based on human preferences, RL for reasoning trains the model to solve problems by producing intermediate thinking steps — a process called **chain-of-thought (CoT) reasoning**.
+
+The approach works as follows:
+
+1. The model is given a problem (e.g., a math question)
+2. It generates multiple candidate solutions, each with step-by-step reasoning
+3. Each solution is checked against the correct answer
+4. Solutions that arrive at the correct answer are reinforced; incorrect solutions are not
+
+One widely used algorithm for this is **Group Relative Policy Optimization (GRPO)**, which compares the model's multiple outputs against each other rather than training a separate reward model. This is significantly more efficient than the PPO approach used in RLHF and is the technique behind reasoning models like DeepSeek R1.
+
+The result is a **reasoning model** — a model that "thinks" through problems step by step before providing a final answer, producing more reliable results in math, logic, and code. Some reasoning models expose their thinking tokens to the user; others hide them and only show the final answer.
+
+**Distillation** is a related technique where a smaller model is trained to mimic the reasoning behavior of a larger model. The smaller "student" model learns by training on the reasoning traces produced by the larger "teacher" model. This creates efficient reasoning models but also means the student inherits the teacher's failure modes and biases.
+
 ### What Each Training Stage Creates — and What Can Go Wrong
 
 | Training Stage | What Gets Encoded | What Can Go Wrong | Covered In |
@@ -284,8 +301,9 @@ After all three stages, the result is a chat model — the kind of model you int
 | Pre-training | World knowledge, language patterns, code | Memorized private data, embedded biases, outdated facts | Module 1 (1.2.1, 1.2.4) |
 | Instruction tuning (SFT) | Instruction following, role boundaries | Instruction hierarchy is a soft preference, can be broken | Module 1 (1.2.2, 1.2.3) |
 | RLHF / alignment | Safety behaviors, refusal patterns | Safety training can be bypassed via jailbreaking | Module 1 (1.2.3) |
+| RL for reasoning | Step-by-step reasoning, problem decomposition | Reasoning traces may contain harmful content or leaked data invisible in the final answer; capability gains can outpace safety guardrails | Module 1 (1.2.3), Module 5 |
 
-> **Why this matters for guardrails:** Every training stage creates capabilities AND risks. Pre-training gives the model knowledge but also memorized data. Instruction tuning gives it conversational ability but also a breakable instruction hierarchy. Safety training gives it refusal behavior but also a target for jailbreaking. No amount of training eliminates these risks — guardrails exist because model-level safety is necessary but insufficient.
+> **Why this matters for guardrails:** Every training stage creates capabilities AND risks. Pre-training gives the model knowledge but also memorized data. Instruction tuning gives it conversational ability but also a breakable instruction hierarchy. Safety training gives it refusal behavior but also a target for jailbreaking. Reasoning training gives the model step-by-step thinking but creates a new guardrail surface — the thinking tokens themselves — where policy violations can hide. No amount of training eliminates these risks — guardrails exist because model-level safety is necessary but insufficient.
 
 ### What You Can and Cannot Control
 
@@ -431,6 +449,30 @@ return detokenize(tokens)
 
 > **Why this matters for guardrails:** LLM output is non-deterministic by design. The same prompt can produce different outputs on different runs. This means you cannot test a guardrail once and assume it will always catch the same issue — a prompt that was blocked today might produce a slightly different output tomorrow that slips through. Guardrail testing requires repeated runs, diverse inputs, and statistical evaluation rather than simple pass/fail on a single test case.
 
+### Reasoning Models and Chain-of-Thought
+
+Standard LLMs generate their answer directly — one token at a time from left to right. **Reasoning models** add an additional step: before producing the final answer, the model generates an extended sequence of **thinking tokens** — intermediate reasoning steps that break the problem down.
+
+```
+ Standard model:
+   Input:  "What is 27 * 43?"
+   Output: "1,161"
+
+ Reasoning model:
+   Input:  "What is 27 * 43?"
+   Thinking: "I need to multiply 27 by 43.
+              27 * 40 = 1,080
+              27 * 3 = 81
+              1,080 + 81 = 1,161"
+   Output: "1,161"
+```
+
+The thinking tokens may be visible to the user, hidden behind an interface, or only available through the API. Either way, they are generated using the same autoregressive process described above — the model is still predicting one token at a time.
+
+**Inference-time scaling** is a related concept: making a model "think harder" by spending more compute at inference time. Techniques include generating multiple candidate answers and selecting the best one (**Best-of-N sampling**), having the model check its own work (**self-refinement**), or generating multiple solutions and picking the most common answer (**self-consistency**). These techniques can significantly improve accuracy without changing the model's weights.
+
+> **Why this matters for guardrails:** Reasoning models create a new guardrail surface. The final answer may look safe and compliant, but the reasoning trace — the thinking tokens — may contain policy violations, leaked sensitive data, or harmful content. Guardrails must inspect both the reasoning trace and the final output. Additionally, inference-time scaling means the same model can behave very differently depending on how it is configured — a model that passes guardrail testing with standard inference may fail when inference-time scaling is enabled.
+
 ---
 
 ## What LLMs Get Wrong: Failure Modes from Architecture
@@ -445,6 +487,7 @@ The architectural properties described in the previous sections are not just tec
 | Learned role boundaries (not enforced) | Flexible instruction following | Users can override system instructions through carefully crafted prompts (jailbreaking) |
 | Trained to be helpful and compliant | Useful assistant behavior | Model follows user requests even when it should refuse, or drifts away from its designated topic (over-compliance, off-topic drift) |
 | Training data reflects human biases | Understanding of human language and culture | Model reproduces and potentially amplifies societal biases (toxic/biased output) |
+| Extended chain-of-thought reasoning | More accurate problem-solving | Thinking tokens may contain policy violations, sensitive data, or harmful reasoning not visible in the final answer |
 
 These are not bugs. They are direct consequences of how the technology works. You cannot "fix" hallucination by improving the model alone — the architecture generates text probabilistically, so there will always be cases where the model produces plausible-sounding nonsense. You cannot "fix" prompt injection by training the model harder — the attention mechanism does not architecturally distinguish trusted from untrusted tokens.
 
@@ -618,6 +661,10 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | **Top-k sampling** | Limiting token selection to the k most probable candidates |
 | **Top-p (nucleus) sampling** | Limiting token selection to the smallest set of tokens whose cumulative probability exceeds p |
 | **Greedy decoding** | Selecting the single highest-probability token at each step (temperature = 0) |
+| **Chain-of-thought (CoT)** | A reasoning pattern where the model produces intermediate thinking steps before providing a final answer |
+| **Reasoning model** | An LLM trained (via RL for reasoning) to generate step-by-step thinking tokens before its final output |
+| **Inference-time scaling** | Techniques that improve output quality by spending more compute at inference (Best-of-N, self-consistency, self-refinement) |
+| **Distillation** | Training a smaller model to replicate a larger model's behavior by learning from its outputs |
 
 **Chat and Roles**
 
