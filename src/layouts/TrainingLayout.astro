@@ -14,7 +14,7 @@ interface Props {
 const { title, currentPath, prev = null, next = null } = Astro.props;
 ---
 
-<BaseLayout title={`${title} — cAIge Training`} footer={false}>
+<BaseLayout title={`${title} — cAIge Training`}>
   <button class="menu-toggle" id="menu-toggle">&#9776;</button>
   <div class="training-layout">
     <TrainingSidebar currentPath={currentPath} />

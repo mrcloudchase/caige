@@ -5,12 +5,9 @@ import '../styles/global.css';
 
 interface Props {
   title: string;
-  timer?: boolean;
-  footer?: boolean;
-  extraStyles?: string[];
 }
 
-const { title, timer = false, footer = true, extraStyles = [] } = Astro.props;
+const { title } = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -19,11 +16,10 @@ const { title, timer = false, footer = true, extraStyles = [] } = Astro.props;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
-  {extraStyles.map(href => <link rel="stylesheet" href={href} />)}
 </head>
 <body>
-  <Header timer={timer} />
+  <Header />
   <slot />
-  {footer && <Footer />}
+  <Footer />
 </body>
 </html>

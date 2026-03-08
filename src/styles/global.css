@@ -29,6 +29,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
+  padding-top: 64px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -169,11 +170,10 @@ footer {
 }
 
 .footer-inner {
-  max-width: 1120px;
-  margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 32px;
 }
 
 .footer-copy { font-size: 0.85rem; color: var(--color-text-muted); }
