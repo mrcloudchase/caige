@@ -56,17 +56,67 @@ The result of training is a set of weights that encode the patterns found in the
 
 ## Part 2: What Is a Large Language Model?
 
-A **large language model (LLM)** is a neural network — but a very specific kind. Not all neural networks are LLMs. Neural networks are used for many different tasks: classifying images, detecting fraud, recommending products, controlling robots. What makes an LLM distinct is three things: its architecture, its training objective, and its scale.
+A **large language model (LLM)** is a neural network — but a very specific kind. Not all neural networks are LLMs. Neural networks are used for many different tasks: classifying images, detecting fraud, recommending products, controlling robots. What makes an LLM distinct is three things: its architecture, its training objective, and its scale. This section explains each in detail.
 
 ### Architecture: The Transformer
 
-LLMs are built on a specific neural network architecture called the **transformer**. The transformer was introduced in 2017 and replaced earlier architectures (like recurrent neural networks) that processed text one word at a time. The transformer's key innovation is that it processes all tokens in a sequence simultaneously, using a mechanism called **attention** that lets each token look at every other token to determine context. Part 3 explains the transformer's internal components in detail. For now, the important point is that the transformer is the specific type of neural network that powers LLMs — not all neural networks are transformers, but all modern LLMs are.
+LLMs are built on a specific neural network architecture called the **transformer**. To understand why this architecture exists and why it matters, it helps to know where it came from.
+
+#### The Paper That Changed Everything
+
+In 2017, a team of researchers at Google published a paper titled [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) (Vaswani et al.). This paper introduced the transformer architecture, and it is not an exaggeration to say it changed the trajectory of artificial intelligence. Every major LLM today — GPT, Claude, Llama, Gemini, Mistral — is built on the architecture described in this paper.
+
+Before the transformer, the dominant approach to language modeling was **recurrent neural networks (RNNs)** and their variant, **Long Short-Term Memory networks (LSTMs)**. These architectures processed text **sequentially** — one token at a time, from left to right. Each token's processing depended on the previous token's output, like reading a book one word at a time and trying to remember everything you have read so far. This created two fundamental problems:
+
+- **Long-range dependencies were difficult.** By the time the model reached the 500th word in a paragraph, the information about the 1st word had been passed through 499 sequential processing steps, degrading at each step. The model struggled to connect ideas that were far apart in the text.
+- **Training was slow.** Because each step depended on the previous step, the computation could not be parallelized. You had to wait for token 1 to finish before processing token 2, then wait for token 2 before processing token 3, and so on. This made training on large datasets impractical.
+
+The transformer solved both problems with a single mechanism: **self-attention**. Instead of processing tokens one at a time, the transformer processes all tokens in a sequence simultaneously. Each token can directly attend to every other token in the input, regardless of distance. The word at position 500 can directly reference the word at position 1 without any information having to pass through 499 intermediate steps. And because every token is processed in parallel, training became dramatically faster, making it feasible to train on internet-scale datasets.
+
+#### From Encoder-Decoder to Decoder-Only
+
+The original transformer described in "Attention Is All You Need" had two halves: an **encoder** and a **decoder**.
+
+- The **encoder** reads an entire input sequence and builds a rich internal representation of it. It processes all input tokens in parallel, and each token can attend to every other token in the input (full bidirectional attention). The encoder's job is understanding — it creates a contextual representation of the input.
+- The **decoder** generates output one token at a time, attending both to the encoder's representation of the input and to the tokens it has already generated. The decoder uses **masked self-attention** (also called causal attention) — each token can only attend to tokens that came before it, not tokens that come after. This is because during generation, future tokens do not exist yet.
+
+This encoder-decoder design was built for **sequence-to-sequence tasks** like machine translation, where you have a complete input (a sentence in French) and need to produce a complete output (the same sentence in English). The encoder understands the French sentence; the decoder generates the English translation.
+
+Modern generative AI models like GPT, Claude, and Llama use a **decoder-only** architecture. They removed the encoder entirely. Why?
+
+- **Generative tasks do not have a fixed input to encode.** In a conversation, the "input" is the entire conversation history so far, and the "output" is the next response. The boundary between input and output is fluid — the model's own previous outputs become part of the input for the next generation step. A decoder-only architecture handles this naturally: everything is one continuous sequence, processed left-to-right.
+- **Simplicity and scalability.** Removing the encoder cuts the architecture roughly in half, making it simpler to train, scale, and optimize. One unified architecture handles both understanding and generation.
+- **It works.** Empirically, decoder-only transformers trained on massive datasets match or exceed the performance of encoder-decoder models on virtually all tasks, including tasks the encoder-decoder was specifically designed for. Scale compensated for the architectural simplification.
+
+The result is that every major LLM you interact with today is a **decoder-only transformer**: a stack of repeated layers that process a token sequence from left to right, where each token can attend to all previous tokens but not to future tokens.
+
+### Components of the Decoder-Only Transformer
+
+A decoder-only transformer is assembled from a small number of component types, stacked and repeated. Understanding what each component does is essential to understanding how LLMs work and where their risks come from. Here is each component, from bottom to top:
+
+**Token Embedding.** The model cannot process raw text. Each input token (a word, subword, or character — Part 3 explains tokenization in detail) is converted into a dense vector of numbers called an **embedding**. This embedding is a learned representation — it starts as random numbers and is refined during training so that tokens with related meanings end up with similar vectors. The embedding layer is essentially a large lookup table: token ID in, vector out.
+
+**Positional Encoding.** The transformer processes all tokens in parallel, which means it has no inherent sense of order. Without positional information, "the dog bit the man" and "the man bit the dog" would be indistinguishable. Positional encoding adds information about each token's position in the sequence to its embedding vector, so the model knows that "dog" is the second word, not the fifth.
+
+**Masked Self-Attention (Multi-Head).** This is the core mechanism of the transformer. Self-attention allows each token to look at every other token in the sequence and compute a relevance score — "how much should I pay attention to this other token when determining my own meaning?" For example, when processing the word "it" in "The cat sat on the mat because it was tired," the attention mechanism computes high scores for "cat" and low scores for irrelevant tokens like "on." The "masked" (causal) part means each token can only attend to tokens at its position or earlier — it cannot look ahead at future tokens. This is what makes the architecture autoregressive: it generates text left-to-right, one token at a time, never peeking at what comes next. "Multi-head" means the model runs multiple attention computations in parallel, each learning to focus on different types of relationships (syntactic structure, semantic meaning, positional patterns, etc.).
+
+**Feed-Forward Network.** After attention gathers relevant context from other tokens, a feed-forward network processes each token's representation independently. Think of attention as "gathering information from context" and the feed-forward layer as "thinking about what that information means." The feed-forward network is applied to each token separately — unlike attention, it does not look at other tokens. It is typically the largest component in each layer by parameter count, and research suggests this is where much of the model's factual knowledge is stored.
+
+**Residual Connections and Layer Normalization.** After each sub-component (attention and feed-forward), a **residual connection** adds the sub-component's input to its output, and **layer normalization** stabilizes the resulting values. Residual connections (also called skip connections) solve a critical problem: in a network with 32-128+ layers, the signal would degrade to nothing without them. By adding the input directly to the output, information can flow through the entire network without being forced through every transformation. Layer normalization keeps the numerical values in a stable range, preventing training from becoming unstable. Without these two components, deep transformers would be extremely difficult to train.
+
+**Output Head (Linear Layer + Softmax).** After the final transformer layer, the model needs to convert its internal representations back into a prediction over the vocabulary. A linear layer (sometimes called the unembedding layer) projects each token's hidden state vector to a vocabulary-sized set of raw scores called **logits** — one score for every token in the vocabulary (often 32,000 to 128,000+ tokens). A **softmax** function then converts these logits into a probability distribution that sums to 1. The result is the model's answer to the question "what is the probability of each possible next token?"
+
+**Layer Stacking.** A single decoder layer (masked self-attention + feed-forward, with residual connections and normalization) has limited capacity. The power of the transformer comes from stacking many of these layers in sequence — typically 32 to 128+ layers in modern LLMs. Early layers tend to learn simple patterns (syntax, common phrases). Deeper layers combine those patterns into increasingly abstract representations (semantic meaning, logical relationships, intent). The output of one layer becomes the input to the next.
+
+![Decoder-only transformer architecture](content/svg/decoder-only-transformer.svg)
 
 ### Training Objective: Next-Token Prediction
 
 While a spam classifier is trained to predict "spam or not spam" and an image classifier is trained to predict "cat, dog, or bird," an LLM is trained on a fundamentally different task: **predict the next token**. Given a sequence of text, the model learns to predict what comes next. For example, given "The capital of France is," the model should assign high probability to "Paris."
 
 This single objective — next-token prediction — is deceptively powerful. To predict the next word accurately across billions of sentences drawn from the entire internet, a model must implicitly learn grammar, facts, reasoning patterns, coding conventions, mathematical relationships, and much more. No one explicitly teaches the model these things. They emerge as a byproduct of getting very good at predicting what word comes next. This is why LLMs can answer questions, write code, summarize documents, and carry on conversations — all of these are forms of "what token should come next, given everything that came before?"
+
+The training objective also explains why the decoder-only architecture uses **masked** self-attention. During training, the model is shown a complete text and must predict each token from only the tokens that precede it. The causal mask prevents the model from "cheating" by looking at the answer. This training setup mirrors how the model will be used in practice — during generation, future tokens genuinely do not exist yet, so the model must predict them from context alone.
 
 ### Scale
 
@@ -89,9 +139,9 @@ Understanding what an LLM is also means understanding what it is not:
 - **It is not a search engine.** An LLM does not look up answers. It generates text by predicting the most likely next token based on patterns learned during training. It can produce confident, fluent text about things that are completely false.
 - **It is not a reasoning engine.** An LLM produces outputs that often look like reasoning, but it is fundamentally a pattern-matching system trained on statistical correlations in text. This distinction matters enormously for guardrail design — you cannot assume the model "understands" a safety rule just because it can recite it.
 
-> **Why this matters for guardrails:** An LLM is a next-token predictor at massive scale. Every capability it demonstrates — following instructions, refusing harmful requests, providing accurate information — is a learned statistical pattern, not a hard-coded behavior. Learned behaviors can be fragile: they work in the scenarios well-represented in training data and can fail unpredictably in novel situations. Guardrails exist because you cannot rely on the model's learned behaviors alone.
+> **Why this matters for guardrails:** An LLM is a decoder-only transformer trained to predict the next token at massive scale. Every capability it demonstrates — following instructions, refusing harmful requests, providing accurate information — is a learned statistical pattern, not a hard-coded behavior. Learned behaviors can be fragile: they work in the scenarios well-represented in training data and can fail unpredictably in novel situations. Guardrails exist because you cannot rely on the model's learned behaviors alone.
 
-The rest of this guide now dives into the internals. Part 3 traces the complete data path through the transformer architecture — how text is converted to numbers, processed through attention and feed-forward layers, and turned back into text. Part 4 explains how LLMs are trained across multiple stages. Part 5 connects everything to the risks that make guardrails necessary.
+The rest of this guide now dives deeper into the internals. Part 3 traces the complete data path through the transformer step by step — showing how text is converted to numbers, processed through the attention and feed-forward layers described above, and turned back into text. Part 4 explains how LLMs are trained across multiple stages. Part 5 connects everything to the risks that make guardrails necessary.
 
 ---
 
@@ -304,20 +354,11 @@ The thinking tokens may be visible to the user, hidden behind an interface, or o
 
 > **Why this matters for guardrails:** Reasoning models create a new guardrail surface. The final answer may look safe and compliant, but the reasoning trace — the thinking tokens — may contain policy violations, leaked sensitive data, or harmful content. Guardrails must inspect both the reasoning trace and the final output. Additionally, inference-time scaling means the same model can behave very differently depending on how it is configured — a model that passes guardrail testing with standard inference may fail when inference-time scaling is enabled.
 
-### 3.7 Scale
+### 3.7 Scale and Practical Considerations
 
-What makes large language models "large" is the number of parameters (weights):
+Part 2 covered how scale relates to capabilities. From an implementation perspective, there are additional considerations. Architecture innovations like **Mixture-of-Experts (MoE)** — where only a fraction of the model's parameters are active for any given input — allow models to have very large total parameter counts while keeping per-inference computation manageable. A well-trained 8B parameter model today can outperform a 100B+ model from a few years ago due to improvements in training data quality and techniques.
 
-| Model Size | Parameters | Rough Capability |
-|-----------|-----------|-----------------|
-| Small | 1-8 billion | Capable for focused tasks, code, structured outputs |
-| Medium | 8-70 billion | Strong instruction following, reasoning, multi-step tasks |
-| Large | 70+ billion | Complex reasoning, nuanced understanding |
-| Frontier | Varies (often MoE) | State-of-the-art performance across tasks |
-
-These categories are approximate and shift over time — training data quality, architecture innovations (such as Mixture-of-Experts, where only a fraction of parameters are active per inference), and post-training techniques can dramatically change capability at any given parameter count. A well-trained 8B model today can outperform a 100B+ model from a few years ago.
-
-More parameters means more capacity to learn patterns from training data. However, more parameters also means more capacity to memorize training data (relevant to data leakage) and more complex behaviors that are harder to predict (relevant to guardrails).
+More parameters also means more capacity to **memorize** training data (relevant to data leakage risks) and more complex behaviors that are harder to predict and test (relevant to guardrails).
 
 ---
 
