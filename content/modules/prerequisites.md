@@ -514,7 +514,7 @@ Through fine-tuning on hundreds of thousands to millions of these curated exampl
 
 This is where the model gains its conversational ability and its tendency to follow instructions. The model also learns an **instruction hierarchy** — a priority ordering where system instructions take precedence over user instructions, with tool results treated as data the model incorporates rather than instructions that compete in the hierarchy.
 
-> **Critical insight: learned, not enforced.** The instruction-following behavior and the instruction hierarchy are **learned from patterns in training data**, not architecturally enforced. There is no parser inside the model that reads system prompts and creates access control rules. There is no enforcement mechanism that prevents the model from ignoring system instructions. The model learned from thousands of examples where system instructions were followed, so it tends to follow them — but "tends to" is not "guaranteed to." This is foundational to understanding why guardrails exist. Part 4 examines the security implications in detail.
+> **Critical insight: learned, not enforced.** The instruction-following behavior and the instruction hierarchy are **learned from patterns in training data**, not architecturally enforced. There is no parser inside the model that reads system prompts and creates access control rules. There is no enforcement mechanism that prevents the model from ignoring system instructions. The model learned from thousands of examples where system instructions were followed, so it tends to follow them — but "tends to" is not "guaranteed to." This is foundational to understanding why guardrails exist. Part 5 examines the security implications in detail.
 
 ### 4.3 RLHF and Alignment
 
