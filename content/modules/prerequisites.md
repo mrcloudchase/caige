@@ -47,7 +47,7 @@ At its core, a neural network is a series of mathematical operations organized i
 
 ## Tokens and Tokenization
 
-LLMs do not read text the way humans do. Before any text reaches the model, it must be converted into **tokens** — the basic units the model actually processes.
+LLMs do not read text the way humans do. Before any text reaches the model, it must be converted into **tokens** — subword units that are then transformed into numerical vectors the model can process.
 
 ### What Is a Token?
 
@@ -140,7 +140,7 @@ The complete pipeline from text to transformer input is:
                       [input to transformer]
 ```
 
-This is the same concept behind the embedding models used for RAG (covered later in this guide), but here the embeddings are the model's internal input layer, not a separate model.
+This uses the same underlying concept — learned vector representations — as the embedding models used for RAG (covered later in this guide). The difference is granularity: the LLM's embedding layer converts individual tokens into vectors, while a RAG embedding model converts entire passages into a single vector that captures the meaning of the whole text.
 
 ---
 
@@ -172,7 +172,7 @@ For example, in the sentence "The cat sat on the mat because it was tired," the 
 
 ### Positional Encoding
 
-The attention mechanism processes all tokens in parallel, which means it has no inherent sense of token order. The sentence "the dog chased the cat" and "the cat chased the dog" would produce the same set of embedding vectors — both contain the same tokens. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
+The attention mechanism processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
 
 ```
  Embedding:  [vec for "The"]  [vec for "cat"]  [vec for "sat"]
@@ -218,11 +218,19 @@ A transformer stacks multiple layers. Each layer contains two main computational
             |               deeper understanding
             v
  +---------------------+
+ | Output Linear Layer  |  Projects hidden states to
+ | (unembedding)        |   vocabulary-sized logits
+ +----------+----------+
+            |
+        softmax
+            |
+            v
+ +---------------------+
  | Output Probabilities |  "What token comes next?"
  +---------------------+
 ```
 
-Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patterns (grammar, common phrases). Later layers capture complex patterns (reasoning, context, intent). The final layer produces a probability distribution over the vocabulary — the model's prediction for what token comes next.
+Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patterns (grammar, common phrases). Later layers capture complex patterns (reasoning, context, intent). After the final transformer layer, a linear output layer (sometimes called the unembedding layer) projects the hidden state vectors to a vocabulary-sized set of logits, which are then converted to probabilities via softmax — producing the model's prediction for what token comes next.
 
 ### Scale
 
@@ -301,7 +309,7 @@ Through fine-tuning on these examples, the model learns:
 
 This is where the model gains its conversational ability and its tendency to follow instructions.
 
-> **Critical insight: learned, not enforced.** The instruction-following behavior is **learned from patterns in training data**, not architecturally enforced. There is no parser inside the model that reads system prompts and creates access control rules. There is no enforcement mechanism that prevents the model from ignoring system instructions. The model learned that following system instructions leads to higher reward during training, so it tends to follow them — but "tends to" is not "guaranteed to." This distinction is foundational to understanding why guardrails exist.
+> **Critical insight: learned, not enforced.** The instruction-following behavior is **learned from patterns in training data**, not architecturally enforced. There is no parser inside the model that reads system prompts and creates access control rules. There is no enforcement mechanism that prevents the model from ignoring system instructions. The model learned from thousands of examples where system instructions were followed, so it tends to follow them — but "tends to" is not "guaranteed to." This distinction is foundational to understanding why guardrails exist.
 
 ### Stage 3: RLHF (Reinforcement Learning from Human Feedback)
 
@@ -314,11 +322,11 @@ The instruction-tuned model is further refined using human preferences:
 
 This is where the model learns safety behaviors — refusing harmful requests, being honest about uncertainty, following system prompt instructions more reliably. **Constitutional AI** (used by Anthropic) is a variation where the model evaluates its own responses against a set of principles rather than relying solely on human raters. More recent approaches like **Direct Preference Optimization (DPO)** skip the separate reward model and optimize the language model directly on human preference data.
 
-After all three stages, the result is a chat model — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
+After these three stages, the result is a **chat model** — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around. Not all models go further; Stage 4 is an optional additional stage that produces reasoning models.
 
 ### Stage 4: Reinforcement Learning for Reasoning
 
-The most recent evolution in LLM training adds a fourth stage: reinforcement learning specifically for reasoning capabilities. Where RLHF (Stage 3) trains the model to be safe and helpful based on human preferences, RL for reasoning trains the model to solve problems by producing intermediate thinking steps — a process called **chain-of-thought (CoT) reasoning**.
+Some models undergo an optional fourth stage: reinforcement learning specifically for reasoning capabilities. Where RLHF (Stage 3) trains the model to be safe and helpful based on human preferences, RL for reasoning trains the model to solve problems by producing intermediate thinking steps — a process called **chain-of-thought (CoT) reasoning**.
 
 The approach works as follows:
 
@@ -394,7 +402,7 @@ Different model families use different template formats — Llama 3 uses `<|star
 
 ### The Instruction Hierarchy
 
-During instruction tuning and RLHF, models learn to treat these roles with a priority order: **system > user > tool**. The system prompt sets the rules, and the model generally follows them even when the user asks it not to.
+During instruction tuning and RLHF, models learn to treat these roles with a priority order: **system > user**, with tool results treated as data the model incorporates rather than instructions that compete in the hierarchy. The system prompt sets the rules, and the model generally follows them even when the user asks it not to.
 
 But this hierarchy is a **learned statistical preference**, not an enforced constraint. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. The model learned during training that system instructions should take priority, so it usually follows them — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override system instructions.
 
@@ -675,7 +683,7 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | Term | Definition |
 |------|-----------|
 | **Token** | The basic unit of text that LLMs process; a subword unit, roughly 3/4 of a word in English |
-| **Byte Pair Encoding (BPE)** | A tokenization algorithm that iteratively merges frequent character pairs to build a vocabulary |
+| **Byte Pair Encoding (BPE)** | A tokenization algorithm that iteratively merges frequent adjacent pairs to build a vocabulary |
 | **Vocabulary** | The fixed mapping from token IDs to subword strings used by a model's tokenizer |
 | **Special tokens** | Reserved tokens (BOS, EOS, PAD, role delimiters) with unique IDs that the tokenizer does not produce from regular text |
 | **Context window** | The maximum number of tokens a model can process in a single inference call |
