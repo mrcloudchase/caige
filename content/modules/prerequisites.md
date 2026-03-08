@@ -46,6 +46,15 @@ Training works through a loop called an **epoch**. One epoch means the network h
 
 4. **Weight update:** Each weight is adjusted slightly in the direction that reduces the loss. A weight that contributed to the error is nudged in the opposite direction. The size of each adjustment is controlled by the **learning rate** — a hyperparameter (a setting chosen before training begins, not learned during training) that determines how big each step is. A learning rate that is too large causes the network to overshoot and miss good solutions. A learning rate that is too small makes training painfully slow. Finding the right learning rate is one of the fundamental challenges of training neural networks.
 
+```
+ Forward Pass --> Loss Calculation
+      ^                  |
+      |                  v
+ Weight Update <-- Backpropagation
+
+ (repeat for every batch, across multiple epochs)
+```
+
 This four-step cycle (forward pass, loss calculation, backpropagation, weight update) repeats for every batch of training examples, across multiple epochs. Over millions or billions of iterations, the weights gradually converge on values that produce accurate predictions. Each pass through the cycle is a small incremental improvement — the network does not learn all at once, it learns by making its predictions slightly less wrong, over and over.
 
 The result of training is a set of weights that encode the patterns found in the training data. These weights are saved as a file — this file is the "model." When we "use" a model, we load these weights, feed in new data, and run a forward pass to get a prediction. No further weight updates occur during normal use (called **inference**).
@@ -70,6 +79,16 @@ Before the transformer, the dominant approach to language modeling was **recurre
 
 - **Long-range dependencies were difficult.** By the time the model reached the 500th word in a paragraph, the information about the 1st word had been passed through 499 sequential processing steps, degrading at each step. The model struggled to connect ideas that were far apart in the text.
 - **Training was slow.** Because each step depended on the previous step, the computation could not be parallelized. You had to wait for token 1 to finish before processing token 2, then wait for token 2 before processing token 3, and so on. This made training on large datasets impractical.
+
+```
+ RNN (sequential):
+ token1 --> token2 --> token3 --> ... --> token500
+ (each step waits for the previous one)
+
+ Transformer (parallel):
+ token1 <-> token2 <-> token3 <-> ... <-> token500
+ (all tokens attend to all others simultaneously)
+```
 
 The transformer solved both problems with a single mechanism: **self-attention**. Instead of processing tokens one at a time, the transformer processes all tokens in a sequence simultaneously. Each token can directly attend to every other token in the input, regardless of distance. The word at position 500 can directly reference the word at position 1 without any information having to pass through 499 intermediate steps. And because every token is processed in parallel, training became dramatically faster, making it feasible to train on internet-scale datasets.
 
@@ -128,6 +147,18 @@ For each token, the model computes a score between that token's Query and every 
 
 **Why "masked" (causal).** In a decoder-only transformer, each token can only attend to tokens at its position or **earlier** in the sequence — it cannot look ahead at tokens that come after it. This is enforced by a **causal mask** that sets the attention scores for all future positions to negative infinity before the softmax step, effectively making them zero. This constraint exists because the model is trained to predict the next token — if it could see the answer, it would just copy it instead of learning to predict. During actual text generation, this constraint matches reality: when the model is generating the 10th word, the 11th word does not exist yet.
 
+```
+ Can attend to:  The  cat  sat  on   it
+                 ---  ---  ---  ---  ---
+ The            [ Y    .    .    .    . ]
+ cat            [ Y    Y    .    .    . ]
+ sat            [ Y    Y    Y    .    . ]
+ on             [ Y    Y    Y    Y    . ]
+ it             [ Y    Y    Y    Y    Y ]
+
+ Y = can attend    . = masked (future token)
+```
+
 **Why "multi-head."** A single attention computation can only capture one type of relationship at a time. But language has many simultaneous relationships: grammatical structure, semantic meaning, coreference (what "it" refers to), temporal ordering, and more. **Multi-head attention** runs multiple attention computations in parallel — typically 32 to 128 "heads" — each with its own learned Q, K, and V projections. One head might learn to track grammatical subjects, another might learn to connect pronouns to their referents, another might focus on positional relationships. The outputs of all heads are concatenated and projected back down to the model's hidden dimension. This allows the model to simultaneously attend to different types of information from different parts of the sequence.
 
 #### Feed-Forward Network
@@ -135,6 +166,11 @@ For each token, the model computes a score between that token's Query and every 
 After the attention mechanism gathers relevant context from across the sequence, a **feed-forward network (FFN)** processes each token's representation independently. If attention is "gathering information from context," the feed-forward layer is "thinking about what that information means."
 
 The feed-forward network is structurally simple: it takes each token's vector, expands it to a larger dimension (typically 4x the model's hidden size), applies an activation function (introducing the non-linearity you learned about in Part 1), and then projects it back down to the original size. This expand-activate-compress pattern gives the network a large internal workspace to transform each token's representation.
+
+```
+ token vector --> expand    --> activate      --> compress   --> output
+ (4,096 dims)   (16,384)      (non-linearity)   (4,096)
+```
 
 Two important details distinguish the FFN from the attention layer. First, the FFN is applied to each token **separately** — unlike attention, it does not look at other tokens. Each token goes through the same computation independently. Second, the FFN is typically the largest component in each layer by parameter count, often containing two-thirds of the layer's total parameters. Research suggests that the feed-forward layers are where much of the model's **factual knowledge** is stored — the attention layers decide what information to gather, and the feed-forward layers encode the knowledge that informs the model's responses.
 
@@ -153,6 +189,12 @@ After the final transformer layer, the model has produced a rich internal repres
 This is the job of the **output head**, which works in two steps. First, a **linear layer** (sometimes called the **unembedding layer**, because it reverses what the embedding layer did) projects each token's hidden state vector to a set of raw scores called **logits**. There is one logit for every token in the model's vocabulary — if the vocabulary has 100,000 tokens, this linear layer produces 100,000 scores. A high logit means "this token is a likely next token." A low logit means "this token is unlikely."
 
 Second, the **softmax** function converts these raw logits into a **probability distribution** — a set of values between 0 and 1 that sum to exactly 1. After softmax, each score represents the model's estimated probability that the corresponding token is the correct next token. The token with the highest probability is the model's best guess, but the full distribution matters: during generation, the model can sample from this distribution (not always picking the top choice) to produce varied and natural-sounding text.
+
+```
+ hidden state --> Linear Layer --> logits    --> Softmax --> probabilities
+ (4,096 dims)    (unembedding)    (100,000      (normalize)  (100,000 values
+                                   raw scores)                summing to 1.0)
+```
 
 This output head connects directly back to what you learned in Part 1: the output layer of a neural network produces the final result. For a spam classifier, the output was a single probability (spam or not). For an LLM, the output is a probability distribution across the entire vocabulary — tens of thousands of simultaneous predictions about what comes next.
 
@@ -438,6 +480,8 @@ You now understand the complete machine — how text is tokenized, embedded, pro
 
 Understanding these stages matters because each one creates specific capabilities AND specific risks. As a guardrail engineer, you need to know where the model's behaviors come from to understand which behaviors you can rely on and which you cannot.
 
+![LLM training stages pipeline](content/svg/training-stages.svg)
+
 ### 4.1 Pre-Training: Learning Language
 
 Pre-training is where the model acquires its core knowledge. The training loop from Part 1 — forward pass, loss calculation, backpropagation, weight update — is run on a massive corpus of text, typically trillions of tokens from books, websites, code repositories, academic papers, and other sources. The training objective is the same next-token prediction you learned about in Part 2: given a sequence of tokens, **predict what comes next.**
@@ -531,6 +575,8 @@ RLHF works differently from the previous training stages. Instead of showing the
 4. **Optimize the language model.** The language model is then optimized to produce responses that the reward model scores highly. This is typically done using an algorithm called **Proximal Policy Optimization (PPO)**, which adjusts the model's weights to increase the probability of high-scoring responses while constraining how much the model can change from its instruction-tuned behavior. This constraint is important — without it, the model might "game" the reward model by finding adversarial outputs that score high but are actually low quality.
 
 Through this process, the model learns safety behaviors: refusing harmful requests, expressing uncertainty when appropriate, following system prompt instructions more reliably, and avoiding toxic or biased outputs. These behaviors are layered on top of the instruction-following ability from Stage 2, using the same fundamental mechanism — adjusting weights through training — but guided by human preferences rather than next-token prediction.
+
+![RLHF training pipeline](content/svg/rlhf-pipeline.svg)
 
 **Variations on RLHF.** The basic RLHF process described above has inspired several alternatives. **Constitutional AI** (developed by Anthropic) is an approach where the model evaluates its own responses against a written set of principles (a "constitution") rather than relying solely on human raters — this makes the alignment criteria more transparent and scalable. **Direct Preference Optimization (DPO)** skips the separate reward model entirely and optimizes the language model directly on human preference data, simplifying the training pipeline while achieving similar results.
 
@@ -642,6 +688,8 @@ An **agentic AI system** is one that can take actions — not just generate text
 | Impact of errors | Bad text | Bad actions with real consequences |
 
 Consider the difference: if a chat model hallucinates a wrong answer, a human reads it and can ignore it. If an agentic model hallucinates a database query and executes it, records may be modified before anyone reviews the output. The stakes increase dramatically when the model can act on its predictions, not just report them.
+
+![Agentic system tool call flow](content/svg/agentic-tool-flow.svg)
 
 #### Tool Integration and MCP
 

@@ -1,0 +1,93 @@
+<svg viewBox="0 0 720 340" width="720" height="340" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="ag-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker>
+<marker id="ag-b" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#ef4444"/></marker>
+</defs>
+<g font-family="system-ui,sans-serif">
+
+<!-- Title -->
+<text x="360" y="20" fill="#e1e4eb" font-size="14" text-anchor="middle" font-weight="600">Agentic System: Tool Call Flow</text>
+<text x="360" y="36" fill="#8b90a0" font-size="10" text-anchor="middle">Arrows show data flow. Colors indicate trust level.</text>
+
+<!-- ═══ TOP ROW: Forward flow ═══ -->
+
+<!-- User Input -->
+<rect x="20" y="68" width="120" height="40" rx="5" fill="#1a1d27" stroke="#ef4444" stroke-width="1.5"/>
+<text x="80" y="91" fill="#ef4444" font-size="11" text-anchor="middle" font-weight="600">User Input</text>
+<text x="80" y="122" fill="#ef4444" font-size="9" text-anchor="middle">untrusted</text>
+
+<!-- Arrow to Model -->
+<line x1="140" y1="88" x2="170" y2="88" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ag-a)"/>
+
+<!-- Model (tall central box spanning both rows) -->
+<rect x="176" y="60" width="130" height="130" rx="6" fill="#1a1d27" stroke="#6c9fff" stroke-width="2"/>
+<text x="241" y="100" fill="#6c9fff" font-size="13" text-anchor="middle" font-weight="600">LLM</text>
+<text x="241" y="116" fill="#8b90a0" font-size="9" text-anchor="middle">decides action</text>
+<text x="241" y="150" fill="#8b90a0" font-size="9" text-anchor="middle">processes result</text>
+<text x="241" y="164" fill="#8b90a0" font-size="9" text-anchor="middle">generates response</text>
+
+<!-- Arrow from Model to Tool Call -->
+<line x1="306" y1="88" x2="348" y2="88" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ag-a)"/>
+
+<!-- Tool Call -->
+<rect x="354" y="68" width="120" height="40" rx="5" fill="#1a1d27" stroke="#f4a752" stroke-width="1.5"/>
+<text x="414" y="85" fill="#f4a752" font-size="11" text-anchor="middle" font-weight="600">Tool Call</text>
+<text x="414" y="99" fill="#8b90a0" font-size="9" text-anchor="middle">function + params</text>
+
+<!-- Arrow to External Tool -->
+<line x1="474" y1="88" x2="510" y2="88" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ag-a)"/>
+
+<!-- External Tool -->
+<rect x="516" y="60" width="150" height="48" rx="5" fill="#1a1d27" stroke="#ef4444" stroke-width="1.5"/>
+<text x="591" y="80" fill="#ef4444" font-size="11" text-anchor="middle" font-weight="600">External Tool</text>
+<text x="591" y="96" fill="#8b90a0" font-size="9" text-anchor="middle">DB, API, file system</text>
+
+<!-- ═══ IDENTITY DELEGATION CALLOUT ═══ -->
+<rect x="516" y="120" width="186" height="52" rx="4" fill="#1a1d27" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,3"/>
+<text x="609" y="137" fill="#fbbf24" font-size="10" text-anchor="middle" font-weight="600">Whose permissions?</text>
+<text x="609" y="152" fill="#8b90a0" font-size="9" text-anchor="middle">User's? App's service account?</text>
+<text x="609" y="165" fill="#8b90a0" font-size="9" text-anchor="middle">Wrong answer = privilege escalation</text>
+
+<!-- ═══ RETURN PATH ═══ -->
+
+<!-- Vertical connector: External Tool down to Tool Result -->
+<path d="M591,108 L591,192 L474,192" fill="none" stroke="#ef4444" stroke-width="1.5" marker-end="url(#ag-b)"/>
+
+<!-- Tool Result -->
+<rect x="354" y="178" width="120" height="40" rx="5" fill="#1a1d27" stroke="#ef4444" stroke-width="1.5"/>
+<text x="414" y="195" fill="#ef4444" font-size="11" text-anchor="middle" font-weight="600">Tool Result</text>
+<text x="414" y="209" fill="#8b90a0" font-size="9" text-anchor="middle">returned as data</text>
+<text x="414" y="232" fill="#ef4444" font-size="9" text-anchor="middle">untrusted</text>
+
+<!-- Arrow from Tool Result to Model -->
+<line x1="354" y1="198" x2="306" y2="160" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ag-a)"/>
+
+<!-- ═══ BOTTOM ROW: Response ═══ -->
+
+<!-- Arrow from Model to Response -->
+<line x1="176" y1="160" x2="140" y2="198" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#ag-a)"/>
+
+<!-- Response -->
+<rect x="20" y="178" width="120" height="40" rx="5" fill="#1a1d27" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="80" y="195" fill="#fbbf24" font-size="11" text-anchor="middle" font-weight="600">Response</text>
+<text x="80" y="209" fill="#fbbf24" font-size="9" text-anchor="middle">to user</text>
+<text x="80" y="232" fill="#fbbf24" font-size="9" text-anchor="middle">validate before serving</text>
+
+<!-- ═══ BOTTOM: Trust boundary summary ═══ -->
+<line x1="20" y1="262" x2="700" y2="262" stroke="#2a2e3a" stroke-width="1"/>
+
+<!-- Legend -->
+<rect x="20" y="276" width="12" height="12" rx="2" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+<text x="38" y="287" fill="#8b90a0" font-size="10">Untrusted</text>
+
+<rect x="120" y="276" width="12" height="12" rx="2" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="138" y="287" fill="#8b90a0" font-size="10">Validate</text>
+
+<rect x="210" y="276" width="12" height="12" rx="2" fill="none" stroke="#6c9fff" stroke-width="2"/>
+<text x="228" y="287" fill="#8b90a0" font-size="10">Model (processing center)</text>
+
+<text x="20" y="316" fill="#8b90a0" font-size="10">Every boundary is a point where guardrails must be applied.</text>
+<text x="20" y="332" fill="#8b90a0" font-size="10">The model can loop through multiple tool calls before responding.</text>
+
+</g>
+</svg>
