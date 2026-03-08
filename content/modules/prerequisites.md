@@ -6,7 +6,7 @@
 
 **Estimated Study Time:** 2-3 hours
 
-This guide is organized in four parts. Part 1 introduces neural networks — the foundation that everything else builds on. Part 2 traces the complete path of how an LLM processes text and generates output, from raw characters to predicted tokens. Part 3 explains how LLMs are trained across multiple stages, each creating new capabilities and new risks. Part 4 connects architecture and training to the specific dangers that make guardrails necessary. By the end, you will understand not just how LLMs work, but why their design makes external controls essential.
+This guide is organized in five parts. Part 1 introduces neural networks — the foundation that everything else builds on. Part 2 explains what a large language model is and how it differs from other neural networks. Part 3 traces the complete path of how an LLM processes text and generates output, from raw characters to predicted tokens. Part 4 explains how LLMs are trained across multiple stages, each creating new capabilities and new risks. Part 5 connects architecture and training to the specific dangers that make guardrails necessary. By the end, you will understand not just how LLMs work, but why their design makes external controls essential.
 
 ---
 
@@ -20,7 +20,7 @@ At its core, a neural network is a series of mathematical operations organized i
 
 - **Hidden layers:** the layers between input and output where the network learns to detect patterns. These are called "hidden" because their internal operations are not directly visible — you see what goes in and what comes out, but the intermediate representations are opaque. A network can have one hidden layer or hundreds. Early hidden layers tend to learn simple patterns (edges in images, common character combinations in text). Deeper hidden layers combine those simple patterns into increasingly complex ones (faces in images, sentence structure in text). This progression from simple to complex is a fundamental property of deep neural networks.
 
-- **Output layer:** the final layer that produces the network's result. The format of the output depends on the task. For a spam classifier, the output might be a single number between 0 and 1 representing the probability that an email is spam. For a language model (as we will see in Part 2), the output is a probability distribution across the entire vocabulary — a score for every possible next word.
+- **Output layer:** the final layer that produces the network's result. The format of the output depends on the task. For a spam classifier, the output might be a single number between 0 and 1 representing the probability that an email is spam. For a language model (as we will see in Part 3), the output is a probability distribution across the entire vocabulary — a score for every possible next word.
 
 ![Neural network diagram](content/svg/neural-network.svg)
 
@@ -52,15 +52,54 @@ The result of training is a set of weights that encode the patterns found in the
 
 > **Why this matters for guardrails:** Knowledge in a neural network is distributed across billions of weights — it is not stored in a searchable database. You cannot open up a model and delete a specific fact it memorized, remove a bias it learned, or inspect what it "knows" about a topic. If the training data contained toxic content, misinformation, or private data, traces of that information are encoded somewhere in the weights — but you cannot locate or remove those traces without retraining the entire model. This is why external guardrails are necessary: since you cannot control what the model has learned internally, you must control what it is allowed to output.
 
-A large language model is a neural network — a very specific kind, with an architecture called the **transformer**, scaled to billions of parameters and trained on vast amounts of text. The rest of this guide explains how it works, how it was trained, and why its design creates risks.
+---
+
+## Part 2: What Is a Large Language Model?
+
+A **large language model (LLM)** is a neural network — but a very specific kind. Not all neural networks are LLMs. Neural networks are used for many different tasks: classifying images, detecting fraud, recommending products, controlling robots. What makes an LLM distinct is three things: its architecture, its training objective, and its scale.
+
+### Architecture: The Transformer
+
+LLMs are built on a specific neural network architecture called the **transformer**. The transformer was introduced in 2017 and replaced earlier architectures (like recurrent neural networks) that processed text one word at a time. The transformer's key innovation is that it processes all tokens in a sequence simultaneously, using a mechanism called **attention** that lets each token look at every other token to determine context. Part 3 explains the transformer's internal components in detail. For now, the important point is that the transformer is the specific type of neural network that powers LLMs — not all neural networks are transformers, but all modern LLMs are.
+
+### Training Objective: Next-Token Prediction
+
+While a spam classifier is trained to predict "spam or not spam" and an image classifier is trained to predict "cat, dog, or bird," an LLM is trained on a fundamentally different task: **predict the next token**. Given a sequence of text, the model learns to predict what comes next. For example, given "The capital of France is," the model should assign high probability to "Paris."
+
+This single objective — next-token prediction — is deceptively powerful. To predict the next word accurately across billions of sentences drawn from the entire internet, a model must implicitly learn grammar, facts, reasoning patterns, coding conventions, mathematical relationships, and much more. No one explicitly teaches the model these things. They emerge as a byproduct of getting very good at predicting what word comes next. This is why LLMs can answer questions, write code, summarize documents, and carry on conversations — all of these are forms of "what token should come next, given everything that came before?"
+
+### Scale
+
+The "large" in large language model refers to the number of parameters (weights). Early neural networks had thousands or millions of parameters. Modern LLMs have billions to trillions:
+
+| Model | Parameters | Training Data |
+|-------|-----------|---------------|
+| GPT-2 (2019) | 1.5 billion | 40 GB of text |
+| GPT-3 (2020) | 175 billion | 570 GB of text |
+| LLaMA 2 (2023) | 7-70 billion | 2 trillion tokens |
+| Modern frontier models | 200B-1T+ | 10+ trillion tokens |
+
+Scale matters because larger models with more training data develop capabilities that smaller models do not exhibit. A model with 1 billion parameters might produce grammatically correct text but hallucinate facts constantly. A model with 100 billion parameters trained on more data might demonstrate reasoning, follow complex instructions, and produce factually grounded responses — even though it was trained on the exact same objective (next-token prediction). These emergent capabilities appear as models scale up, often unexpectedly.
+
+### What an LLM Is Not
+
+Understanding what an LLM is also means understanding what it is not:
+
+- **It is not a database.** An LLM does not store facts in a retrievable table. Knowledge is distributed across billions of weights in ways that cannot be queried, inspected, or selectively deleted.
+- **It is not a search engine.** An LLM does not look up answers. It generates text by predicting the most likely next token based on patterns learned during training. It can produce confident, fluent text about things that are completely false.
+- **It is not a reasoning engine.** An LLM produces outputs that often look like reasoning, but it is fundamentally a pattern-matching system trained on statistical correlations in text. This distinction matters enormously for guardrail design — you cannot assume the model "understands" a safety rule just because it can recite it.
+
+> **Why this matters for guardrails:** An LLM is a next-token predictor at massive scale. Every capability it demonstrates — following instructions, refusing harmful requests, providing accurate information — is a learned statistical pattern, not a hard-coded behavior. Learned behaviors can be fragile: they work in the scenarios well-represented in training data and can fail unpredictably in novel situations. Guardrails exist because you cannot rely on the model's learned behaviors alone.
+
+The rest of this guide now dives into the internals. Part 3 traces the complete data path through the transformer architecture — how text is converted to numbers, processed through attention and feed-forward layers, and turned back into text. Part 4 explains how LLMs are trained across multiple stages. Part 5 connects everything to the risks that make guardrails necessary.
 
 ---
 
-## Part 2: How an LLM Works — From Text In to Text Out
+## Part 3: How an LLM Works — From Text In to Text Out
 
 This section traces the complete data path through an LLM. By the end, you will understand every step from raw text input to generated text output.
 
-### 2.1 Text to Numbers: Tokenization
+### 3.1 Text to Numbers: Tokenization
 
 Neural networks process numbers, not words. The first step is **tokenization** — converting text into numerical units called **tokens** that the model can work with.
 
@@ -109,7 +148,7 @@ Beyond regular text tokens, every vocabulary includes **special tokens** — tok
 - **EOS** (end of sequence): signals the model to stop generating
 - **PAD** (padding): fills unused positions when processing batches of different-length inputs
 
-Special tokens become critical when we discuss chat templates and role boundaries in Part 3.
+Special tokens become critical when we discuss chat templates and role boundaries in Part 4.
 
 #### The Context Window
 
@@ -119,7 +158,7 @@ Context window arithmetic matters: a 128,000-token context window is approximate
 
 > **Why this matters for guardrails:** Tokenization affects guardrails in two important ways. First, token boundaries determine what keyword-based filters can and cannot catch — a word split across two tokens may evade a filter looking for the whole word. Second, every guardrail instruction (safety rules, few-shot examples, reference material) consumes tokens from the finite context window budget.
 
-### 2.2 Numbers to Meaning: The Embedding Layer
+### 3.2 Numbers to Meaning: The Embedding Layer
 
 Token IDs are integers — they are lookup indices, not something the model can do math on. The model cannot reason about the number 464; it needs a rich numerical representation that captures meaning. This is the job of the **embedding layer**.
 
@@ -129,9 +168,9 @@ The embedding layer is a large table of learned vectors — one vector per token
 
 These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity appears throughout AI systems wherever similarity between texts needs to be measured.
 
-The LLM's embedding layer converts individual tokens into vectors. Later, in Part 4, we will see how a different type of embedding model converts entire passages into a single vector — the same concept at a different granularity, used for retrieving relevant documents.
+The LLM's embedding layer converts individual tokens into vectors. Later, in Part 5, we will see how a different type of embedding model converts entire passages into a single vector — the same concept at a different granularity, used for retrieving relevant documents.
 
-### 2.3 Adding Position: Positional Encoding
+### 3.3 Adding Position: Positional Encoding
 
 The transformer processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
 
@@ -143,7 +182,7 @@ The complete pipeline from text to transformer input is:
 
 ![Input pipeline diagram](content/svg/input-pipeline.svg)
 
-### 2.4 The Transformer: Processing Context
+### 3.4 The Transformer: Processing Context
 
 The **transformer** is the architecture used by all modern LLMs (GPT, Claude, Llama, Gemini). Its central innovation is **self-attention**: the ability to look at all parts of the input simultaneously and determine which parts are most relevant to each other.
 
@@ -171,7 +210,7 @@ Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patter
 
 > **Why this matters for guardrails:** Combined with the fact that knowledge in weights cannot be inspected or removed, the attention mechanism adds a second architectural challenge: it treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. This is why prompt injection is a fundamental architectural challenge, not a bug that can be patched.
 
-### 2.5 The Generation Loop
+### 3.5 The Generation Loop
 
 The transformer processes its input and produces a probability distribution over the vocabulary — but that is just one prediction. LLMs generate text one token at a time in an **autoregressive** loop: each generated token is appended to the input, and the entire model runs again to predict the next token.
 
@@ -241,7 +280,7 @@ return detokenize(tokens)
 
 > **Why this matters for guardrails:** Add non-determinism to the list of architectural challenges: uninspectable weights, unprivileged attention, and now outputs that vary on every run. The same prompt can produce different outputs on different runs. This means you cannot test a guardrail once and assume it will always catch the same issue — a prompt that was blocked today might produce a slightly different output tomorrow that slips through. Guardrail testing requires repeated runs, diverse inputs, and statistical evaluation rather than simple pass/fail on a single test case.
 
-### 2.6 Reasoning Models and Chain-of-Thought
+### 3.6 Reasoning Models and Chain-of-Thought
 
 Standard LLMs generate their answer directly — one token at a time from left to right. **Reasoning models** add an additional step: before producing the final answer, the model generates an extended sequence of **thinking tokens** — intermediate reasoning steps that break the problem down.
 
@@ -265,7 +304,7 @@ The thinking tokens may be visible to the user, hidden behind an interface, or o
 
 > **Why this matters for guardrails:** Reasoning models create a new guardrail surface. The final answer may look safe and compliant, but the reasoning trace — the thinking tokens — may contain policy violations, leaked sensitive data, or harmful content. Guardrails must inspect both the reasoning trace and the final output. Additionally, inference-time scaling means the same model can behave very differently depending on how it is configured — a model that passes guardrail testing with standard inference may fail when inference-time scaling is enabled.
 
-### 2.7 Scale
+### 3.7 Scale
 
 What makes large language models "large" is the number of parameters (weights):
 
@@ -282,13 +321,13 @@ More parameters means more capacity to learn patterns from training data. Howeve
 
 ---
 
-## Part 3: How LLMs Are Trained
+## Part 4: How LLMs Are Trained
 
 You now understand the machine — how text is tokenized, embedded, processed through transformer layers, and converted into predictions one token at a time. But how did the model learn to produce useful outputs instead of random noise? Training is how the weights were set.
 
 LLM training happens in stages, and understanding these stages helps you understand where model behaviors come from and which behaviors you can influence as an application developer.
 
-### 3.1 Pre-Training: Learning Language
+### 4.1 Pre-Training: Learning Language
 
 The model is trained on a massive corpus of text — typically trillions of tokens from books, websites, code repositories, academic papers, and other sources. The training objective is simple: **predict the next token.**
 
@@ -322,7 +361,7 @@ What is the capital of Italy?
 
 It is completing a pattern (a list of questions), not answering your question. It has no concept of "user asks, assistant answers."
 
-### 3.2 Instruction Tuning and Chat Templates
+### 4.2 Instruction Tuning and Chat Templates
 
 The base model is then **fine-tuned** — trained further on a smaller, specialized dataset to adapt its behavior. In this stage, the model is fine-tuned on curated datasets of conversations formatted in a **chat template** — a structured format with special tokens that marks where each role's content begins and ends.
 
@@ -366,7 +405,7 @@ This is where the model gains its conversational ability and its tendency to fol
 
 > **Critical insight: learned, not enforced.** The instruction-following behavior and the instruction hierarchy are **learned from patterns in training data**, not architecturally enforced. There is no parser inside the model that reads system prompts and creates access control rules. There is no enforcement mechanism that prevents the model from ignoring system instructions. The model learned from thousands of examples where system instructions were followed, so it tends to follow them — but "tends to" is not "guaranteed to." This is foundational to understanding why guardrails exist. Part 4 examines the security implications in detail.
 
-### 3.3 RLHF and Alignment
+### 4.3 RLHF and Alignment
 
 The instruction-tuned model is further refined using human preferences:
 
@@ -379,9 +418,9 @@ This is where the model learns safety behaviors — refusing harmful requests, b
 
 After these three stages, the result is a **chat model** — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
 
-### 3.4 RL for Reasoning (Optional)
+### 4.4 RL for Reasoning (Optional)
 
-Some models undergo an optional fourth stage: reinforcement learning specifically for reasoning capabilities. Where RLHF (Stage 3) trains the model to be safe and helpful based on human preferences, RL for reasoning trains the model to solve problems by producing intermediate thinking steps — the chain-of-thought reasoning described in Part 2.
+Some models undergo an optional fourth stage: reinforcement learning specifically for reasoning capabilities. Where RLHF (Stage 3) trains the model to be safe and helpful based on human preferences, RL for reasoning trains the model to solve problems by producing intermediate thinking steps — the chain-of-thought reasoning described in Part 3.
 
 The approach works as follows:
 
@@ -394,7 +433,7 @@ One widely used algorithm for this is **Group Relative Policy Optimization (GRPO
 
 **Distillation** is a related technique where a smaller model is trained to mimic the reasoning behavior of a larger model. The smaller "student" model learns by training on the reasoning traces produced by the larger "teacher" model. This creates efficient reasoning models but also means the student inherits the teacher's failure modes and biases.
 
-### 3.5 What Each Training Stage Creates — and What Can Go Wrong
+### 4.5 What Each Training Stage Creates — and What Can Go Wrong
 
 | Training Stage | What Gets Encoded | What Can Go Wrong | Covered In |
 |---|---|---|---|
@@ -405,7 +444,7 @@ One widely used algorithm for this is **Group Relative Policy Optimization (GRPO
 
 > **Why this matters for guardrails:** The risks compound across every layer you have learned about: knowledge distributed across uninspectable weights, attention that does not distinguish trusted from untrusted tokens, non-deterministic outputs that vary on every run, and now safety behaviors that can be bypassed. Every training stage creates capabilities AND risks. Pre-training gives the model knowledge but also memorized data. Instruction tuning gives it conversational ability but also a breakable instruction hierarchy. Safety training gives it refusal behavior but also a target for jailbreaking. Reasoning training creates a new surface — thinking tokens — where policy violations can hide. No amount of training eliminates these risks — guardrails exist because model-level safety is necessary but insufficient.
 
-### 3.6 What You Can and Cannot Control
+### 4.6 What You Can and Cannot Control
 
 | Layer | Who Controls It | Can You Change It? |
 |-------|----------------|-------------------|
@@ -421,19 +460,19 @@ As a guardrail engineer, you work primarily in the bottom three rows. You build 
 
 ---
 
-## Part 4: Why This Architecture Is Dangerous
+## Part 5: Why This Architecture Is Dangerous
 
-You now understand how LLMs work (Part 2) and how they are trained (Part 3). Every property you have learned about — distributed knowledge in weights, attention that processes all tokens equally, probabilistic generation, learned instruction following — creates specific risks. This section connects architecture to danger and makes the case for guardrails.
+You now understand how LLMs work (Part 3) and how they are trained (Part 4). Every property you have learned about — distributed knowledge in weights, attention that processes all tokens equally, probabilistic generation, learned instruction following — creates specific risks. This section connects architecture to danger and makes the case for guardrails.
 
-### 4.1 The Instruction Hierarchy Problem
+### 5.1 The Instruction Hierarchy Problem
 
-In Part 3, you learned that models are trained on chat templates with distinct roles (system, user, assistant, tool) and that through instruction tuning and RLHF, models learn to prioritize system instructions over user input. But this hierarchy is a **learned statistical preference**, not an enforced constraint.
+In Part 4, you learned that models are trained on chat templates with distinct roles (system, user, assistant, tool) and that through instruction tuning and RLHF, models learn to prioritize system instructions over user input. But this hierarchy is a **learned statistical preference**, not an enforced constraint.
 
 There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. The model learned during training that system instructions should take priority, so it usually follows them — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override system instructions.
 
 > **Why this matters for guardrails:** System prompts are necessary but insufficient as a security control. A user who crafts input that mimics special token patterns, uses role-play to reframe the conversation, or applies multi-turn pressure can weaken the model's adherence to system-level rules. This is why application-level guardrails — code that runs independently of the model — are essential. The model's compliance with the system prompt is a guideline, not a guarantee.
 
-### 4.2 Architecture to Risk Mapping
+### 5.2 Architecture to Risk Mapping
 
 | Architectural Property | What It Enables | What Can Go Wrong |
 |---|---|---|
@@ -451,13 +490,13 @@ This is the fundamental argument for guardrails: **the risks are inherent to the
 
 Module 1 examines each of these failure modes in detail. The rest of the training program teaches you how to build the guardrails that address them.
 
-### 4.3 Expanded Attack Surface: RAG and Agentic Systems
+### 5.3 Expanded Attack Surface: RAG and Agentic Systems
 
 The risks above apply to a single model in a conversation. But modern AI applications rarely consist of a single model answering questions. Two architectural patterns — Retrieval-Augmented Generation (RAG) and agentic systems — are now dominant in production deployments, and each dramatically expands the attack surface.
 
 #### Embedding Models and Vector Search
 
-In Part 2, you learned that the LLM's embedding layer converts individual tokens into vectors. A different type of model — an **embedding model** — converts entire passages of text into a single vector that captures the passage's semantic meaning. Texts with similar meanings produce vectors that are close together in mathematical space (measured by cosine similarity). This enables **semantic search**: instead of matching keywords, you can find documents that are conceptually related to a query.
+In Part 3, you learned that the LLM's embedding layer converts individual tokens into vectors. A different type of model — an **embedding model** — converts entire passages of text into a single vector that captures the passage's semantic meaning. Texts with similar meanings produce vectors that are close together in mathematical space (measured by cosine similarity). This enables **semantic search**: instead of matching keywords, you can find documents that are conceptually related to a query.
 
 ![Embedding model diagram](content/svg/embedding-model.svg)
 
@@ -496,7 +535,7 @@ This is the **identity delegation** problem. Without careful design, an AI agent
 
 > **Why this matters for guardrails:** RAG and agentic patterns dramatically expand the attack surface. In a simple chat application, the worst case is bad text. With RAG, attackers can poison the documents the model reads (indirect prompt injection). With agents, attackers can cause the model to take unauthorized actions in real systems — sending data to external servers, modifying records, or escalating privileges. Modules 2 and 3 cover the guardrail architectures and implementations for these patterns in detail.
 
-### 4.4 The Security Mindset
+### 5.4 The Security Mindset
 
 With this full picture — from architecture-level risks to application-level complexity — one conclusion emerges: **LLMs are powerful but fundamentally unpredictable systems, and the risks they create are inherent to their architecture.** You cannot train away hallucination, patch prompt injection, or configure your way out of jailbreaking. These are not bugs — they are consequences of how the technology works.
 
