@@ -1,0 +1,12 @@
+<svg viewBox="0 0 520 110" width="520" height="110" xmlns="http://www.w3.org/2000/svg">
+<g font-family="'Courier New',monospace" font-size="12" text-anchor="middle">
+<text x="55" y="18" fill="#8b90a0" text-anchor="end">Embedding:</text>
+<text x="170" y="18" fill="#e1e4eb">[vec for "The"]</text><text x="310" y="18" fill="#e1e4eb">[vec for "cat"]</text><text x="450" y="18" fill="#e1e4eb">[vec for "sat"]</text>
+<text x="170" y="40" fill="#6c9fff" font-size="14">+</text><text x="310" y="40" fill="#6c9fff" font-size="14">+</text><text x="450" y="40" fill="#6c9fff" font-size="14">+</text>
+<text x="55" y="58" fill="#8b90a0" text-anchor="end">Position:</text>
+<text x="170" y="58" fill="#e1e4eb">[pos 1]</text><text x="310" y="58" fill="#e1e4eb">[pos 2]</text><text x="450" y="58" fill="#e1e4eb">[pos 3]</text>
+<text x="170" y="78" fill="#6c9fff" font-size="14">=</text><text x="310" y="78" fill="#6c9fff" font-size="14">=</text><text x="450" y="78" fill="#6c9fff" font-size="14">=</text>
+<text x="55" y="100" fill="#8b90a0" text-anchor="end">Input:</text>
+<text x="170" y="100" fill="#4ade80">[combined]</text><text x="310" y="100" fill="#4ade80">[combined]</text><text x="450" y="100" fill="#4ade80">[combined]</text>
+</g>
+</svg>

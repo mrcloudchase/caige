@@ -17,7 +17,9 @@ All content is version 1.0.
 
 ## How Content Is Consumed
 
-All Markdown files are fetched at runtime by `js/training.js` and rendered client-side via `js/markdown.js` — a custom Markdown renderer (not a library). It supports: headings (h1-h4), bold/italic/code inline, links, unordered/ordered lists, code blocks, tables, blockquotes, and horizontal rules. **No HTML is supported in Markdown files** — raw HTML tags will render as text. The one exception is inline `<svg>` elements, which the renderer passes through directly. SVG diagrams should use the site's color scheme (see CSS variables in `css/styles.css`) and include `style="max-width:Npx;width:100%;display:block;margin:1.5rem auto"` for responsive sizing.
+All Markdown files are fetched at runtime by `js/training.js` and rendered client-side via `js/markdown.js` — a custom Markdown renderer (not a library). It supports: headings (h1-h4), bold/italic/code inline, links, images, unordered/ordered lists, code blocks, tables, blockquotes, and horizontal rules. **No HTML is supported in Markdown files** — raw HTML tags will render as text. The one exception is inline `<svg>` elements, which the renderer passes through directly.
+
+Images use standard Markdown syntax: `![alt text](path/to/image.svg)`. The renderer converts these to `<img>` tags with responsive styling. SVG diagrams are stored in `svg/` as standalone files with hardcoded colors matching the site's color scheme (see CSS variables in `css/styles.css`). Each SVG file should include `width` and `height` attributes matching its `viewBox` dimensions.
 
 ## Question Bank Format
 

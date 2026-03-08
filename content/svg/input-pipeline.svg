@@ -1,0 +1,19 @@
+<svg viewBox="0 0 420 280" width="420" height="280" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="pl-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker></defs>
+<g font-family="'Courier New',monospace" text-anchor="middle">
+<rect x="110" y="8" width="200" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="210" y="28" fill="#e1e4eb" font-size="13">"The cat sat"</text>
+<line x1="210" y1="38" x2="210" y2="58" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="54" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">tokenize</text>
+<rect x="85" y="62" width="250" height="30" rx="4" fill="#1a1d27" stroke="#6c9fff" stroke-width="1"/>
+<text x="210" y="82" fill="#6c9fff" font-size="13">[464, 3857, 3332]</text>
+<line x1="210" y1="92" x2="210" y2="112" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="108" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">embedding lookup</text>
+<rect x="45" y="116" width="330" height="30" rx="4" fill="#1a1d27" stroke="#2a2e3a"/>
+<text x="210" y="136" fill="#e1e4eb" font-size="12">[vec_464, vec_3857, vec_3332]</text>
+<line x1="210" y1="146" x2="210" y2="166" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#pl-a)"/>
+<text x="310" y="162" fill="#8b90a0" font-family="system-ui,sans-serif" font-size="10">+ positional encoding</text>
+<rect x="80" y="170" width="260" height="30" rx="4" fill="#1a1d27" stroke="#4ade80" stroke-width="1"/>
+<text x="210" y="190" fill="#4ade80" font-size="12">[input to transformer]</text>
+</g>
+</svg>
