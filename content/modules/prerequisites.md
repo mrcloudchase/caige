@@ -124,7 +124,7 @@ The embedding layer is a large table of learned vectors — one vector per token
  These vectors are what the transformer processes.
 ```
 
-These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart.
+These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity is the metric behind semantic search in RAG systems and similarity-based guardrail techniques.
 
 The complete pipeline from text to transformer input is:
 
@@ -289,7 +289,7 @@ It is completing a pattern (a list of questions), not answering your question. I
 
 ### Stage 2: Instruction Tuning (Supervised Fine-Tuning)
 
-The base model is fine-tuned on curated datasets of conversations formatted in a **chat template** — the structured format with special tokens that marks role boundaries (covered in its own section below).
+The base model is then **fine-tuned** — trained further on a smaller, specialized dataset to adapt its behavior. In this stage, it is fine-tuned on curated datasets of conversations formatted in a **chat template** — the structured format with special tokens that marks role boundaries (covered in its own section below).
 
 The training data for this stage contains hundreds of thousands to millions of curated examples, including conversations where a system message sets rules and an assistant follows them:
 
@@ -432,7 +432,7 @@ LLMs generate text one token at a time in an **autoregressive** loop: each gener
          Stop -- end of sequence token reached
 ```
 
-At each step, the model does not output a single token directly. It produces **logits** — raw numerical scores for every token in the vocabulary. These logits are converted into a probability distribution using a mathematical function called softmax. The question is: which token do you actually select from this distribution?
+At each step, the model does not output a single token directly. It produces **logits** — raw numerical scores for every token in the vocabulary. These logits are converted into a probability distribution using a mathematical function called softmax. Some model APIs expose **log probabilities** (the logarithm of these probabilities) for each generated token, which can serve as a confidence signal — low log probabilities across a response suggest the model is uncertain about its output. The question is: which token do you actually select from this distribution?
 
 ### Temperature and Sampling
 
@@ -689,6 +689,7 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | **Context window** | The maximum number of tokens a model can process in a single inference call |
 | **Embedding layer** | A lookup table of learned vectors that converts token IDs into dense numerical representations the transformer can process |
 | **Embedding vector** | A dense list of numbers (typically 768-12,288 dimensions) representing a token's learned semantic and syntactic properties |
+| **Cosine similarity** | A metric that measures the angle between two vectors, producing a score from -1 to 1; used to compare semantic similarity between embeddings |
 
 **Architecture**
 
@@ -699,6 +700,7 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | **Multi-head attention** | Running multiple attention computations in parallel, each learning different types of relationships |
 | **Positional encoding** | Information added to embedding vectors so the model knows token order in the sequence |
 | **Logits** | The raw numerical scores a model produces for each vocabulary token before conversion to probabilities |
+| **Log probabilities** | The logarithm of token probabilities; exposed by some APIs as a confidence signal for model output |
 
 **Inference and Generation**
 
