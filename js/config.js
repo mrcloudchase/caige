@@ -8,11 +8,11 @@ export const SITE = {
   ],
   programs: [
     { label: 'Overview', path: 'content/modules/README.md' },
-    { label: 'Prerequisites', path: 'content/modules/prerequisites.md' },
     { label: 'Competency Matrix', path: 'content/competency-matrix.md' },
     { label: 'Exam Blueprint', path: 'content/exam-blueprint.md' },
   ],
   modules: [
+    { label: 'Prerequisites: AI Foundations', path: 'content/modules/prerequisites.md', weight: '—' },
     { label: '1. AI Fundamentals & Failure Modes', path: 'content/modules/module-1-ai-fundamentals.md', weight: '15%' },
     { label: '2. Guardrail Architecture & Design', path: 'content/modules/module-2-guardrail-architecture.md', weight: '25%' },
     { label: '3. Guardrail Implementation', path: 'content/modules/module-3-guardrail-implementation.md', weight: '20%' },
