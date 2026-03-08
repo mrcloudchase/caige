@@ -6,6 +6,8 @@
 
 **Estimated Study Time:** 2-3 hours
 
+This guide follows the path from the simplest building block — a neural network — through the complete pipeline of how LLMs process text, learn from data, and generate responses. Each section builds on the previous one. By the end, you will understand not just how LLMs work, but why their architecture creates the risks that make guardrails necessary.
+
 ---
 
 ## What Is a Neural Network?
@@ -47,7 +49,7 @@ At its core, a neural network is a series of mathematical operations organized i
 
 ## Tokens and Tokenization
 
-LLMs do not read text the way humans do. Before any text reaches the model, it must be converted into **tokens** — subword units that are then transformed into numerical vectors the model can process.
+Neural networks process numbers, not words. So how does text get into a neural network? The answer is **tokenization** — converting text into numerical units called **tokens** that the model can work with.
 
 ### What Is a Token?
 
@@ -62,7 +64,7 @@ A token is a subword unit. It is not the same as a word. Depending on the tokeni
 
  The model never sees the original text.
  It receives the sequence of token IDs, which are
- then converted into embedding vectors (see below).
+ then converted into embedding vectors (next section).
 ```
 
 ### How Tokenization Works: Byte Pair Encoding
@@ -100,9 +102,17 @@ Special tokens become critical when we discuss chat templates and role boundarie
 
 The **context window** is the maximum number of tokens a model can process in a single inference call. It functions as the model's working memory — everything the model "knows" during a conversation must fit in this window. A typical context window ranges from 8,000 to over 1,000,000 tokens depending on the model, with most production models offering 32,000 to 200,000 tokens.
 
-Context window arithmetic matters: a 128,000-token context window is approximately 96,000 words of English text. Every element of a conversation consumes tokens from this budget — the system prompt, conversation history, retrieved documents, and the user's current message all compete for space.
+Context window arithmetic matters: a 128,000-token context window is approximately 96,000 words of English text. Every element of a conversation consumes tokens from this budget — instructions, conversation history, reference material, and the user's current message all compete for space.
 
-> **Why this matters for guardrails:** Tokenization affects guardrails in three ways. First, token boundaries determine what keyword-based filters can and cannot catch — a word split across two tokens may evade a filter looking for the whole word. Second, every guardrail instruction (system prompt safety rules, few-shot examples, retrieved context) consumes tokens from the finite context window budget. Third, special tokens will reappear when we discuss how models distinguish between system instructions and user messages.
+> **Why this matters for guardrails:** Tokenization affects guardrails in two important ways. First, token boundaries determine what keyword-based filters can and cannot catch — a word split across two tokens may evade a filter looking for the whole word. Second, every guardrail instruction (safety rules, few-shot examples, reference material) consumes tokens from the finite context window budget.
+
+---
+
+## The Transformer Architecture
+
+Tokenization converts text into integer token IDs — but these are just lookup indices, not something the model can reason about. The **transformer** architecture, introduced in 2017 and used by all modern LLMs (GPT, Claude, Llama, Gemini), turns these token IDs into rich representations and processes them to predict what comes next. You do not need to understand the math, but understanding the key ideas will help you reason about guardrails.
+
+This section follows the data flow through a transformer: token IDs enter, embedding vectors are created, position information is added, attention determines relationships, and probabilities come out.
 
 ### From Token IDs to Embeddings
 
@@ -112,8 +122,8 @@ The embedding layer is a large table of learned vectors — one vector per token
 
 ```
  Token IDs:    [464,     3857,    3332   ]
-                |         |        |
-                v         v        v
+               |         |        |
+               v         v        v
  Embedding    [0.12,   [-0.34,  [0.78,
  lookup:       0.87,    0.56,    0.23,
                -0.23,   0.91,   -0.45,
@@ -124,7 +134,21 @@ The embedding layer is a large table of learned vectors — one vector per token
  These vectors are what the transformer processes.
 ```
 
-These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity is the metric behind semantic search in RAG systems and similarity-based guardrail techniques.
+These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity appears throughout AI systems wherever similarity between texts needs to be measured.
+
+### Positional Encoding
+
+The transformer processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
+
+```
+ Embedding:  [vec for "The"]  [vec for "cat"]  [vec for "sat"]
+                  +                +                +
+ Position:     [pos 1]          [pos 2]          [pos 3]
+                  =                =                =
+ Input:      [combined]        [combined]        [combined]
+```
+
+The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
 
 The complete pipeline from text to transformer input is:
 
@@ -140,13 +164,7 @@ The complete pipeline from text to transformer input is:
                       [input to transformer]
 ```
 
-This uses the same underlying concept — learned vector representations — as the embedding models used for RAG (covered later in this guide). The difference is granularity: the LLM's embedding layer converts individual tokens into vectors, while a RAG embedding model converts entire passages into a single vector that captures the meaning of the whole text.
-
----
-
-## The Transformer Architecture
-
-Large language models like GPT, Claude, Llama, and Gemini are all based on the **transformer** architecture, introduced in 2017. You do not need to understand the math, but understanding the key ideas will help you reason about guardrails.
+This same concept — learned vector representations — will reappear later when we discuss how retrieval systems find relevant documents. The difference is granularity: the LLM's embedding layer converts individual tokens into vectors, while a retrieval embedding model converts entire passages into a single vector that captures the meaning of the whole text.
 
 ### The Core Idea: Attention
 
@@ -156,33 +174,19 @@ For example, in the sentence "The cat sat on the mat because it was tired," the 
 
 ```
  "The  cat  sat  on  the  mat  because  it  was  tired"
-                                         |
-                    attention scores (illustrative,
-                    from a single attention head):
-                         "cat" = 0.42  (strong)
-                         "mat" = 0.18  (moderate)
-                         "sat" = 0.09
-                         ...
+                                        |
+                   attention scores (illustrative,
+                   from a single attention head):
+                        "cat" = 0.42  (strong)
+                        "mat" = 0.18  (moderate)
+                        "sat" = 0.09
+                        ...
 
  The model determines "it" most likely refers to "cat"
  by computing these scores across all tokens in parallel.
 ```
 
-> **Why this matters for guardrails:** The attention mechanism treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. This is why prompt injection is a fundamental architectural challenge, not a bug that can be patched.
-
-### Positional Encoding
-
-The attention mechanism processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
-
-```
- Embedding:  [vec for "The"]  [vec for "cat"]  [vec for "sat"]
-                   +                +                +
- Position:     [pos 1]          [pos 2]          [pos 3]
-                   =                =                =
- Input:      [combined]        [combined]        [combined]
-```
-
-The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
+> **Why this matters for guardrails:** Combined with the fact that knowledge in weights cannot be inspected or removed, the attention mechanism adds a second architectural challenge: it treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. This is why prompt injection is a fundamental architectural challenge, not a bug that can be patched.
 
 ### Layers of a Transformer
 
@@ -251,7 +255,7 @@ More parameters means more capacity to learn patterns from training data. Howeve
 
 ## How LLMs Are Trained
 
-LLM training happens in stages. Understanding these stages helps you understand where model behaviors come from and which behaviors you can influence as an application developer.
+The transformer architecture defines what the model can learn. Training determines what it actually learns. LLM training happens in stages, and understanding these stages helps you understand where model behaviors come from and which behaviors you can influence as an application developer.
 
 ### Stage 1: Pre-Training
 
@@ -289,7 +293,7 @@ It is completing a pattern (a list of questions), not answering your question. I
 
 ### Stage 2: Instruction Tuning (Supervised Fine-Tuning)
 
-The base model is then **fine-tuned** — trained further on a smaller, specialized dataset to adapt its behavior. In this stage, it is fine-tuned on curated datasets of conversations formatted in a **chat template** — the structured format with special tokens that marks role boundaries (covered in its own section below).
+The base model is then **fine-tuned** — trained further on a smaller, specialized dataset to adapt its behavior. In this stage, it is fine-tuned on curated datasets of conversations formatted in a **chat template** — the structured format with special tokens that marks role boundaries (explained in the Chat Templates section later in this guide).
 
 The training data for this stage contains hundreds of thousands to millions of curated examples, including conversations where a system message sets rules and an assistant follows them:
 
@@ -350,7 +354,7 @@ The result is a **reasoning model** — a model that "thinks" through problems s
 | RLHF / alignment | Safety behaviors, refusal patterns | Safety training can be bypassed via jailbreaking | Module 1 (1.2.3) |
 | RL for reasoning | Step-by-step reasoning, problem decomposition | Reasoning traces may contain harmful content or leaked data invisible in the final answer; capability gains can outpace safety guardrails | Module 1 (1.2.3), Module 5 |
 
-> **Why this matters for guardrails:** Every training stage creates capabilities AND risks. Pre-training gives the model knowledge but also memorized data. Instruction tuning gives it conversational ability but also a breakable instruction hierarchy. Safety training gives it refusal behavior but also a target for jailbreaking. Reasoning training gives the model step-by-step thinking but creates a new guardrail surface — the thinking tokens themselves — where policy violations can hide. No amount of training eliminates these risks — guardrails exist because model-level safety is necessary but insufficient.
+> **Why this matters for guardrails:** The risks compound: knowledge you cannot inspect (weights), attention that does not distinguish trusted from untrusted tokens, and now safety behaviors that can be bypassed. Every training stage creates capabilities AND risks. Pre-training gives the model knowledge but also memorized data. Instruction tuning gives it conversational ability but also a breakable instruction hierarchy. Safety training gives it refusal behavior but also a target for jailbreaking. Reasoning training gives the model step-by-step thinking but creates a new guardrail surface — the thinking tokens themselves — where policy violations can hide. No amount of training eliminates these risks — guardrails exist because model-level safety is necessary but insufficient.
 
 ### What You Can and Cannot Control
 
@@ -368,51 +372,9 @@ As a guardrail engineer, you work primarily in the bottom three rows. You build 
 
 ---
 
-## Chat Templates and Role Boundaries
-
-When you use a chat API, your messages are formatted using a **chat template** — a structured format that uses special tokens to mark where each role's content begins and ends. Understanding this structure is essential because the model's ability to distinguish "system rules" from "user input" depends entirely on these templates.
-
-### The Structure
-
-A chat template wraps each message with special tokens that identify the role:
-
-```
-<|im_start|>system
-You are a helpful customer service agent. Do not discuss
-competitor products.<|im_end|>
-<|im_start|>user
-What can you tell me about your competitor's pricing?<|im_end|>
-<|im_start|>assistant
-I am not able to provide information about competitor products.
-I would be happy to help you with our pricing instead.<|im_end|>
-```
-
-The tokens `<|im_start|>` and `<|im_end|>` are **special tokens** — they exist as single entries in the vocabulary with unique token IDs. In a properly configured system, the tokenizer will not produce these token IDs from regular user text input. If a user types the literal characters `<|im_start|>`, those characters are tokenized as a sequence of regular text tokens, not as the special token. This prevents users from injecting role boundaries through normal text input.
-
-Different model families use different template formats — Llama 3 uses `<|start_header_id|>` and `<|end_header_id|>`, for example — but the principle is the same: special tokens create role boundaries.
-
-### The Roles
-
-| Role | Purpose | Who Controls It |
-|------|---------|----------------|
-| system | Behavioral rules and constraints | Application developer (trusted) |
-| user | End-user input | End user (untrusted) |
-| assistant | Model's generated response | Model (validate before use) |
-| tool | Data returned from tool/function calls | External systems (untrusted) |
-
-### The Instruction Hierarchy
-
-During instruction tuning and RLHF, models learn to treat these roles with a priority order: **system > user**, with tool results treated as data the model incorporates rather than instructions that compete in the hierarchy. The system prompt sets the rules, and the model generally follows them even when the user asks it not to.
-
-But this hierarchy is a **learned statistical preference**, not an enforced constraint. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. The model learned during training that system instructions should take priority, so it usually follows them — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override system instructions.
-
-> **Why this matters for guardrails:** System prompts are necessary but insufficient as a security control. A user who crafts input that mimics special token patterns, uses role-play to reframe the conversation, or applies multi-turn pressure can weaken the model's adherence to system-level rules. This is why application-level guardrails — code that runs independently of the model — are essential. The model's compliance with the system prompt is a guideline, not a guarantee.
-
----
-
 ## Inference: How LLMs Generate Text
 
-**Inference** is the process of running a trained model to generate output. Understanding how text generation works explains why LLM output is non-deterministic and why the same prompt can produce different responses.
+Training produces the model. **Inference** is the process of using it — running the trained model to generate output. Understanding how text generation works explains why LLM output is non-deterministic and why the same prompt can produce different responses.
 
 ### The Generation Loop
 
@@ -494,7 +456,7 @@ while not stop_condition_met:
 return detokenize(tokens)
 ```
 
-> **Why this matters for guardrails:** LLM output is non-deterministic by design. The same prompt can produce different outputs on different runs. This means you cannot test a guardrail once and assume it will always catch the same issue — a prompt that was blocked today might produce a slightly different output tomorrow that slips through. Guardrail testing requires repeated runs, diverse inputs, and statistical evaluation rather than simple pass/fail on a single test case.
+> **Why this matters for guardrails:** Add non-determinism to the list of architectural challenges: uninspectable weights, unprivileged attention, breakable safety training, and now outputs that vary on every run. The same prompt can produce different outputs on different runs. This means you cannot test a guardrail once and assume it will always catch the same issue — a prompt that was blocked today might produce a slightly different output tomorrow that slips through. Guardrail testing requires repeated runs, diverse inputs, and statistical evaluation rather than simple pass/fail on a single test case.
 
 ### Reasoning Models and Chain-of-Thought
 
@@ -522,9 +484,53 @@ The thinking tokens may be visible to the user, hidden behind an interface, or o
 
 ---
 
+## Chat Templates and Role Boundaries
+
+Inference explains how the model generates text mechanically. But modern LLMs do not just complete text — they have conversations, with distinct roles and rules. This structure is defined by **chat templates**.
+
+When you use a chat API, your messages are formatted using a chat template — a structured format that uses special tokens to mark where each role's content begins and ends. Understanding this structure is essential because the model's ability to distinguish "system rules" from "user input" depends entirely on these templates.
+
+### The Structure
+
+A chat template wraps each message with special tokens that identify the role:
+
+```
+<|im_start|>system
+You are a helpful customer service agent. Do not discuss
+competitor products.<|im_end|>
+<|im_start|>user
+What can you tell me about your competitor's pricing?<|im_end|>
+<|im_start|>assistant
+I am not able to provide information about competitor products.
+I would be happy to help you with our pricing instead.<|im_end|>
+```
+
+The tokens `<|im_start|>` and `<|im_end|>` are **special tokens** — they exist as single entries in the vocabulary with unique token IDs. In a properly configured system, the tokenizer will not produce these token IDs from regular user text input. If a user types the literal characters `<|im_start|>`, those characters are tokenized as a sequence of regular text tokens, not as the special token. This prevents users from injecting role boundaries through normal text input.
+
+Different model families use different template formats — Llama 3 uses `<|start_header_id|>` and `<|end_header_id|>`, for example — but the principle is the same: special tokens create role boundaries.
+
+### The Roles
+
+| Role | Purpose | Who Controls It |
+|------|---------|----------------|
+| system | Behavioral rules and constraints | Application developer (trusted) |
+| user | End-user input | End user (untrusted) |
+| assistant | Model's generated response | Model (validate before use) |
+| tool | Data returned from tool/function calls | External systems (untrusted) |
+
+### The Instruction Hierarchy
+
+During instruction tuning and RLHF, models learn to treat these roles with a priority order: **system > user**, with tool results treated as data the model incorporates rather than instructions that compete in the hierarchy. The system prompt sets the rules, and the model generally follows them even when the user asks it not to.
+
+But this hierarchy is a **learned statistical preference**, not an enforced constraint. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. The model learned during training that system instructions should take priority, so it usually follows them — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override system instructions.
+
+> **Why this matters for guardrails:** System prompts are necessary but insufficient as a security control. A user who crafts input that mimics special token patterns, uses role-play to reframe the conversation, or applies multi-turn pressure can weaken the model's adherence to system-level rules. This is why application-level guardrails — code that runs independently of the model — are essential. The model's compliance with the system prompt is a guideline, not a guarantee.
+
+---
+
 ## What LLMs Get Wrong: Failure Modes from Architecture
 
-The architectural properties described in the previous sections are not just technical details — each one creates specific risks. Understanding these connections is the bridge between "how LLMs work" and "why guardrails are necessary."
+You now understand how LLMs are built, trained, generate text, and structure conversations. Each of these properties creates specific risks. Understanding these connections is the bridge between "how LLMs work" and "why guardrails are necessary."
 
 | Architectural Property | What It Enables | What Can Go Wrong |
 |---|---|---|
@@ -546,7 +552,7 @@ Module 1 examines each of these failure modes in detail. The rest of the trainin
 
 ## Beyond Single Models: RAG and Agentic Systems
 
-Modern AI applications rarely consist of a single model answering questions. Two architectural patterns — Retrieval-Augmented Generation (RAG) and agentic systems — are now dominant in production deployments, and each introduces its own guardrail challenges.
+The failure modes above apply to a single model in a conversation. But modern AI applications rarely consist of a single model answering questions. Two architectural patterns — Retrieval-Augmented Generation (RAG) and agentic systems — are now dominant in production deployments, and each introduces its own guardrail challenges.
 
 ### Embedding Models and Vector Search
 
@@ -622,7 +628,7 @@ This is the **identity delegation** problem. Without careful design, an AI agent
 
 ## The Security Mindset: Why Guardrails Are Necessary
 
-Everything in this guide leads to a single conclusion: **LLMs are powerful but fundamentally unpredictable systems, and the risks they create are inherent to their architecture.** You cannot train away hallucination, patch prompt injection, or configure your way out of jailbreaking. These are not bugs — they are consequences of how the technology works.
+With this full picture — from architecture-level risks to application-level complexity — one conclusion emerges: **LLMs are powerful but fundamentally unpredictable systems, and the risks they create are inherent to their architecture.** You cannot train away hallucination, patch prompt injection, or configure your way out of jailbreaking. These are not bugs — they are consequences of how the technology works.
 
 ### Three Layers of Defense
 
