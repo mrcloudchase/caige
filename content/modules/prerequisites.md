@@ -207,11 +207,11 @@ The rest of this guide now dives deeper into the internals. Part 3 traces the co
 
 ## Part 3: How an LLM Works — From Text In to Text Out
 
-This section traces the complete data path through an LLM. By the end, you will understand every step from raw text input to generated text output.
+Parts 1 and 2 gave you the building blocks: what a neural network is, how it learns, and the specific architecture (the decoder-only transformer) that makes LLMs work. Now it is time to trace the complete journey of data through an LLM — from the moment raw text enters the system to the moment a generated response comes out. Each step in this section builds on concepts you have already learned, so you will see the components from Part 2 in action rather than in isolation.
 
 ### 3.1 Text to Numbers: Tokenization
 
-Neural networks process numbers, not words. The first step is **tokenization** — converting text into numerical units called **tokens** that the model can work with.
+In Part 2, you learned that the first component of a decoder-only transformer is the token embedding layer — a lookup table that converts token IDs into vectors. But what are token IDs, and where do they come from? Before the embedding layer can do its work, the raw text must be broken into discrete units and assigned numerical identifiers. This process is called **tokenization**, and it is the very first step in the LLM pipeline.
 
 #### What Is a Token?
 
@@ -258,7 +258,7 @@ Beyond regular text tokens, every vocabulary includes **special tokens** — tok
 - **EOS** (end of sequence): signals the model to stop generating
 - **PAD** (padding): fills unused positions when processing batches of different-length inputs
 
-Special tokens become critical when we discuss chat templates and role boundaries in Part 4.
+Special tokens become critical when we discuss chat templates and role boundaries in Part 4 — they are how the model distinguishes between system instructions, user messages, and its own responses.
 
 #### The Context Window
 
@@ -270,7 +270,7 @@ Context window arithmetic matters: a 128,000-token context window is approximate
 
 ### 3.2 Numbers to Meaning: The Embedding Layer
 
-Token IDs are integers — they are lookup indices, not something the model can do math on. The model cannot reason about the number 464; it needs a rich numerical representation that captures meaning. This is the job of the **embedding layer**.
+Tokenization gave us a sequence of integer IDs — for example, [464, 3857, 3332, 319, 262, 2648] for "The cat sat on the mat." But as you learned in Part 2's section on token embeddings, these integers are just lookup addresses. The number 464 does not carry any information about the meaning of "The" — it is simply an index. The model needs rich numerical representations that capture what each token means and how it relates to other tokens. This is the job of the **embedding layer**, the first true component of the transformer that you learned about in Part 2.
 
 The embedding layer is a large table of learned vectors — one vector per token in the vocabulary. When the model receives a token ID, it looks up the corresponding row in this table and retrieves a dense vector (typically 768 to 12,288 numbers, depending on model size). This vector is the token's **embedding** — a learned representation that captures semantic and syntactic properties of that token.
 
@@ -294,35 +294,43 @@ The complete pipeline from text to transformer input is:
 
 ### 3.4 The Transformer: Processing Context
 
-The **transformer** is the architecture used by all modern LLMs (GPT, Claude, Llama, Gemini). Its central innovation is **self-attention**: the ability to look at all parts of the input simultaneously and determine which parts are most relevant to each other.
+In Part 2, you learned the components of a decoder-only transformer — token embedding, positional encoding, masked self-attention, feed-forward networks, residual connections, layer normalization, and the output head. You know what each one does in isolation. Now let's watch them work together as data flows through the model.
 
-#### The Core Idea: Attention
+#### Attention in Action
 
-Before transformers, the dominant language models (RNNs and LSTMs) processed text sequentially — one token at a time — making it difficult to capture relationships between distant words and preventing parallelization during training. Self-attention changed this.
+The combined embedding vectors (token meaning + position information) from the previous steps enter the first transformer layer. The first thing that happens is **self-attention** — the mechanism you learned about in Part 2 that lets each token look at every other token and compute relevance scores using Query, Key, and Value projections.
 
-For example, in the sentence "The cat sat on the mat because it was tired," the model needs to understand that "it" refers to "the cat," not "the mat." The attention mechanism lets the model compute a relevance score between every pair of tokens, so when processing "it," the model attends strongly to "cat."
+To see this in practice, consider the sentence "The cat sat on the mat because it was tired." When the model processes the token "it," the attention mechanism computes scores between "it's" Query vector and the Key vectors of every preceding token: "The," "cat," "sat," "on," "the," "mat," "because." The result: "cat" gets a high attention score (because "it" refers to the cat), while tokens like "on" and "the" get low scores.
 
 ![Attention scores diagram](content/svg/attention-scores.svg)
 
-#### Layers of a Transformer
+These scores determine how much each token's Value vector contributes to "it's" updated representation. After attention, the representation of "it" now carries information about what it refers to — the model has connected a pronoun to its referent, not by following a grammar rule, but by learning statistical patterns from billions of similar examples during training.
 
-A transformer stacks multiple layers. Each layer contains two main computational components, along with **residual connections** and **layer normalization** that enable stable training across many layers:
+Remember from Part 2 that this is **multi-head** attention: dozens of these computations run in parallel. One head might connect "it" to "cat" (coreference). Another head might note that "it" is the subject of "was tired" (syntactic role). Another might track that "it" appears after "because" (causal relationship). Each head captures a different type of relationship, and their combined outputs give the model a rich, multi-faceted understanding of each token's role in context.
 
-**Self-attention:** computes which parts of the input are relevant to each other (as described above). In practice, models use **multi-head attention** — multiple attention computations running in parallel, each potentially learning to focus on different types of relationships (for example, some heads may track syntactic dependencies, while others track positional or semantic relationships).
+And because this is a **decoder-only** transformer, the attention is **masked**: each token can only attend to tokens at its position or earlier. The token "was" cannot look ahead to see "tired." This constraint matches how the model generates text — when predicting the next word, it genuinely cannot see the future.
 
-**Feed-forward network:** after attention determines which tokens are relevant, a feed-forward network processes that information to build more abstract representations. Think of attention as "gathering relevant context" and the feed-forward layer as "processing it further" — though this is a simplified mental model.
+#### Through the Layers
 
-**Residual connections** (also called skip connections) add the input of each sub-layer to its output, allowing information to flow directly through the network and preventing the signal from degrading across many layers. **Layer normalization** stabilizes the values flowing through the network, keeping training stable. Without these two components, training deep transformers (32-128+ layers) would be extremely difficult.
+After attention gathers context from across the sequence, the data passes through the **feed-forward network**, which processes each token's representation independently — applying the expand-activate-compress pattern described in Part 2. Then the **residual connections** add the original input back to the output (so information is not lost even if the layer had nothing useful to add), and **layer normalization** keeps the numerical values stable for the next layer.
+
+This completes one transformer layer. The output flows into the next layer, where the same process repeats: attention gathers new contextual information (now building on the richer representations from the previous layer), and the feed-forward network refines it further.
 
 ![Transformer stack diagram](content/svg/transformer-stack.svg)
 
-Modern LLMs stack 32 to 128+ of these layers. Early layers capture simple patterns (grammar, common phrases). Later layers capture complex patterns (reasoning, context, intent). After the final transformer layer, a linear output layer (sometimes called the unembedding layer) projects the hidden state vectors to a vocabulary-sized set of logits — raw numerical scores for every token in the vocabulary. These logits are converted into a probability distribution using a mathematical function called softmax. The result is the model's prediction: a probability for every possible next token.
+Modern LLMs repeat this process across 32 to 128+ layers. As you learned in Part 2, early layers capture surface-level patterns (grammar, common phrases), middle layers build semantic understanding (meaning, factual associations), and deep layers develop high-level representations (intent, reasoning, judgment). Each layer refines the representations produced by the layer before it.
 
-> **Why this matters for guardrails:** Combined with the fact that knowledge in weights cannot be inspected or removed, the attention mechanism adds a second architectural challenge: it treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. This is why prompt injection is a fundamental architectural challenge, not a bug that can be patched.
+#### From Hidden States to Predictions
+
+After the final transformer layer, each token's representation is a rich vector that encodes its meaning in the full context of the sequence. The **output head** — the linear layer followed by softmax that you learned about in Part 2 — converts the last token's hidden state into a probability distribution over the entire vocabulary. Each score represents the model's estimated probability that the corresponding token should come next. The highest-probability token is the model's best guess, but the full distribution matters for generation (as the next section explains).
+
+> **Why this matters for guardrails:** Now you can see why prompt injection is a fundamental architectural challenge, not a bug that can be patched. The attention mechanism treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. The model has no way to distinguish "instructions I should follow" from "text I should process" — it simply computes attention scores across everything in its context window.
 
 ### 3.5 The Generation Loop
 
-The transformer processes its input and produces a probability distribution over the vocabulary — but that is just one prediction. LLMs generate text one token at a time in an **autoregressive** loop: each generated token is appended to the input, and the entire model runs again to predict the next token.
+You now understand the complete forward pass: text is tokenized into IDs, IDs are converted to embedding vectors, positional encoding is added, and the transformer layers process the sequence through repeated rounds of attention and feed-forward computation to produce a probability distribution over the vocabulary. But that entire process — from input to probability distribution — produces just **one prediction**: the probability of the next single token. How does the model generate an entire response?
+
+The answer is an **autoregressive** loop: the model generates one token, appends it to the input, and runs the entire forward pass again to predict the next token after that.
 
 ![Generation loop diagram](content/svg/generation-loop.svg)
 
@@ -392,6 +400,8 @@ return detokenize(tokens)
 
 ### 3.6 Reasoning Models and Chain-of-Thought
 
+The autoregressive generation loop described above applies to all LLMs — every model generates text one token at a time, left to right. But some models add an additional step that changes how they approach complex problems.
+
 Standard LLMs generate their answer directly — one token at a time from left to right. **Reasoning models** add an additional step: before producing the final answer, the model generates an extended sequence of **thinking tokens** — intermediate reasoning steps that break the problem down.
 
 ```
@@ -424,13 +434,13 @@ More parameters also means more capacity to **memorize** training data (relevant
 
 ## Part 4: How LLMs Are Trained
 
-You now understand the machine — how text is tokenized, embedded, processed through transformer layers, and converted into predictions one token at a time. But how did the model learn to produce useful outputs instead of random noise? Training is how the weights were set.
+You now understand the complete machine — how text is tokenized, embedded, processed through transformer layers, and converted into predictions one token at a time. But how did the model learn to produce useful outputs instead of random noise? In Part 1, you learned the fundamental training loop: forward pass, loss calculation, backpropagation, and weight update, repeated across many epochs until the weights converge on values that produce accurate predictions. LLM training uses the exact same process, but at a scale that transforms what the network can do — and across multiple distinct stages that each shape different aspects of the model's behavior.
 
-LLM training happens in stages, and understanding these stages helps you understand where model behaviors come from and which behaviors you can influence as an application developer.
+Understanding these stages matters because each one creates specific capabilities AND specific risks. As a guardrail engineer, you need to know where the model's behaviors come from to understand which behaviors you can rely on and which you cannot.
 
 ### 4.1 Pre-Training: Learning Language
 
-The model is trained on a massive corpus of text — typically trillions of tokens from books, websites, code repositories, academic papers, and other sources. The training objective is simple: **predict the next token.**
+Pre-training is where the model acquires its core knowledge. The training loop from Part 1 — forward pass, loss calculation, backpropagation, weight update — is run on a massive corpus of text, typically trillions of tokens from books, websites, code repositories, academic papers, and other sources. The training objective is the same next-token prediction you learned about in Part 2: given a sequence of tokens, **predict what comes next.**
 
 ```
  Training example:
@@ -464,7 +474,7 @@ It is completing a pattern (a list of questions), not answering your question. I
 
 ### 4.2 Instruction Tuning and Chat Templates
 
-The base model is then **fine-tuned** — trained further on a smaller, specialized dataset to adapt its behavior. In this stage, the model is fine-tuned on curated datasets of conversations formatted in a **chat template** — a structured format with special tokens that marks where each role's content begins and ends.
+The base model can complete text patterns, but it cannot have a conversation. To transform a text completer into an instruction-following assistant, the model is **fine-tuned** — trained further on a smaller, curated dataset of conversations. This is still the same training loop from Part 1 (forward pass, loss, backpropagation, weight update), but applied to a dataset of conversations formatted in a **chat template** — a structured format with the special tokens you learned about in Part 3 that marks where each role's content begins and ends.
 
 #### The Chat Template
 
@@ -508,16 +518,23 @@ This is where the model gains its conversational ability and its tendency to fol
 
 ### 4.3 RLHF and Alignment
 
-The instruction-tuned model is further refined using human preferences:
+After instruction tuning, the model can follow instructions and have conversations, but it does not yet have reliable safety behaviors. It might follow harmful instructions, generate toxic content, or confidently state false information — because instruction tuning taught it to be helpful and compliant, not necessarily to be safe. **Reinforcement Learning from Human Feedback (RLHF)** is the training stage that adds safety and alignment behaviors.
 
-1. The model generates multiple responses to the same prompt
-2. Human raters rank the responses (helpful, safe, accurate, etc.)
-3. A reward model is trained on these rankings
-4. The language model is optimized — typically using an algorithm called **Proximal Policy Optimization (PPO)** — to produce responses the reward model rates highly, while staying close to its original behavior to prevent instability
+RLHF works differently from the previous training stages. Instead of showing the model correct answers and adjusting weights to match them (as in pre-training and instruction tuning), RLHF trains the model to produce outputs that humans prefer. The process has four steps:
 
-This is where the model learns safety behaviors — refusing harmful requests, being honest about uncertainty, following system prompt instructions more reliably. **Constitutional AI** (used by Anthropic) is a variation where the model evaluates its own responses against a set of principles rather than relying solely on human raters. More recent approaches like **Direct Preference Optimization (DPO)** skip the separate reward model and optimize the language model directly on human preference data.
+1. **Generate candidates.** The model is given a prompt and generates multiple different responses to it. For example, given "How do I pick a lock?", the model might generate one response that provides lock-picking instructions, another that refuses and explains why, and another that asks for clarification about the context.
 
-After these three stages, the result is a **chat model** — the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
+2. **Human ranking.** Human raters evaluate these responses and rank them according to criteria like helpfulness, safety, accuracy, and honesty. The response that refuses the potentially harmful request might be ranked highest. The response that provides detailed instructions might be ranked lowest.
+
+3. **Train a reward model.** A separate neural network — the **reward model** — is trained on thousands of these human rankings. It learns to predict which responses humans would prefer. Once trained, the reward model can score any response without needing a human to evaluate it, making the process scalable.
+
+4. **Optimize the language model.** The language model is then optimized to produce responses that the reward model scores highly. This is typically done using an algorithm called **Proximal Policy Optimization (PPO)**, which adjusts the model's weights to increase the probability of high-scoring responses while constraining how much the model can change from its instruction-tuned behavior. This constraint is important — without it, the model might "game" the reward model by finding adversarial outputs that score high but are actually low quality.
+
+Through this process, the model learns safety behaviors: refusing harmful requests, expressing uncertainty when appropriate, following system prompt instructions more reliably, and avoiding toxic or biased outputs. These behaviors are layered on top of the instruction-following ability from Stage 2, using the same fundamental mechanism — adjusting weights through training — but guided by human preferences rather than next-token prediction.
+
+**Variations on RLHF.** The basic RLHF process described above has inspired several alternatives. **Constitutional AI** (developed by Anthropic) is an approach where the model evaluates its own responses against a written set of principles (a "constitution") rather than relying solely on human raters — this makes the alignment criteria more transparent and scalable. **Direct Preference Optimization (DPO)** skips the separate reward model entirely and optimizes the language model directly on human preference data, simplifying the training pipeline while achieving similar results.
+
+After these three stages — pre-training, instruction tuning, and RLHF — the result is a **chat model**: the kind of model you interact with through APIs and chat interfaces, and the kind of model you build guardrails around.
 
 ### 4.4 RL for Reasoning (Optional)
 
@@ -563,17 +580,19 @@ As a guardrail engineer, you work primarily in the bottom three rows. You build 
 
 ## Part 5: Why This Architecture Is Dangerous
 
-You now understand how LLMs work (Part 3) and how they are trained (Part 4). Every property you have learned about — distributed knowledge in weights, attention that processes all tokens equally, probabilistic generation, learned instruction following — creates specific risks. This section connects architecture to danger and makes the case for guardrails.
+You now understand the complete picture: how neural networks learn (Part 1), the specific transformer architecture that powers LLMs (Part 2), how data flows through the model from text to prediction (Part 3), and how the model is trained across multiple stages to become a useful assistant (Part 4). Every property you have learned about — distributed knowledge in billions of uninspectable weights, attention that processes all tokens equally regardless of trust, probabilistic generation that varies on every run, and safety behaviors that are learned preferences rather than hard-coded rules — creates specific risks. This section connects what you have learned to the dangers that make guardrails necessary.
 
 ### 5.1 The Instruction Hierarchy Problem
 
-In Part 4, you learned that models are trained on chat templates with distinct roles (system, user, assistant, tool) and that through instruction tuning and RLHF, models learn to prioritize system instructions over user input. But this hierarchy is a **learned statistical preference**, not an enforced constraint.
+In Part 4, you learned that models are trained on chat templates with distinct roles (system, user, assistant, tool) and that through instruction tuning and RLHF, models learn to prioritize system instructions over user input. This sounds like a security feature — the developer's system prompt takes priority over the user's input. But as you learned in Part 4, this hierarchy is a **learned statistical preference**, not an enforced constraint.
 
-There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. The model learned during training that system instructions should take priority, so it usually follows them — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override system instructions.
+Think about what this means architecturally. In Part 2, you learned that the attention mechanism computes relevance scores between all tokens in the context window. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. There is no mechanism that marks certain tokens as "higher authority." The model learned during training that text after the system role token tends to be followed, so it usually follows system instructions — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override those instructions. The compliance is statistical, not absolute.
 
 > **Why this matters for guardrails:** System prompts are necessary but insufficient as a security control. A user who crafts input that mimics special token patterns, uses role-play to reframe the conversation, or applies multi-turn pressure can weaken the model's adherence to system-level rules. This is why application-level guardrails — code that runs independently of the model — are essential. The model's compliance with the system prompt is a guideline, not a guarantee.
 
 ### 5.2 Architecture to Risk Mapping
+
+Every architectural property you have learned about in this guide has a dual nature — the same property that makes LLMs powerful also creates a specific risk. The table below maps each property to the risk it creates. As you read it, notice that these are not bugs or design flaws. They are direct, unavoidable consequences of how the technology works.
 
 | Architectural Property | What It Enables | What Can Go Wrong |
 |---|---|---|
@@ -585,7 +604,7 @@ There is no access control system inside the model. There is no parser that read
 | Training data reflects human biases | Understanding of human language and culture | Model reproduces and potentially amplifies societal biases (toxic/biased output) |
 | Extended chain-of-thought reasoning | More accurate problem-solving | Thinking tokens may contain policy violations, sensitive data, or harmful reasoning not visible in the final answer |
 
-These are not bugs. They are direct consequences of how the technology works. You cannot "fix" hallucination by improving the model alone — the architecture generates text probabilistically, so there will always be cases where the model produces plausible-sounding nonsense. You cannot "fix" prompt injection by training the model harder — the attention mechanism does not architecturally distinguish trusted from untrusted tokens.
+These are not bugs — they are direct consequences of how the technology works. You cannot "fix" hallucination by improving the model alone, because the architecture generates text probabilistically (as you saw in Part 3's discussion of temperature and sampling), so there will always be cases where the model produces plausible-sounding nonsense. You cannot "fix" prompt injection by training the model harder, because the attention mechanism (as you learned in Parts 2 and 3) does not architecturally distinguish trusted from untrusted tokens. You cannot "fix" jailbreaking by writing better system prompts, because the instruction hierarchy (as you learned in Part 4) is a learned preference, not an enforcement mechanism.
 
 This is the fundamental argument for guardrails: **the risks are inherent to the architecture, so the controls must be external to the model.**
 
@@ -593,7 +612,7 @@ Module 1 examines each of these failure modes in detail. The rest of the trainin
 
 ### 5.3 Expanded Attack Surface: RAG and Agentic Systems
 
-The risks above apply to a single model in a conversation. But modern AI applications rarely consist of a single model answering questions. Two architectural patterns — Retrieval-Augmented Generation (RAG) and agentic systems — are now dominant in production deployments, and each dramatically expands the attack surface.
+Everything you have learned so far applies to a single model in a conversation — a user sends a message, the model generates a response. But modern AI applications rarely work this way. Two architectural patterns — **Retrieval-Augmented Generation (RAG)** and **agentic systems** — are now dominant in production deployments. Each pattern makes the model more capable, but each also dramatically expands the attack surface by introducing new sources of untrusted data and new ways the model can cause harm.
 
 #### Embedding Models and Vector Search
 
@@ -613,7 +632,7 @@ RAG reduces hallucination by giving the model real source material to reference,
 
 #### Agentic AI Systems
 
-An **agentic AI system** is one that can take actions — not just generate text. Instead of simply answering questions, an agent can call tools, query databases, send emails, create files, execute code, and make decisions across multiple steps.
+An **agentic AI system** is one that can take actions — not just generate text. Instead of simply answering questions, an agent can call tools, query databases, send emails, create files, execute code, and make decisions across multiple steps. This is a fundamental shift in what can go wrong: in a simple chat application, the worst case is the model producing harmful text. In an agentic system, the model can take harmful **actions** in real systems.
 
 | Capability | Simple Chat | Agentic System |
 |---|---|---|
@@ -622,23 +641,27 @@ An **agentic AI system** is one that can take actions — not just generate text
 | Steps | Single turn | Multi-step reasoning and execution |
 | Impact of errors | Bad text | Bad actions with real consequences |
 
+Consider the difference: if a chat model hallucinates a wrong answer, a human reads it and can ignore it. If an agentic model hallucinates a database query and executes it, records may be modified before anyone reviews the output. The stakes increase dramatically when the model can act on its predictions, not just report them.
+
 #### Tool Integration and MCP
 
-Agents interact with external systems through tool integrations. The **Model Context Protocol (MCP)** is an example of a standardized approach to tool integration: it defines a client-server architecture where AI models connect to tool servers that expose capabilities the model can invoke.
+Agents interact with external systems through **tool integrations** — structured interfaces that allow the model to invoke specific capabilities. The **Model Context Protocol (MCP)** is an example of a standardized approach: it defines a client-server architecture where AI models connect to tool servers that expose capabilities the model can invoke. Other approaches use function calling or custom API integrations.
 
-Regardless of the specific protocol, the pattern is the same: the model decides which tool to call and with what parameters, the application executes the tool call, and the result is returned to the model for further processing.
+Regardless of the specific protocol, the pattern is the same: the model decides which tool to call and with what parameters (based on its next-token prediction — the same mechanism you learned about in Parts 2 and 3), the application executes the tool call, and the result is returned to the model as a new message with the "tool" role (as you saw in Part 4's chat template section). The model then processes this result and decides what to do next — potentially calling more tools in a multi-step chain.
 
 #### Identity Delegation
 
 When an agent calls a tool, a critical question arises: **whose permissions does it use?** If a user asks an AI agent to "look up the salary data," should the agent use the user's permissions (which may not include salary access) or the application's service account (which might have broader access)?
 
-This is the **identity delegation** problem. Without careful design, an AI agent can become a privilege escalation vector — giving users access to data and actions they would not have through normal channels.
+This is the **identity delegation** problem, and it is one of the most consequential design decisions in agentic AI systems. If the agent uses the application's service account, it can access anything that account can access — regardless of what the specific user is authorized to see. The user effectively inherits the application's permissions, not their own. Without careful design, an AI agent can become a **privilege escalation vector** — giving users access to data and actions they would not have through any other channel. The user does not need to hack anything; they simply ask the agent, and the agent acts with elevated privileges on their behalf.
 
 > **Why this matters for guardrails:** RAG and agentic patterns dramatically expand the attack surface. In a simple chat application, the worst case is bad text. With RAG, attackers can poison the documents the model reads (indirect prompt injection). With agents, attackers can cause the model to take unauthorized actions in real systems — sending data to external servers, modifying records, or escalating privileges. Modules 2 and 3 cover the guardrail architectures and implementations for these patterns in detail.
 
 ### 5.4 The Security Mindset
 
-With this full picture — from architecture-level risks to application-level complexity — one conclusion emerges: **LLMs are powerful but fundamentally unpredictable systems, and the risks they create are inherent to their architecture.** You cannot train away hallucination, patch prompt injection, or configure your way out of jailbreaking. These are not bugs — they are consequences of how the technology works.
+With the full picture you have built across all five parts of this guide — from how neural networks learn (Part 1), to the transformer architecture that powers LLMs (Part 2), to how data flows through the model (Part 3), to how training creates both capabilities and vulnerabilities (Part 4), to the risks that emerge in production applications (this section) — one conclusion emerges: **LLMs are powerful but fundamentally unpredictable systems, and the risks they create are inherent to their architecture.** You cannot train away hallucination, patch prompt injection, or configure your way out of jailbreaking. These are not bugs — they are consequences of how the technology works.
+
+This realization is the foundation of the **security mindset** that the cAIge certification teaches. You are not trying to make the model perfectly safe (that is not possible). You are building layers of defense around an inherently unpredictable system so that when it fails — and it will fail — the consequences are contained.
 
 #### Three Layers of Defense
 
@@ -668,9 +691,16 @@ The model itself sits at the center — processing untrusted inputs and producin
 
 #### Who Attacks AI Systems?
 
-AI systems face threats from multiple adversary types: malicious end users trying to extract data or bypass restrictions, automated attacks probing for vulnerabilities at scale, insiders with legitimate access who misuse the system, and researchers discovering new attack techniques that are rapidly adopted in the wild. Module 1 section 1.3 covers threat modeling in detail.
+AI systems face threats from multiple adversary types, and understanding who attacks these systems is essential for designing effective guardrails:
 
-> With this foundation — understanding how LLMs are built, how they generate text, and why their architecture creates inherent risks — you are ready to study the guardrails that address these risks. Module 1 begins with a detailed examination of how AI systems work in production and the specific failure modes you will learn to guard against.
+- **Malicious end users** try to extract private data, bypass content restrictions, or get the model to produce harmful outputs. They use techniques like prompt injection, jailbreaking, and multi-turn manipulation.
+- **Automated attacks** probe for vulnerabilities at scale, testing thousands of prompt variations to find ones that bypass guardrails. Unlike human attackers, automated attacks are tireless and systematic.
+- **Insiders** have legitimate access to the system but misuse it — extracting training data, exfiltrating sensitive information through model interactions, or using agentic tools beyond their authorization.
+- **Researchers** discover new attack techniques and publish them, which means the threat landscape evolves continuously. An attack technique described in an academic paper today may be automated and deployed in the wild within weeks.
+
+Module 1 section 1.3 covers threat modeling in detail.
+
+> With this foundation — understanding how neural networks learn, how the transformer architecture processes language, how data flows through the model from text to prediction, how training creates both capabilities and vulnerabilities, and why the resulting risks are inherent rather than fixable — you are ready to study the guardrails that address these risks. Module 1 begins with a detailed examination of how AI systems work in production and the specific failure modes you will learn to guard against.
 
 ---
 
