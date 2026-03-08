@@ -28,13 +28,13 @@ function isInModule(moduleSlug: string) {
     <p>Certified AI Guardrail Engineer</p>
   </div>
 
-  <button class="nav-section nav-section-toggle" id="program-toggle" aria-expanded="true">
+  <button class="nav-section nav-section-toggle collapsed" id="program-toggle" aria-expanded="false">
     <span>Program</span>
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <div class="nav-section-items" id="program-items">
+  <div class="nav-section-items collapsed" id="program-items">
     {programs.map((p) => (
       <a
         class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
@@ -45,13 +45,13 @@ function isInModule(moduleSlug: string) {
     ))}
   </div>
 
-  <button class="nav-section nav-section-toggle" id="modules-toggle" aria-expanded="true">
+  <button class="nav-section nav-section-toggle collapsed" id="modules-toggle" aria-expanded="false">
     <span>Training Modules</span>
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <div class="nav-section-items" id="modules-items">
+  <div class="nav-section-items collapsed" id="modules-items">
   {modules.map((m) => {
     const moduleHref = `/training/module/${m.data.slug}`;
     const inModule = isInModule(m.data.slug);
@@ -59,20 +59,20 @@ function isInModule(moduleSlug: string) {
 
     return (
       <div class="nav-module-group" data-module={m.data.slug}>
-        <div class:list={['nav-item', 'nav-module', { active: isActive(moduleHref), expanded: inModule }]}>
+        <div class:list={['nav-item', 'nav-module', { active: isActive(moduleHref) }]}>
           <a href={moduleHref} class="nav-module-link">
             <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
           </a>
           <div class="nav-module-right">
             <span class="nav-weight">{m.data.weight ?? '—'}</span>
-            <button class="nav-toggle" aria-label="Toggle sections" aria-expanded={inModule ? 'true' : 'false'}>
+            <button class="nav-toggle" aria-label="Toggle sections" aria-expanded="false">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
           </div>
         </div>
-        <div class:list={['nav-sub-items', { collapsed: !inModule }]}>
+        <div class="nav-sub-items collapsed">
           {moduleSections.map((s) => {
             const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
             return (
