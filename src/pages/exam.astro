@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ExamApp from '../components/exam/ExamApp';
+import '../styles/exam.css';
+---
+
+<BaseLayout title="cAIge Certification Exam" footer={false}>
+  <ExamApp client:load />
+</BaseLayout>
