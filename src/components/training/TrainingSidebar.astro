@@ -28,17 +28,30 @@ function isInModule(moduleSlug: string) {
     <p>Certified AI Guardrail Engineer</p>
   </div>
 
-  <div class="nav-section">Program</div>
-  {programs.map((p) => (
-    <a
-      class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
-      href={`/training/${p.data.slug}`}
-    >
-      {p.data.title}
-    </a>
-  ))}
+  <button class="nav-section nav-section-toggle" id="program-toggle" aria-expanded="true">
+    <span>Program</span>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="nav-section-items" id="program-items">
+    {programs.map((p) => (
+      <a
+        class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
+        href={`/training/${p.data.slug}`}
+      >
+        {p.data.title}
+      </a>
+    ))}
+  </div>
 
-  <div class="nav-section">Training Modules</div>
+  <button class="nav-section nav-section-toggle" id="modules-toggle" aria-expanded="true">
+    <span>Training Modules</span>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="nav-section-items" id="modules-items">
   {modules.map((m) => {
     const moduleHref = `/training/module/${m.data.slug}`;
     const inModule = isInModule(m.data.slug);
@@ -75,9 +88,11 @@ function isInModule(moduleSlug: string) {
       </div>
     );
   })}
+  </div>
 </nav>
 
 <script>
+  // Module section toggles (expand/collapse individual module's sections)
   document.querySelectorAll('.nav-toggle').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -89,6 +104,17 @@ function isInModule(moduleSlug: string) {
 
       subItems.classList.toggle('collapsed');
       navModule.classList.toggle('expanded', isCollapsed);
+      btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
+    });
+  });
+
+  // Section heading toggles (collapse entire Program / Training Modules groups)
+  document.querySelectorAll('.nav-section-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const items = btn.nextElementSibling as HTMLElement;
+      const isCollapsed = items.classList.contains('collapsed');
+      items.classList.toggle('collapsed');
+      btn.classList.toggle('collapsed', !isCollapsed);
       btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
     });
   });

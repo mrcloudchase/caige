@@ -34,6 +34,38 @@ body { line-height: 1.7; padding-top: 64px; }
   color: var(--color-text-muted);
 }
 
+/* Collapsible section headings */
+.nav-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.nav-section-toggle:hover { color: var(--color-text); }
+
+.nav-section-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.nav-section-toggle.collapsed svg {
+  transform: rotate(-90deg);
+}
+
+.nav-section-items {
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.3s ease;
+}
+
+.nav-section-items.collapsed {
+  max-height: 0;
+}
+
 .nav-item {
   display: flex;
   justify-content: space-between;
