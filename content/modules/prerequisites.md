@@ -61,7 +61,8 @@ A token is a subword unit. It is not the same as a word. Depending on the tokeni
  Token IDs:    [464,   3857,   3332,   319,   262,   2648]
 
  The model never sees the original text.
- It processes the sequence of token IDs.
+ It receives the sequence of token IDs, which are
+ then converted into embedding vectors (see below).
 ```
 
 ### How Tokenization Works: Byte Pair Encoding
@@ -103,6 +104,44 @@ Context window arithmetic matters: a 128,000-token context window is approximate
 
 > **Why this matters for guardrails:** Tokenization affects guardrails in three ways. First, token boundaries determine what keyword-based filters can and cannot catch — a word split across two tokens may evade a filter looking for the whole word. Second, every guardrail instruction (system prompt safety rules, few-shot examples, retrieved context) consumes tokens from the finite context window budget. Third, special tokens will reappear when we discuss how models distinguish between system instructions and user messages.
 
+### From Token IDs to Embeddings
+
+Token IDs are integers — they are lookup indices, not something the model can do math on. The model cannot reason about the number 464; it needs a rich numerical representation that captures meaning. This is the job of the **embedding layer**.
+
+The embedding layer is a large table of learned vectors — one vector per token in the vocabulary. When the model receives a token ID, it looks up the corresponding row in this table and retrieves a dense vector (typically 768 to 12,288 numbers, depending on model size). This vector is the token's **embedding** — a learned representation that captures semantic and syntactic properties of that token.
+
+```
+ Token IDs:    [464,     3857,    3332   ]
+                |         |        |
+                v         v        v
+ Embedding    [0.12,   [-0.34,  [0.78,
+ lookup:       0.87,    0.56,    0.23,
+               -0.23,   0.91,   -0.45,
+               ...]     ...]     ...]
+
+ Each token ID is replaced by a dense vector
+ of hundreds or thousands of numbers.
+ These vectors are what the transformer processes.
+```
+
+These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart.
+
+The complete pipeline from text to transformer input is:
+
+```
+ "The cat sat" --> tokenize --> [464, 3857, 3332]
+                                  |
+                         embedding lookup
+                                  |
+                   [vec_464, vec_3857, vec_3332]
+                                  |
+                      + positional encoding
+                                  |
+                      [input to transformer]
+```
+
+This is the same concept behind the embedding models used for RAG (covered later in this guide), but here the embeddings are the model's internal input layer, not a separate model.
+
 ---
 
 ## The Transformer Architecture
@@ -133,17 +172,17 @@ For example, in the sentence "The cat sat on the mat because it was tired," the 
 
 ### Positional Encoding
 
-The attention mechanism processes all tokens in parallel, which means it has no inherent sense of token order. The sentence "the dog chased the cat" and "the cat chased the dog" would look identical to pure attention — both contain the same tokens. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the token representations before they enter the attention layers.
+The attention mechanism processes all tokens in parallel, which means it has no inherent sense of token order. The sentence "the dog chased the cat" and "the cat chased the dog" would produce the same set of embedding vectors — both contain the same tokens. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
 
 ```
- Token:    "The"    "cat"    "sat"
-           +         +        +
- Position:  1         2        3
-           =         =        =
- Input:   [combined representation for each token]
+ Embedding:  [vec for "The"]  [vec for "cat"]  [vec for "sat"]
+                   +                +                +
+ Position:     [pos 1]          [pos 2]          [pos 3]
+                   =                =                =
+ Input:      [combined]        [combined]        [combined]
 ```
 
-The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added, not something the architecture inherently provides.
+The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
 
 ### Layers of a Transformer
 
@@ -156,7 +195,7 @@ A transformer stacks multiple layers. Each layer contains two main computational
 **Residual connections** (also called skip connections) add the input of each sub-layer to its output, allowing information to flow directly through the network and preventing the signal from degrading across many layers. **Layer normalization** stabilizes the values flowing through the network, keeping training stable. Without these two components, training deep transformers (32-128+ layers) would be extremely difficult.
 
 ```
- Input Text (tokenized + positional encoding)
+ Embedding Vectors (+ positional encoding)
        |
        v
  +---------------------+
@@ -640,6 +679,8 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | **Vocabulary** | The fixed mapping from token IDs to subword strings used by a model's tokenizer |
 | **Special tokens** | Reserved tokens (BOS, EOS, PAD, role delimiters) with unique IDs that the tokenizer does not produce from regular text |
 | **Context window** | The maximum number of tokens a model can process in a single inference call |
+| **Embedding layer** | A lookup table of learned vectors that converts token IDs into dense numerical representations the transformer can process |
+| **Embedding vector** | A dense list of numbers (typically 768-12,288 dimensions) representing a token's learned semantic and syntactic properties |
 
 **Architecture**
 
@@ -648,7 +689,7 @@ These terms appear throughout the training modules. They are grouped by topic ar
 | **Transformer** | The neural network architecture used by all modern LLMs; key innovation is self-attention |
 | **Self-attention** | Mechanism that lets the model consider all parts of its input simultaneously and compute relevance between token pairs |
 | **Multi-head attention** | Running multiple attention computations in parallel, each learning different types of relationships |
-| **Positional encoding** | Information added to token representations so the model knows token order |
+| **Positional encoding** | Information added to embedding vectors so the model knows token order in the sequence |
 | **Logits** | The raw numerical scores a model produces for each vocabulary token before conversion to probabilities |
 
 **Inference and Generation**
