@@ -111,106 +111,7 @@ Modern generative AI models like GPT, Claude, and Llama use a **decoder-only** a
 
 The result is that every major LLM you interact with today is a **decoder-only transformer**: a stack of repeated layers that process a token sequence from left to right, where each token can attend to all previous tokens but not to future tokens.
 
-### Components of the Decoder-Only Transformer
-
-A decoder-only transformer is assembled from a small number of component types, stacked and repeated. If you understood the three layer types from Part 1 — input, hidden, and output — the transformer builds on those same ideas but organizes them in a very specific way. This section walks through each component from bottom to top, following the path that data takes through the model.
-
-#### Token Embedding
-
-In Part 1, you learned that neural networks process numbers, not words. The input layer of a neural network receives numerical values — pixel values for images, for example. But an LLM receives text. So the very first thing the model must do is convert each token (a word, subword, or character) into numbers the network can process.
-
-This conversion happens through an **embedding layer**, which is essentially a giant lookup table. Every token in the model's vocabulary is assigned a unique integer ID. The embedding layer maps each ID to a **vector** — a list of numbers, typically 4,096 to 12,288 numbers long. These are not random numbers. They are **learned during training**, meaning the model adjusts them over billions of examples so that tokens with related meanings end up with similar vectors. The word "king" and the word "queen" will end up with vectors that are close to each other in this high-dimensional space, while "king" and "refrigerator" will be far apart.
-
-Think of it this way: before training, every token's vector is random gibberish. After training, these vectors encode rich information about what each token means and how it relates to other tokens. The embedding layer is the bridge between the world of text and the world of numbers that the neural network operates in. Part 3 covers tokenization and embeddings in much more detail.
-
-#### Positional Encoding
-
-Remember that the transformer processes all tokens **in parallel** — this is what makes it fast. But this creates a problem. If every token is processed simultaneously, the model has no idea what order they appear in. The sentence "the dog bit the man" and "the man bit the dog" would produce identical results, because the model sees the same set of tokens with no indication of sequence.
-
-**Positional encoding** solves this by adding information about each token's position to its embedding vector. After the embedding layer produces a vector for each token, the model adds a second vector that encodes that token's position in the sequence — "this is the 1st token," "this is the 2nd token," and so on. The result is a combined vector that represents both what the token is and where it appears.
-
-The original transformer paper used fixed mathematical functions (sine and cosine waves at different frequencies) to generate positional vectors. Modern LLMs typically use **learned positional representations** or techniques like **Rotary Position Embeddings (RoPE)** that allow the model to generalize to longer sequences than it saw during training. The specific technique matters less than the concept: position is information that must be explicitly injected, because the architecture has no inherent sense of order.
-
-#### Masked Self-Attention (Multi-Head)
-
-This is the most important component of the transformer — the mechanism that gives the architecture its name and its power. Self-attention is what allows the model to understand context, resolve ambiguity, and connect related ideas across a sequence.
-
-**The core idea.** When you read the sentence "The cat sat on the mat because it was tired," you instantly know that "it" refers to "the cat." You make this connection because you understand the meaning of the words and the structure of the sentence. A transformer needs to make the same kind of connection, but it does so through a mathematical process: for each token in the sequence, the model computes a **relevance score** against every other token. These scores determine how much each token should influence each other token's representation.
-
-**How it works: Queries, Keys, and Values.** The attention mechanism uses three learned projections for each token, called **Query (Q)**, **Key (K)**, and **Value (V)**. Think of it like a search engine:
-
-- The **Query** is what a token is looking for — "what kind of information do I need from other tokens?"
-- The **Key** is what a token advertises about itself — "here is what I can offer to other tokens looking for context."
-- The **Value** is the actual information a token provides when it is selected as relevant.
-
-For each token, the model computes a score between that token's Query and every other token's Key. High scores mean "this other token is highly relevant to me." These scores are normalized (using softmax) into weights that sum to 1, and then each token's output is a weighted sum of all the Value vectors — pulling more information from tokens with high relevance scores and less from tokens with low scores. The word "it" in our example sentence would produce a high attention score when its Query matches against the Key for "cat," pulling "cat's" information into "it's" representation.
-
-**Why "masked" (causal).** In a decoder-only transformer, each token can only attend to tokens at its position or **earlier** in the sequence — it cannot look ahead at tokens that come after it. This is enforced by a **causal mask** that sets the attention scores for all future positions to negative infinity before the softmax step, effectively making them zero. This constraint exists because the model is trained to predict the next token — if it could see the answer, it would just copy it instead of learning to predict. During actual text generation, this constraint matches reality: when the model is generating the 10th word, the 11th word does not exist yet.
-
-```
- Can attend to:  The  cat  sat  on   it
-                 ---  ---  ---  ---  ---
- The            [ Y    .    .    .    . ]
- cat            [ Y    Y    .    .    . ]
- sat            [ Y    Y    Y    .    . ]
- on             [ Y    Y    Y    Y    . ]
- it             [ Y    Y    Y    Y    Y ]
-
- Y = can attend    . = masked (future token)
-```
-
-**Why "multi-head."** A single attention computation can only capture one type of relationship at a time. But language has many simultaneous relationships: grammatical structure, semantic meaning, coreference (what "it" refers to), temporal ordering, and more. **Multi-head attention** runs multiple attention computations in parallel — typically 32 to 128 "heads" — each with its own learned Q, K, and V projections. One head might learn to track grammatical subjects, another might learn to connect pronouns to their referents, another might focus on positional relationships. The outputs of all heads are concatenated and projected back down to the model's hidden dimension. This allows the model to simultaneously attend to different types of information from different parts of the sequence.
-
-#### Feed-Forward Network
-
-After the attention mechanism gathers relevant context from across the sequence, a **feed-forward network (FFN)** processes each token's representation independently. If attention is "gathering information from context," the feed-forward layer is "thinking about what that information means."
-
-The feed-forward network is structurally simple: it takes each token's vector, expands it to a larger dimension (typically 4x the model's hidden size), applies an activation function (introducing the non-linearity you learned about in Part 1), and then projects it back down to the original size. This expand-activate-compress pattern gives the network a large internal workspace to transform each token's representation.
-
-```
- token vector --> expand    --> activate      --> compress   --> output
- (4,096 dims)   (16,384)      (non-linearity)   (4,096)
-```
-
-Two important details distinguish the FFN from the attention layer. First, the FFN is applied to each token **separately** — unlike attention, it does not look at other tokens. Each token goes through the same computation independently. Second, the FFN is typically the largest component in each layer by parameter count, often containing two-thirds of the layer's total parameters. Research suggests that the feed-forward layers are where much of the model's **factual knowledge** is stored — the attention layers decide what information to gather, and the feed-forward layers encode the knowledge that informs the model's responses.
-
-#### Residual Connections and Layer Normalization
-
-Modern LLMs stack 32 to 128+ transformer layers on top of each other. Without special architectural support, this would be impossible — the signal would degrade to nothing as it passes through dozens of sequential transformations, and the network would be extremely difficult to train. Two components solve this problem.
-
-**Residual connections** (also called **skip connections**) add a shortcut around each sub-component. After the attention sub-layer processes a token's representation, the original input to that sub-layer is added directly to the output. The same happens after the feed-forward sub-layer. In the decoder-only transformer diagram, these are the (+) circles with arrows bypassing each block. The effect is powerful: information can flow through the entire depth of the network without being forced through every transformation. If a particular layer has nothing useful to add for a given token, the residual connection lets the original signal pass through unchanged. Without residual connections, training networks deeper than a few layers is practically impossible because gradients (the signals used to update weights during backpropagation, as you learned in Part 1) vanish or explode as they propagate through too many layers.
-
-**Layer normalization** standardizes the numerical values at each layer, keeping them in a stable range. Without normalization, the values flowing through the network can grow very large or very small as they pass through many layers, causing training to become unstable or fail entirely. Layer normalization is applied before each sub-component (in modern pre-norm architectures) and ensures that regardless of what happened in previous layers, the inputs to each component are in a well-behaved numerical range.
-
-#### Output Head (Linear Layer + Softmax)
-
-After the final transformer layer, the model has produced a rich internal representation for each token — a vector that encodes the token's meaning in the context of the entire sequence. But this vector is not yet useful as a prediction. The model needs to answer the question: "What token should come next?"
-
-This is the job of the **output head**, which works in two steps. First, a **linear layer** (sometimes called the **unembedding layer**, because it reverses what the embedding layer did) projects each token's hidden state vector to a set of raw scores called **logits**. There is one logit for every token in the model's vocabulary — if the vocabulary has 100,000 tokens, this linear layer produces 100,000 scores. A high logit means "this token is a likely next token." A low logit means "this token is unlikely."
-
-Second, the **softmax** function converts these raw logits into a **probability distribution** — a set of values between 0 and 1 that sum to exactly 1. After softmax, each score represents the model's estimated probability that the corresponding token is the correct next token. The token with the highest probability is the model's best guess, but the full distribution matters: during generation, the model can sample from this distribution (not always picking the top choice) to produce varied and natural-sounding text.
-
-```
- hidden state --> Linear Layer --> logits    --> Softmax --> probabilities
- (4,096 dims)    (unembedding)    (100,000      (normalize)  (100,000 values
-                                   raw scores)                summing to 1.0)
-```
-
-This output head connects directly back to what you learned in Part 1: the output layer of a neural network produces the final result. For a spam classifier, the output was a single probability (spam or not). For an LLM, the output is a probability distribution across the entire vocabulary — tens of thousands of simultaneous predictions about what comes next.
-
-#### Layer Stacking
-
-A single decoder layer — one round of masked self-attention followed by one feed-forward network, with residual connections and normalization — has limited capacity. It can capture some patterns, but not enough to understand the full complexity of language. The power of the transformer comes from **stacking many identical layers in sequence**.
-
-Modern LLMs use 32 to 128+ layers. Each layer takes the output of the previous layer as its input and refines the representations further. Research has shown that different depths of the network learn different kinds of information:
-
-- **Early layers** (layers 1-10) tend to learn surface-level patterns: syntax, grammar, common word combinations, formatting conventions.
-- **Middle layers** build on those patterns to develop semantic understanding: what words mean in context, how concepts relate, factual associations.
-- **Deep layers** (the final layers) combine everything into high-level representations: intent, logical relationships, complex reasoning patterns, and the nuanced judgment needed to produce a specific output.
-
-This progression from simple to complex mirrors what you learned about hidden layers in Part 1 — each layer builds on the patterns detected by the layer before it. The difference is scale: instead of a few hidden layers with thousands of parameters, a modern LLM stacks 100+ layers with billions of parameters, allowing it to learn extraordinarily complex patterns in language.
-
-![Decoder-only transformer architecture](content/svg/decoder-only-transformer.svg)
+Internally, a decoder-only transformer is assembled from a small number of component types, stacked and repeated: an **embedding layer** converts tokens to numerical vectors, **positional encoding** adds sequence position information, **masked self-attention** lets each token attend to all previous tokens, **feed-forward networks** process each token's representation independently, **residual connections** and **layer normalization** keep signals stable across dozens of stacked layers, and an **output head** converts the final representations into a probability distribution over the vocabulary. Part 3 walks through each of these components in detail, following the path that data takes from raw text to generated output.
 
 ### Training Objective: Next-Token Prediction
 
@@ -233,6 +134,8 @@ The "large" in large language model refers to the number of parameters (weights)
 
 Scale matters because larger models with more training data develop capabilities that smaller models do not exhibit. A model with 1 billion parameters might produce grammatically correct text but hallucinate facts constantly. A model with 100 billion parameters trained on more data might demonstrate reasoning, follow complex instructions, and produce factually grounded responses — even though it was trained on the exact same objective (next-token prediction). These emergent capabilities appear as models scale up, often unexpectedly.
 
+Architecture innovations like **Mixture-of-Experts (MoE)** — where only a fraction of the model's parameters are active for any given input — allow models to have very large total parameter counts while keeping per-inference computation manageable. A well-trained 8B parameter model today can outperform a 100B+ model from a few years ago due to improvements in training data quality and techniques. More parameters also means more capacity to **memorize** training data (relevant to data leakage risks) and more complex behaviors that are harder to predict and test (relevant to guardrails).
+
 ### What an LLM Is Not
 
 Understanding what an LLM is also means understanding what it is not:
@@ -243,17 +146,17 @@ Understanding what an LLM is also means understanding what it is not:
 
 > **Why this matters for guardrails:** An LLM is a decoder-only transformer trained to predict the next token at massive scale. Every capability it demonstrates — following instructions, refusing harmful requests, providing accurate information — is a learned statistical pattern, not a hard-coded behavior. Learned behaviors can be fragile: they work in the scenarios well-represented in training data and can fail unpredictably in novel situations. Guardrails exist because you cannot rely on the model's learned behaviors alone.
 
-The rest of this guide now dives deeper into the internals. Part 3 traces the complete data path through the transformer step by step — showing how text is converted to numbers, processed through the attention and feed-forward layers described above, and turned back into text. Part 4 explains how LLMs are trained across multiple stages. Part 5 connects everything to the risks that make guardrails necessary.
+Part 3 opens up the transformer and traces the complete data path step by step — showing how text is converted to numbers, processed through each component of the architecture, and turned back into text. Part 4 explains how LLMs are trained across multiple stages. Part 5 connects everything to the risks that make guardrails necessary.
 
 ---
 
 ## Part 3: How an LLM Works — From Text In to Text Out
 
-Parts 1 and 2 gave you the building blocks: what a neural network is, how it learns, and the specific architecture (the decoder-only transformer) that makes LLMs work. Now it is time to trace the complete journey of data through an LLM — from the moment raw text enters the system to the moment a generated response comes out. Each step in this section builds on concepts you have already learned, so you will see the components from Part 2 in action rather than in isolation.
+Parts 1 and 2 gave you the building blocks: what a neural network is, how it learns, and the three properties that define an LLM — the transformer architecture, next-token prediction, and massive scale. Now it is time to look inside the transformer and trace the complete journey of data through an LLM — from the moment raw text enters the system to the moment a generated response comes out. Each step introduces a component of the decoder-only transformer in the order that data encounters it. Understanding this data flow is essential for understanding where attacks can target the system and where guardrails can be applied.
 
 ### 3.1 Text to Numbers: Tokenization
 
-In Part 2, you learned that the first component of a decoder-only transformer is the token embedding layer — a lookup table that converts token IDs into vectors. But what are token IDs, and where do they come from? Before the embedding layer can do its work, the raw text must be broken into discrete units and assigned numerical identifiers. This process is called **tokenization**, and it is the very first step in the LLM pipeline.
+In Part 2, you learned that a decoder-only transformer starts with an embedding layer that converts token IDs into vectors. But what are token IDs, and where do they come from? Before the embedding layer can do its work, the raw text must be broken into discrete units and assigned numerical identifiers. This process is called **tokenization**, and it is the very first step in the LLM pipeline.
 
 #### What Is a Token?
 
@@ -312,23 +215,25 @@ Context window arithmetic matters: a 128,000-token context window is approximate
 
 ### 3.2 Numbers to Meaning: The Embedding Layer
 
-Tokenization gave us a sequence of integer IDs — for example, [464, 3857, 3332, 319, 262, 2648] for "The cat sat on the mat." But as you learned in Part 2's section on token embeddings, these integers are just lookup addresses. The number 464 does not carry any information about the meaning of "The" — it is simply an index. The model needs rich numerical representations that capture what each token means and how it relates to other tokens. This is the job of the **embedding layer**, the first true component of the transformer that you learned about in Part 2.
+Tokenization gave us a sequence of integer IDs — for example, [464, 3857, 3332, 319, 262, 2648] for "The cat sat on the mat." But these integers are just lookup addresses. The number 464 does not carry any information about the meaning of "The" — it is simply an index. In Part 1, you learned that neural networks process numbers, not words. The model needs rich numerical representations that capture what each token means and how it relates to other tokens. This is the job of the **embedding layer** — the first true component of the decoder-only transformer.
 
-The embedding layer is a large table of learned vectors — one vector per token in the vocabulary. When the model receives a token ID, it looks up the corresponding row in this table and retrieves a dense vector (typically 768 to 12,288 numbers, depending on model size). This vector is the token's **embedding** — a learned representation that captures semantic and syntactic properties of that token.
+The embedding layer is essentially a giant lookup table — one row per token in the vocabulary. When the model receives a token ID, it looks up the corresponding row and retrieves a dense **vector** (a list of numbers, typically 768 to 12,288 numbers long, depending on model size). This vector is the token's **embedding** — a learned representation that captures semantic and syntactic properties of that token.
 
 ![Embedding lookup diagram](content/svg/embedding-lookup.svg)
 
-These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity appears throughout AI systems wherever similarity between texts needs to be measured.
+These embedding vectors are **learned during training** — they start as random numbers and are adjusted through backpropagation just like every other weight in the model (as you learned in Part 1). Before training, every token's vector is random gibberish. After training, tokens with related meanings end up with similar vectors. The word "cat" and "kitten" will have vectors that are close together in this high-dimensional space, while "cat" and "spreadsheet" will be far apart. The standard way to measure this closeness is **cosine similarity** — a calculation that compares the angle between two vectors, producing a score from -1 (opposite) to 1 (identical direction). Cosine similarity appears throughout AI systems wherever similarity between texts needs to be measured.
 
 The LLM's embedding layer converts individual tokens into vectors. Later, in Part 5, we will see how a different type of embedding model converts entire passages into a single vector — the same concept at a different granularity, used for retrieving relevant documents.
 
 ### 3.3 Adding Position: Positional Encoding
 
-The transformer processes all tokens in parallel, which means it has no inherent sense of token order. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors. To solve this, transformers add **positional encoding** — information about each token's position in the sequence — to the embedding vectors before they enter the attention layers.
+The transformer processes all tokens in parallel — this is what makes it fast. But this creates a problem. If every token is processed simultaneously, the model has no idea what order they appear in. Without positional information, the sentences "the dog chased the cat" and "the cat chased the dog" would be indistinguishable — the embedding layer produces the same vector for a given token regardless of where it appears, so both sentences would produce the same bag of vectors.
+
+**Positional encoding** solves this by adding information about each token's position to its embedding vector. After the embedding layer produces a vector for each token, the model adds a second vector that encodes that token's position in the sequence — "this is the 1st token," "this is the 2nd token," and so on. The result is a combined vector that represents both what the token is and where it appears.
 
 ![Positional encoding diagram](content/svg/positional-encoding.svg)
 
-The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like Rotary Position Embeddings (RoPE) that allow the model to generalize to longer sequences. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
+The original transformer paper used fixed mathematical functions (sinusoidal encoding) for positions. Modern LLMs typically use learned positional representations or techniques like **Rotary Position Embeddings (RoPE)** that allow the model to generalize to longer sequences than it saw during training. The specific technique matters less than the concept: position is information that must be explicitly added to the embedding vectors, not something the architecture inherently provides.
 
 The complete pipeline from text to transformer input is:
 
@@ -336,39 +241,110 @@ The complete pipeline from text to transformer input is:
 
 ### 3.4 The Transformer: Processing Context
 
-In Part 2, you learned the components of a decoder-only transformer — token embedding, positional encoding, masked self-attention, feed-forward networks, residual connections, layer normalization, and the output head. You know what each one does in isolation. Now let's watch them work together as data flows through the model.
+With embeddings and positional encoding in place, the token representations are ready to enter the transformer layers — the heart of the model. The diagram below shows the complete decoder-only transformer architecture. You have already seen the bottom portion (embedding and positional encoding). This section explains the transformer layers — the repeated blocks that do the actual processing.
+
+![Decoder-only transformer architecture](content/svg/decoder-only-transformer.svg)
+
+Each transformer layer contains two main components: a **self-attention** mechanism that gathers information from across the sequence, and a **feed-forward network** that processes each token's representation independently. These are supported by **residual connections** and **layer normalization** that keep the signal stable as it passes through many layers. Let's examine each one.
+
+#### Masked Self-Attention (Multi-Head)
+
+This is the most important component of the transformer — the mechanism that gives the architecture its name and its power. Self-attention is what allows the model to understand context, resolve ambiguity, and connect related ideas across a sequence.
+
+**The core idea.** When you read the sentence "The cat sat on the mat because it was tired," you instantly know that "it" refers to "the cat." You make this connection because you understand the meaning of the words and the structure of the sentence. A transformer needs to make the same kind of connection, but it does so through a mathematical process: for each token in the sequence, the model computes a **relevance score** against every other token. These scores determine how much each token should influence each other token's representation.
+
+**How it works: Queries, Keys, and Values.** The attention mechanism uses three learned projections for each token, called **Query (Q)**, **Key (K)**, and **Value (V)**. Think of it like a search engine:
+
+- The **Query** is what a token is looking for — "what kind of information do I need from other tokens?"
+- The **Key** is what a token advertises about itself — "here is what I can offer to other tokens looking for context."
+- The **Value** is the actual information a token provides when it is selected as relevant.
+
+For each token, the model computes a score between that token's Query and every other token's Key. High scores mean "this other token is highly relevant to me." These scores are normalized (using softmax) into weights that sum to 1, and then each token's output is a weighted sum of all the Value vectors — pulling more information from tokens with high relevance scores and less from tokens with low scores. The word "it" in our example sentence would produce a high attention score when its Query matches against the Key for "cat," pulling "cat's" information into "it's" representation.
+
+**Why "masked" (causal).** In a decoder-only transformer, each token can only attend to tokens at its position or **earlier** in the sequence — it cannot look ahead at tokens that come after it. This is enforced by a **causal mask** that sets the attention scores for all future positions to negative infinity before the softmax step, effectively making them zero. This constraint exists because the model is trained to predict the next token — if it could see the answer, it would just copy it instead of learning to predict. During actual text generation, this constraint matches reality: when the model is generating the 10th word, the 11th word does not exist yet.
+
+```
+ Can attend to:  The  cat  sat  on   it
+                 ---  ---  ---  ---  ---
+ The            [ Y    .    .    .    . ]
+ cat            [ Y    Y    .    .    . ]
+ sat            [ Y    Y    Y    .    . ]
+ on             [ Y    Y    Y    Y    . ]
+ it             [ Y    Y    Y    Y    Y ]
+
+ Y = can attend    . = masked (future token)
+```
+
+**Why "multi-head."** A single attention computation can only capture one type of relationship at a time. But language has many simultaneous relationships: grammatical structure, semantic meaning, coreference (what "it" refers to), temporal ordering, and more. **Multi-head attention** runs multiple attention computations in parallel — typically 32 to 128 "heads" — each with its own learned Q, K, and V projections. One head might learn to track grammatical subjects, another might learn to connect pronouns to their referents, another might focus on positional relationships. The outputs of all heads are concatenated and projected back down to the model's hidden dimension. This allows the model to simultaneously attend to different types of information from different parts of the sequence.
 
 #### Attention in Action
 
-The combined embedding vectors (token meaning + position information) from the previous steps enter the first transformer layer. The first thing that happens is **self-attention** — the mechanism you learned about in Part 2 that lets each token look at every other token and compute relevance scores using Query, Key, and Value projections.
-
-To see this in practice, consider the sentence "The cat sat on the mat because it was tired." When the model processes the token "it," the attention mechanism computes scores between "it's" Query vector and the Key vectors of every preceding token: "The," "cat," "sat," "on," "the," "mat," "because." The result: "cat" gets a high attention score (because "it" refers to the cat), while tokens like "on" and "the" get low scores.
+To see self-attention in practice, consider the sentence "The cat sat on the mat because it was tired." When the model processes the token "it," the attention mechanism computes scores between "it's" Query vector and the Key vectors of every preceding token: "The," "cat," "sat," "on," "the," "mat," "because." The result: "cat" gets a high attention score (because "it" refers to the cat), while tokens like "on" and "the" get low scores.
 
 ![Attention scores diagram](content/svg/attention-scores.svg)
 
 These scores determine how much each token's Value vector contributes to "it's" updated representation. After attention, the representation of "it" now carries information about what it refers to — the model has connected a pronoun to its referent, not by following a grammar rule, but by learning statistical patterns from billions of similar examples during training.
 
-Remember from Part 2 that this is **multi-head** attention: dozens of these computations run in parallel. One head might connect "it" to "cat" (coreference). Another head might note that "it" is the subject of "was tired" (syntactic role). Another might track that "it" appears after "because" (causal relationship). Each head captures a different type of relationship, and their combined outputs give the model a rich, multi-faceted understanding of each token's role in context.
+Remember that this is **multi-head** attention: dozens of these computations run in parallel. One head might connect "it" to "cat" (coreference). Another head might note that "it" is the subject of "was tired" (syntactic role). Another might track that "it" appears after "because" (causal relationship). Each head captures a different type of relationship, and their combined outputs give the model a rich, multi-faceted understanding of each token's role in context.
 
 And because this is a **decoder-only** transformer, the attention is **masked**: each token can only attend to tokens at its position or earlier. The token "was" cannot look ahead to see "tired." This constraint matches how the model generates text — when predicting the next word, it genuinely cannot see the future.
 
+#### Feed-Forward Network
+
+After the attention mechanism gathers relevant context from across the sequence, a **feed-forward network (FFN)** processes each token's representation independently. If attention is "gathering information from context," the feed-forward layer is "thinking about what that information means."
+
+The feed-forward network is structurally simple: it takes each token's vector, expands it to a larger dimension (typically 4x the model's hidden size), applies an activation function (introducing the non-linearity you learned about in Part 1), and then projects it back down to the original size. This expand-activate-compress pattern gives the network a large internal workspace to transform each token's representation.
+
+```
+ token vector --> expand    --> activate      --> compress   --> output
+ (4,096 dims)   (16,384)      (non-linearity)   (4,096)
+```
+
+Two important details distinguish the FFN from the attention layer. First, the FFN is applied to each token **separately** — unlike attention, it does not look at other tokens. Each token goes through the same computation independently. Second, the FFN is typically the largest component in each layer by parameter count, often containing two-thirds of the layer's total parameters. Research suggests that the feed-forward layers are where much of the model's **factual knowledge** is stored — the attention layers decide what information to gather, and the feed-forward layers encode the knowledge that informs the model's responses.
+
+#### Residual Connections and Layer Normalization
+
+Modern LLMs stack 32 to 128+ transformer layers on top of each other. Without special architectural support, this would be impossible — the signal would degrade to nothing as it passes through dozens of sequential transformations, and the network would be extremely difficult to train. Two components solve this problem.
+
+**Residual connections** (also called **skip connections**) add a shortcut around each sub-component. After the attention sub-layer processes a token's representation, the original input to that sub-layer is added directly to the output. The same happens after the feed-forward sub-layer. In the decoder-only transformer diagram above, these are the (+) circles with arrows bypassing each block. The effect is powerful: information can flow through the entire depth of the network without being forced through every transformation. If a particular layer has nothing useful to add for a given token, the residual connection lets the original signal pass through unchanged. Without residual connections, training networks deeper than a few layers is practically impossible because gradients (the signals used to update weights during backpropagation, as you learned in Part 1) vanish or explode as they propagate through too many layers.
+
+**Layer normalization** standardizes the numerical values at each layer, keeping them in a stable range. Without normalization, the values flowing through the network can grow very large or very small as they pass through many layers, causing training to become unstable or fail entirely. Layer normalization is applied before each sub-component (in modern pre-norm architectures) and ensures that regardless of what happened in previous layers, the inputs to each component are in a well-behaved numerical range.
+
 #### Through the Layers
 
-After attention gathers context from across the sequence, the data passes through the **feed-forward network**, which processes each token's representation independently — applying the expand-activate-compress pattern described in Part 2. Then the **residual connections** add the original input back to the output (so information is not lost even if the layer had nothing useful to add), and **layer normalization** keeps the numerical values stable for the next layer.
-
-This completes one transformer layer. The output flows into the next layer, where the same process repeats: attention gathers new contextual information (now building on the richer representations from the previous layer), and the feed-forward network refines it further.
+One complete transformer layer consists of self-attention followed by the feed-forward network, with residual connections and layer normalization applied after each. This completes one layer. The output flows into the next layer, where the same process repeats: attention gathers new contextual information (now building on the richer representations from the previous layer), and the feed-forward network refines it further.
 
 ![Transformer stack diagram](content/svg/transformer-stack.svg)
 
-Modern LLMs repeat this process across 32 to 128+ layers. As you learned in Part 2, early layers capture surface-level patterns (grammar, common phrases), middle layers build semantic understanding (meaning, factual associations), and deep layers develop high-level representations (intent, reasoning, judgment). Each layer refines the representations produced by the layer before it.
+A single transformer layer has limited capacity — it can capture some patterns, but not enough to understand the full complexity of language. The power of the transformer comes from **stacking many identical layers in sequence**. Modern LLMs use 32 to 128+ layers. Each layer takes the output of the previous layer as its input and refines the representations further. Research has shown that different depths of the network learn different kinds of information:
 
-#### From Hidden States to Predictions
+- **Early layers** (layers 1-10) tend to learn surface-level patterns: syntax, grammar, common word combinations, formatting conventions.
+- **Middle layers** build on those patterns to develop semantic understanding: what words mean in context, how concepts relate, factual associations.
+- **Deep layers** (the final layers) combine everything into high-level representations: intent, logical relationships, complex reasoning patterns, and the nuanced judgment needed to produce a specific output.
 
-After the final transformer layer, each token's representation is a rich vector that encodes its meaning in the full context of the sequence. The **output head** — the linear layer followed by softmax that you learned about in Part 2 — converts the last token's hidden state into a probability distribution over the entire vocabulary. Each score represents the model's estimated probability that the corresponding token should come next. The highest-probability token is the model's best guess, but the full distribution matters for generation (as the next section explains).
+This progression from simple to complex mirrors what you learned about hidden layers in Part 1 — each layer builds on the patterns detected by the layer before it. The difference is scale: instead of a few hidden layers with thousands of parameters, a modern LLM stacks 100+ layers with billions of parameters, allowing it to learn extraordinarily complex patterns in language.
 
 > **Why this matters for guardrails:** Now you can see why prompt injection is a fundamental architectural challenge, not a bug that can be patched. The attention mechanism treats all tokens in the context window as equally accessible. There is no architectural privilege for system prompt tokens over user input tokens — a malicious instruction buried in retrieved document #47 is attended to just as readily as the first line of the system prompt. The model has no way to distinguish "instructions I should follow" from "text I should process" — it simply computes attention scores across everything in its context window.
 
-### 3.5 The Generation Loop
+### 3.5 From Predictions to Text: The Output Head
+
+After the final transformer layer, the model has produced a rich internal representation for each token — a vector that encodes the token's meaning in the context of the entire sequence. But this vector is not yet useful as a prediction. The model needs to answer the question: "What token should come next?"
+
+This is the job of the **output head**, which works in two steps. First, a **linear layer** (sometimes called the **unembedding layer**, because it reverses what the embedding layer did) projects each token's hidden state vector to a set of raw scores called **logits**. There is one logit for every token in the model's vocabulary — if the vocabulary has 100,000 tokens, this linear layer produces 100,000 scores. A high logit means "this token is a likely next token." A low logit means "this token is unlikely."
+
+Second, the **softmax** function converts these raw logits into a **probability distribution** — a set of values between 0 and 1 that sum to exactly 1. After softmax, each score represents the model's estimated probability that the corresponding token is the correct next token. The token with the highest probability is the model's best guess, but the full distribution matters: during generation, the model can sample from this distribution (not always picking the top choice) to produce varied and natural-sounding text.
+
+```
+ hidden state --> Linear Layer --> logits    --> Softmax --> probabilities
+ (4,096 dims)    (unembedding)    (100,000      (normalize)  (100,000 values
+                                   raw scores)                summing to 1.0)
+```
+
+This output head connects directly back to what you learned in Part 1: the output layer of a neural network produces the final result. For a spam classifier, the output was a single probability (spam or not). For an LLM, the output is a probability distribution across the entire vocabulary — tens of thousands of simultaneous predictions about what comes next.
+
+Some model APIs expose **log probabilities** (the logarithm of the token probabilities) for each generated token, which can serve as a confidence signal — low log probabilities across a response suggest the model is uncertain about its output, which is useful for guardrail systems that need to flag low-confidence outputs for human review.
+
+### 3.6 The Generation Loop
 
 You now understand the complete forward pass: text is tokenized into IDs, IDs are converted to embedding vectors, positional encoding is added, and the transformer layers process the sequence through repeated rounds of attention and feed-forward computation to produce a probability distribution over the vocabulary. But that entire process — from input to probability distribution — produces just **one prediction**: the probability of the next single token. How does the model generate an entire response?
 
@@ -376,7 +352,7 @@ The answer is an **autoregressive** loop: the model generates one token, appends
 
 ![Generation loop diagram](content/svg/generation-loop.svg)
 
-Some model APIs expose **log probabilities** (the logarithm of the token probabilities) for each generated token, which can serve as a confidence signal — low log probabilities across a response suggest the model is uncertain about its output. The question is: which token do you actually select from the probability distribution at each step?
+At each step, the model produces a probability distribution over the entire vocabulary. But which token does it actually select?
 
 #### Temperature and Sampling
 
@@ -440,7 +416,7 @@ return detokenize(tokens)
 
 > **Why this matters for guardrails:** Add non-determinism to the list of architectural challenges: uninspectable weights, unprivileged attention, and now outputs that vary on every run. The same prompt can produce different outputs on different runs. This means you cannot test a guardrail once and assume it will always catch the same issue — a prompt that was blocked today might produce a slightly different output tomorrow that slips through. Guardrail testing requires repeated runs, diverse inputs, and statistical evaluation rather than simple pass/fail on a single test case.
 
-### 3.6 Reasoning Models and Chain-of-Thought
+### 3.7 Reasoning Models and Chain-of-Thought
 
 The autoregressive generation loop described above applies to all LLMs — every model generates text one token at a time, left to right. But some models add an additional step that changes how they approach complex problems.
 
@@ -465,12 +441,6 @@ The thinking tokens may be visible to the user, hidden behind an interface, or o
 **Inference-time scaling** is a related concept: making a model "think harder" by spending more compute at inference time. Techniques include generating multiple candidate answers and selecting the best one (**Best-of-N sampling**), having the model check its own work (**self-refinement**), or generating multiple solutions and picking the most common answer (**self-consistency**). These techniques can significantly improve accuracy without changing the model's weights.
 
 > **Why this matters for guardrails:** Reasoning models create a new guardrail surface. The final answer may look safe and compliant, but the reasoning trace — the thinking tokens — may contain policy violations, leaked sensitive data, or harmful content. Guardrails must inspect both the reasoning trace and the final output. Additionally, inference-time scaling means the same model can behave very differently depending on how it is configured — a model that passes guardrail testing with standard inference may fail when inference-time scaling is enabled.
-
-### 3.7 Scale and Practical Considerations
-
-Part 2 covered how scale relates to capabilities. From an implementation perspective, there are additional considerations. Architecture innovations like **Mixture-of-Experts (MoE)** — where only a fraction of the model's parameters are active for any given input — allow models to have very large total parameter counts while keeping per-inference computation manageable. A well-trained 8B parameter model today can outperform a 100B+ model from a few years ago due to improvements in training data quality and techniques.
-
-More parameters also means more capacity to **memorize** training data (relevant to data leakage risks) and more complex behaviors that are harder to predict and test (relevant to guardrails).
 
 ---
 
@@ -626,13 +596,13 @@ As a guardrail engineer, you work primarily in the bottom three rows. You build 
 
 ## Part 5: Why This Architecture Is Dangerous
 
-You now understand the complete picture: how neural networks learn (Part 1), the specific transformer architecture that powers LLMs (Part 2), how data flows through the model from text to prediction (Part 3), and how the model is trained across multiple stages to become a useful assistant (Part 4). Every property you have learned about — distributed knowledge in billions of uninspectable weights, attention that processes all tokens equally regardless of trust, probabilistic generation that varies on every run, and safety behaviors that are learned preferences rather than hard-coded rules — creates specific risks. This section connects what you have learned to the dangers that make guardrails necessary.
+You now understand the complete picture: how neural networks learn (Part 1), what defines an LLM and why the transformer architecture matters (Part 2), how data flows through each component of the model from text to prediction (Part 3), and how the model is trained across multiple stages to become a useful assistant (Part 4). Every property you have learned about — distributed knowledge in billions of uninspectable weights, attention that processes all tokens equally regardless of trust, probabilistic generation that varies on every run, and safety behaviors that are learned preferences rather than hard-coded rules — creates specific risks. This section connects what you have learned to the dangers that make guardrails necessary.
 
 ### 5.1 The Instruction Hierarchy Problem
 
 In Part 4, you learned that models are trained on chat templates with distinct roles (system, user, assistant, tool) and that through instruction tuning and RLHF, models learn to prioritize system instructions over user input. This sounds like a security feature — the developer's system prompt takes priority over the user's input. But as you learned in Part 4, this hierarchy is a **learned statistical preference**, not an enforced constraint.
 
-Think about what this means architecturally. In Part 2, you learned that the attention mechanism computes relevance scores between all tokens in the context window. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. There is no mechanism that marks certain tokens as "higher authority." The model learned during training that text after the system role token tends to be followed, so it usually follows system instructions — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override those instructions. The compliance is statistical, not absolute.
+Think about what this means architecturally. In Part 3, you learned that the attention mechanism computes relevance scores between all tokens in the context window. There is no access control system inside the model. There is no parser that reads the system prompt and creates rules. There is no mechanism that marks certain tokens as "higher authority." The model learned during training that text after the system role token tends to be followed, so it usually follows system instructions — but under sufficient pressure (carefully crafted prompts, role-play scenarios, multi-turn manipulation), the model can and does override those instructions. The compliance is statistical, not absolute.
 
 > **Why this matters for guardrails:** System prompts are necessary but insufficient as a security control. A user who crafts input that mimics special token patterns, uses role-play to reframe the conversation, or applies multi-turn pressure can weaken the model's adherence to system-level rules. This is why application-level guardrails — code that runs independently of the model — are essential. The model's compliance with the system prompt is a guideline, not a guarantee.
 
@@ -650,7 +620,7 @@ Every architectural property you have learned about in this guide has a dual nat
 | Training data reflects human biases | Understanding of human language and culture | Model reproduces and potentially amplifies societal biases (toxic/biased output) |
 | Extended chain-of-thought reasoning | More accurate problem-solving | Thinking tokens may contain policy violations, sensitive data, or harmful reasoning not visible in the final answer |
 
-These are not bugs — they are direct consequences of how the technology works. You cannot "fix" hallucination by improving the model alone, because the architecture generates text probabilistically (as you saw in Part 3's discussion of temperature and sampling), so there will always be cases where the model produces plausible-sounding nonsense. You cannot "fix" prompt injection by training the model harder, because the attention mechanism (as you learned in Parts 2 and 3) does not architecturally distinguish trusted from untrusted tokens. You cannot "fix" jailbreaking by writing better system prompts, because the instruction hierarchy (as you learned in Part 4) is a learned preference, not an enforcement mechanism.
+These are not bugs — they are direct consequences of how the technology works. You cannot "fix" hallucination by improving the model alone, because the architecture generates text probabilistically (as you saw in Part 3's discussion of temperature and sampling), so there will always be cases where the model produces plausible-sounding nonsense. You cannot "fix" prompt injection by training the model harder, because the attention mechanism (as you learned in Part 3) does not architecturally distinguish trusted from untrusted tokens. You cannot "fix" jailbreaking by writing better system prompts, because the instruction hierarchy (as you learned in Part 4) is a learned preference, not an enforcement mechanism.
 
 This is the fundamental argument for guardrails: **the risks are inherent to the architecture, so the controls must be external to the model.**
 
