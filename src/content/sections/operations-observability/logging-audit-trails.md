@@ -91,6 +91,14 @@ For applications where users consent to detailed logging (e.g., beta testing):
 - Use these logs for guardrail improvement and testing
 - Delete when consent is withdrawn
 
+| Technique | What It Preserves | Debugging Value | Compliance Fit | Trade-off |
+|---|---|---|---|---|
+| Input hashing | Hash for correlation, not content | Medium (can match, can't read) | GDPR-friendly | Cannot reconstruct original input |
+| Tiered logging | Full content in restricted tier | High (with access controls) | Configurable | Operational complexity |
+| Selective content | Only the triggering fragment | Medium-high | Good balance | May miss surrounding context |
+| Differential privacy | Aggregate trends with noise | Low (individual) / High (trends) | Strong | Cannot investigate single events |
+| Consent-gated | Full content for opted-in users | High (for consented subset) | GDPR-compliant | Limited coverage |
+
 ### 6.2.3 Log Retention Policies
 
 Different regulations require different retention periods:

@@ -214,6 +214,14 @@ Using vector embeddings for semantic similarity matching:
 - Cannot explain why something matched (just that it's "similar" to a known-bad example)
 - Encoding attacks may produce embeddings far from the reference set
 
+| Method | Speed | Cost | Accuracy | Explainability | Best For |
+|---|---|---|---|---|---|
+| Rule-based | Very fast | Minimal | Low (known patterns) | High | Known attack signatures |
+| ML classifier | Fast | Low | Medium | Medium | Trained pattern categories |
+| LLM-as-judge | Slow | High | High | High | Nuanced, context-dependent |
+| Embedding-based | Fast | Low | Medium | Low | Topic matching, similarity |
+| Hybrid (layered) | Fast avg | Low-medium | High | Varies | Production systems |
+
 ### 3.1.5 Hybrid Approaches
 
 Production guardrails typically combine multiple detection methods:
@@ -284,5 +292,11 @@ The right threshold depends on the consequences:
 - **Medical AI system:** Prioritize recall. Missing a harmful response (false negative) could endanger patients. Accept more false positives.
 - **Creative writing assistant:** Prioritize precision. Blocking legitimate creative content (false positive) destroys the user experience. Accept more false negatives.
 - **Customer support bot:** Balance both. False negatives risk brand damage, false positives risk customer frustration.
+
+| Threshold Setting | Precision | Recall | Use Case |
+|---|---|---|---|
+| Low (permissive) | Low | High | Safety-critical: catch everything, accept false alarms |
+| Medium (balanced) | Medium | Medium | General-purpose applications |
+| High (strict) | High | Low | Creative/open-ended: minimize user friction |
 
 ---

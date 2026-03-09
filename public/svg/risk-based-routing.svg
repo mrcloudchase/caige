@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 420" width="560" height="420">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,7 L7,1" fill="none" stroke="#8b90a0" stroke-width="1.2"/>
+    </marker>
+    <marker id="arr-r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,4 L7,4" fill="none" stroke="#8b90a0" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <rect width="560" height="420" rx="8" fill="#1a1d27"/>
+
+  <text x="280" y="28" text-anchor="middle" fill="#e1e4eb" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Risk-Based Model Routing</text>
+
+  <!-- User Request -->
+  <rect x="200" y="44" width="160" height="32" rx="5" fill="#2a2d37" stroke="#e1e4eb" stroke-width="1.5"/>
+  <text x="280" y="65" text-anchor="middle" fill="#e1e4eb" font-family="system-ui, sans-serif" font-size="12">User Request</text>
+
+  <!-- Arrow down to classifier -->
+  <line x1="280" y1="76" x2="280" y2="96" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Classifier box -->
+  <rect x="180" y="98" width="200" height="36" rx="5" fill="#2a2d37" stroke="#6c9fff" stroke-width="1.5"/>
+  <text x="280" y="114" text-anchor="middle" fill="#6c9fff" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Risk Classifier</text>
+  <text x="280" y="128" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Small, fast model</text>
+
+  <!-- Three routing paths -->
+
+  <!-- LOW RISK - left path -->
+  <line x1="220" y1="134" x2="100" y2="180" stroke="#8b90a0" stroke-width="1.2"/>
+  <polygon points="97,177 103,177 100,184" fill="#8b90a0"/>
+
+  <!-- Low risk box (small) -->
+  <rect x="30" y="186" width="140" height="90" rx="6" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="100" y="206" text-anchor="middle" fill="#4ade80" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Low Risk</text>
+  <line x1="45" y1="214" x2="155" y2="214" stroke="#4ade80" stroke-width="0.5" opacity="0.4"/>
+  <text x="100" y="232" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Fast/cheap model</text>
+  <text x="100" y="246" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Basic guardrails</text>
+  <text x="100" y="266" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="9">FAQ, simple queries</text>
+
+  <!-- Cost/latency indicator for low -->
+  <rect x="50" y="284" width="100" height="16" rx="3" fill="none" stroke="#4ade80" stroke-width="0.8"/>
+  <rect x="51" y="285" width="25" height="14" rx="2" fill="#4ade80" opacity="0.3"/>
+  <text x="100" y="296" text-anchor="middle" fill="#4ade80" font-family="system-ui, sans-serif" font-size="8">Low cost/latency</text>
+
+  <!-- MEDIUM RISK - center path -->
+  <line x1="280" y1="134" x2="280" y2="180" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- Medium risk box (medium sized) -->
+  <rect x="195" y="186" width="170" height="110" rx="6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="280" y="206" text-anchor="middle" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Medium Risk</text>
+  <line x1="210" y1="214" x2="350" y2="214" stroke="#fbbf24" stroke-width="0.5" opacity="0.4"/>
+  <text x="280" y="232" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Standard model</text>
+  <text x="280" y="246" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Full guardrails</text>
+  <text x="280" y="266" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="9">Nuanced topics,</text>
+  <text x="280" y="280" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="9">ambiguous intent</text>
+
+  <!-- Cost/latency indicator for medium -->
+  <rect x="215" y="304" width="130" height="16" rx="3" fill="none" stroke="#fbbf24" stroke-width="0.8"/>
+  <rect x="216" y="305" width="65" height="14" rx="2" fill="#fbbf24" opacity="0.3"/>
+  <text x="280" y="316" text-anchor="middle" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="8">Moderate cost/latency</text>
+
+  <!-- HIGH RISK - right path -->
+  <line x1="340" y1="134" x2="440" y2="180" stroke="#8b90a0" stroke-width="1.2"/>
+  <polygon points="437,177 443,177 440,184" fill="#8b90a0"/>
+
+  <!-- High risk box (large) -->
+  <rect x="375" y="186" width="170" height="130" rx="6" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="460" y="206" text-anchor="middle" fill="#ef4444" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">High Risk</text>
+  <line x1="390" y1="214" x2="530" y2="214" stroke="#ef4444" stroke-width="0.5" opacity="0.4"/>
+  <text x="460" y="232" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Most capable model</text>
+  <text x="460" y="246" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">Full guardrails</text>
+  <text x="460" y="260" text-anchor="middle" fill="#e1e4eb" font-family="'Courier New', monospace" font-size="9">+ Human review</text>
+  <text x="460" y="284" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="9">Policy boundaries,</text>
+  <text x="460" y="298" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="9">potential injection</text>
+
+  <!-- Cost/latency indicator for high -->
+  <rect x="385" y="324" width="150" height="16" rx="3" fill="none" stroke="#ef4444" stroke-width="0.8"/>
+  <rect x="386" y="325" width="120" height="14" rx="2" fill="#ef4444" opacity="0.3"/>
+  <text x="460" y="336" text-anchor="middle" fill="#ef4444" font-family="system-ui, sans-serif" font-size="8">High cost/latency</text>
+
+  <!-- Bottom legend -->
+  <text x="280" y="380" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="10">Cost and latency scale with risk level.</text>
+  <text x="280" y="396" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="10">Most requests route low-risk, saving cost while protecting high-risk requests.</text>
+</svg>

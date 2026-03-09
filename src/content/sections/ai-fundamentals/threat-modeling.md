@@ -83,6 +83,18 @@ Beyond traditional application security concerns (API authentication, network se
 
 **Model weights** — If using open-source or self-hosted models, the model weights themselves are an asset that needs protection from theft and a potential attack surface (model poisoning).
 
+| Attack Surface | Why It's Vulnerable | Example Attack |
+|---|---|---|
+| Prompts | Direct user control of model input | Prompt injection, jailbreaking |
+| Training data | Shapes model behavior permanently | Data poisoning, backdoor insertion |
+| Retrieval corpora | Documents injected into model context | Indirect prompt injection via RAG |
+| Tool integrations | Agent executes real-world actions | Tool misuse, unauthorized actions |
+| MCP servers | Third-party code in trust boundary | Malicious server exfiltrates context |
+| Identity / multi-tenancy | Isolation failures between users | Cross-tenant data leak, privilege escalation |
+| Model APIs | External access to model capabilities | Model extraction, abuse at scale |
+| Conversation history | Accumulated context persists | Context poisoning across turns |
+| Model weights | Core model parameters | Weight theft, fine-tuning attacks |
+
 ### 1.3.4 Supply Chain Risks
 
 AI systems have supply chain risks that traditional software does not:

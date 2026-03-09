@@ -99,6 +99,22 @@ Guardrails at this layer include:
 Advantages: Applies consistently to all tool interactions, can enforce policy regardless of which model or application is calling
 Disadvantages: Requires protocol-aware guardrail implementation, adds latency to each tool call
 
+```
+SDK-level:                    Proxy-level:
+  App code                      App → Proxy → Model API
+    |                                  |
+    v                           (guardrails in proxy)
+  guardrail.check(input)
+    |
+    v
+  model.generate()
+
+Gateway-level:                MCP-level:
+  Client → API Gateway → App   Model → MCP Client → MCP Server
+              |                            |
+       (guardrails here)           (guardrails here)
+```
+
 ### 3.4.3 Build vs. Buy vs. Open Source
 
 | Factor | Build Custom | Open Source | Commercial |

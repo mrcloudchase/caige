@@ -43,6 +43,23 @@ The AI RMF is organized around four core functions:
 - Communicates risk information to stakeholders
 - Plans for incident response
 
+```
+         ┌─────────┐
+    ┌───>│ GOVERN  │───┐
+    │    └─────────┘   │
+    │                  v
+┌───┴────┐       ┌─────────┐
+│ MANAGE │       │   MAP   │
+└───┬────┘       └────┬────┘
+    ^                 │
+    │   ┌─────────┐   │
+    └───│ MEASURE │<──┘
+        └─────────┘
+
+Continuous cycle — guardrails are implemented
+and refined across all four functions.
+```
+
 **Guardrail connection:** The AI RMF's MANAGE function is where guardrails are explicitly relevant, but guardrail engineers need to understand all four functions. You GOVERN by setting guardrail policies. You MAP by identifying which risks guardrails address. You MEASURE by testing guardrail effectiveness. You MANAGE by deploying and operating guardrails.
 
 **AI RMF Profiles** allow organizations to customize the framework for their specific context. A healthcare AI deployment would have a different profile than a content recommendation system. Profiles help prioritize which guardrails matter most for a given use case.
@@ -82,6 +99,23 @@ Requirements for high-risk systems include:
 - Emotion recognition systems must inform users
 
 **Minimal risk** — No specific requirements (e.g., spam filters, video game AI)
+
+```
+EU AI Act Risk Classification:
+
+  ╔═══════════════════════╗
+  ║     PROHIBITED        ║  Social scoring, real-time biometric ID
+  ╠═══════════════════════╣
+  ║     HIGH-RISK         ║  Critical infrastructure, hiring, credit
+  ║  (heavy requirements) ║  → risk mgmt, data governance, human oversight
+  ╠═══════════════════════╣
+  ║     LIMITED RISK       ║  Chatbots, deepfakes
+  ║  (transparency only)  ║  → must disclose AI interaction
+  ╠═══════════════════════╣
+  ║     MINIMAL RISK      ║  Spam filters, games
+  ║  (no requirements)    ║  → voluntary codes of conduct
+  ╚═══════════════════════╝
+```
 
 **Guardrail connection:** For high-risk systems, the EU AI Act effectively mandates guardrails. Requirements for accuracy, robustness, human oversight, and risk management directly translate to guardrail implementations. A cAIge holder working on high-risk systems must be able to demonstrate that their guardrails satisfy these requirements.
 
@@ -181,5 +215,12 @@ Most major AI organizations have published responsible AI principles. While not 
 - **Safety** — AI systems should not cause harm. Guardrails: content filtering, scope limiting, human oversight.
 - **Privacy** — AI systems should protect user data. Guardrails: PII detection, data minimization, access controls.
 - **Reliability** — AI systems should work as intended. Guardrails: testing, monitoring, fallback mechanisms.
+
+| Framework | Type | Legally Binding | Primary Focus | Guardrail Connection |
+|---|---|---|---|---|
+| NIST AI RMF | Voluntary framework | No | Risk management lifecycle | Maps guardrails to GOVERN/MAP/MEASURE/MANAGE |
+| EU AI Act | Regulation | Yes (in EU) | Risk classification + requirements | Defines guardrail obligations by risk tier |
+| ISO/IEC 42001 | Standard | No (voluntary certification) | AI management systems | Guardrails as part of Plan-Do-Check-Act |
+| OWASP Top 10 for LLMs | Community guidance | No | Technical vulnerabilities | Direct mapping of threats to guardrail types |
 
 ---

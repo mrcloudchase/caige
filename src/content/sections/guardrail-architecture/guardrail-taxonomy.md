@@ -153,33 +153,7 @@ When HITL guardrails handle significant volume, operational challenges emerge th
 
 Most production AI systems use guardrails from multiple categories. A general layering principle:
 
-```
-User Request
-    |
-    v
-[Input Guardrails] -- Block/allow/modify the request
-    |
-    v
-[System-Level Guardrails] -- System prompt, model routing, memory management
-    |
-    v
-[Retrieval Guardrails] -- (if RAG) Access control, relevance, injection scanning
-    |
-    v
-[AI Model Inference]
-    |
-    v
-[Output Guardrails] -- Content filtering, PII detection, groundedness
-    |
-    v
-[Agentic Guardrails] -- (if agentic) Tool policies, approval, scope limits
-    |
-    v
-[Human-in-the-Loop] -- (if needed) Escalation for uncertain or high-stakes cases
-    |
-    v
-User Response
-```
+![Defense-in-depth guardrail pipeline](/svg/defense-in-depth-pipeline.svg)
 
 **Key design principle: defense in depth.** No single guardrail type is sufficient. Input guardrails miss attacks that produce harmful output from benign input. Output guardrails can't prevent the model from seeing injected content. System-level guardrails are soft controls. You need layers.
 

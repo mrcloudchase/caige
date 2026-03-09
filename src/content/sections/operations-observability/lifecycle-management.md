@@ -35,6 +35,13 @@ Guardrails degrade for several reasons:
 - Review false positive/negative samples periodically
 - Track new attack research and test guardrails against new techniques
 
+| Drift Cause | Observable Signal | Detection Method | Metric to Watch |
+|---|---|---|---|
+| New attack techniques | Bypass rate increases | Continuous adversarial testing | Bypass rate trend |
+| Model updates | Guardrail behavior changes | Pre/post-update comparison | Block rate, FP rate deltas |
+| Data shifts | New user types, new topics | Metric monitoring over time | Category distribution changes |
+| Environmental changes | New regulations, policies | Manual review triggers | Compliance gap reports |
+
 ### 6.4.2 Versioning and Rollback
 
 Guardrail configurations should be version-controlled like code:
@@ -82,6 +89,13 @@ Control guardrail behavior through configuration flags that can be toggled witho
 
 Best for: Rapid response to incidents, A/B testing guardrail configurations, gradual rollout by user segment.
 
+| Strategy | How It Works | Rollback Speed | Best For |
+|---|---|---|---|
+| Canary | Route small % of traffic to new version | Fast (shift traffic back) | Most guardrail updates |
+| Shadow | Run new version in parallel, don't enforce | Instant (not enforcing) | Major guardrail changes |
+| Blue-green | Two identical environments, switch traffic | Fast (switch back) | Infrastructure changes |
+| Feature flags | Toggle guardrails on/off per feature | Instant (flip flag) | Gradual feature rollouts |
+
 ### 6.4.4 Deprecation and Migration
 
 When replacing a guardrail:
@@ -95,6 +109,17 @@ When replacing a guardrail:
 7. **Remove the old guardrail** completely after the stabilization period passes
 
 Never cut over from an old guardrail to a new one in a single step. The overlap period is your safety net.
+
+```
+Guardrail migration timeline:
+
+Old guardrail:  ████████████████████░░░░░░░░░░░░░░░░
+New guardrail:  ░░░░░░░░████████████████████████████
+                ^        ^              ^           ^
+                |        |              |           |
+             Shadow   Canary (5%)   Full traffic  Decommission
+             deploy   begins        on new        old version
+```
 
 ### 6.4.5 Capacity Planning
 

@@ -79,6 +79,30 @@ Create a traceability document linking each policy requirement to its technical 
 | No legal advice | Input + Output | Topic classifier | Refuse + redirect | FN < 1%, FP < 5% |
 | No financial advice | Input + Output | Topic classifier | Refuse + redirect | FN < 1%, FP < 5% |
 
+```
+Policy-to-guardrail translation workflow:
+
+Policy statement
+    |
+    v
+[1. Decompose] into atomic requirements
+    |
+    v
+[2. Classify] each as input / output / system-level
+    |
+    v
+[3. Detection method] — rule, classifier, or LLM-as-judge
+    |
+    v
+[4. Define action] — block, redact, flag, escalate
+    |
+    v
+[5. Set tolerance] — acceptable false positive/negative rates
+    |
+    v
+[6. Document mapping] — traceability from policy to implementation
+```
+
 ### 4.2.3 Handling Policy Ambiguity
 
 Policies are often ambiguous because they are written in natural language by non-technical stakeholders. Common ambiguities and how to handle them:

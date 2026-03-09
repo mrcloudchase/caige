@@ -9,6 +9,12 @@ description: "Section 4 of the testing red teaming module."
 
 Testing once is not enough. Guardrails must be continuously validated.
 
+| Technique | What It Tests | Frequency | Detects |
+|---|---|---|---|
+| Canary testing | Known-good/bad inputs against live guardrails | Every 5 minutes | Regressions, config drift, crashes |
+| Synthetic adversarial traffic | LLM-generated attack variations | Continuous | New attack variants, declining detection rates |
+| Chaos testing | Infrastructure failures (service down, network partition) | Scheduled, low-traffic windows | Fail-open bugs, missing fallbacks |
+
 ### 5.4.1 Canary Testing
 
 Run a set of known-good and known-bad inputs through the guardrail system on a schedule:
@@ -122,5 +128,26 @@ When the underlying AI model is updated (new version, different provider):
 - Output format may change, breaking parsing-based guardrails
 - System prompt adherence may vary
 - New capabilities (tool use, longer context) may introduce new attack surfaces
+
+```
+Model update validation:
+
+[Run full test suite on new model]
+         |
+    Any guardrails behave differently?
+         |
+         ├── Yes → Investigate
+         │    ├── System prompt less effective? → Re-tune prompt
+         │    ├── Output format changed? → Update parsers
+         │    └── New capabilities = new attack surface? → Add guardrails
+         │
+         └── No → Deploy with monitoring
+                    |
+              Watch metrics for 48 hours
+                    |
+              Significant degradation?
+                    ├── Yes → Rollback
+                    └── No → Normal operations
+```
 
 ---

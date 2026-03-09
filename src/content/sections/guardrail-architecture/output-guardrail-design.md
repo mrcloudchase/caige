@@ -36,6 +36,17 @@ Rather than a single "safe/unsafe" binary, score output across multiple dimensio
 
 This allows nuanced decisions — content might be acceptable on one dimension but not another.
 
+```
+Model generates response
+    |
+    v
+[Score across dimensions: toxicity, sexual, violence, PII, bias]
+    |
+    ├── Any score exceeds hard threshold? → BLOCK response
+    ├── Multiple flags, none critical? → REDACT flagged content
+    └── All scores below threshold → ALLOW response
+```
+
 ### 2.3.2 PII Detection and Redaction
 
 Detecting and handling personally identifiable information in model output:
@@ -75,6 +86,26 @@ For RAG systems and any system that should provide factual information:
 - What groundedness threshold is required? (e.g., all claims must be supported vs. 80% of claims)
 - What happens to ungrounded claims? (Block the whole response? Redact ungrounded claims? Add a disclaimer?)
 - How do you handle legitimate general knowledge that won't be in the sources?
+
+```
+Retrieved sources + Model response
+    |
+    v
+Extract individual claims from response
+    |
+    v
+For each claim:
+    ├── Found in source documents? → Supported ✓
+    ├── Contradicts source? → Contradiction ✗
+    └── Not mentioned in sources? → Unsupported ?
+    |
+    v
+Groundedness score = Supported / Total claims
+    |
+    ├── Score > 80% → Accept response
+    ├── Score 50-80% → Flag for review or add caveat
+    └── Score < 50% → Reject, regenerate with sources
+```
 
 ### 2.3.4 Structured Output Enforcement
 

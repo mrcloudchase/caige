@@ -95,6 +95,20 @@ This prevents a failing guardrail from:
 - Consuming resources on calls that will fail
 - Creating a cascade of failures in downstream systems
 
+```
+┌────────┐   failure rate    ┌────────┐
+│ CLOSED │── exceeds ──────>│  OPEN  │
+│(normal)│   threshold       │(reject │
+└────┬───┘                   │  all)  │
+     ^                       └───┬────┘
+     |                           |
+     |    test succeeds     ┌────┴─────┐
+     +<─────────────────────┤HALF-OPEN │
+                            │(test one │
+     test fails ──────────>│ request) │
+          (back to OPEN)    └──────────┘
+```
+
 ### 2.4.4 Model Selection and Routing
 
 Using different models for different tasks is itself a guardrail strategy:
@@ -107,13 +121,7 @@ Using different models for different tasks is itself a guardrail strategy:
 **Classifier model as guardrail:**
 Use a small, fast classifier model to evaluate the request before routing to the large generative model:
 
-```
-User Request → [Small Classifier] → Risk Assessment
-    |
-    ├── Low risk → [Standard Model + Basic Guardrails]
-    ├── Medium risk → [Advanced Model + Full Guardrails]
-    └── High risk → [Advanced Model + Full Guardrails + Human Review]
-```
+![Risk-based routing](/svg/risk-based-routing.svg)
 
 This saves cost (most requests go to cheap models) while providing maximum protection for risky requests.
 

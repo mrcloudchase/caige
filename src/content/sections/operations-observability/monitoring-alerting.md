@@ -71,6 +71,13 @@ Beyond tracking metrics, you need to detect when metrics deviate from normal pat
 - **Rate-of-change alerts** — Alert when a metric changes faster than expected (e.g., block rate doubles within 5 minutes). Catches sudden shifts.
 - **Comparative alerts** — Alert when one segment differs significantly from others (e.g., block rate for one API key is 10x higher than average). Catches targeted attacks.
 
+| Detection Approach | How It Works | False Positive Rate | Best For |
+|---|---|---|---|
+| Static thresholds | Alert when metric exceeds fixed value | High (doesn't adapt) | Metrics with known acceptable ranges |
+| Dynamic thresholds | Alert when metric deviates from rolling baseline | Low | Metrics with variable baselines |
+| Rate-of-change | Alert on sudden spikes or drops | Medium | Detecting attacks or failures |
+| Comparative | Alert when segments diverge from each other | Low | Detecting targeted or regional issues |
+
 ### 6.1.3 Alert Design
 
 Not every anomaly is an emergency. Alert design prevents alert fatigue while ensuring critical issues get attention.
@@ -100,6 +107,13 @@ Not every anomaly is an emergency. Alert design prevents alert fatigue while ens
 - Successful guardrail deployments
 - Routine configuration changes
 - Low-priority anomalies that self-resolved
+
+| Severity | Criteria | Response Time | Example |
+|---|---|---|---|
+| P1 (page) | System down, active bypass, PII leak at scale | 15 minutes | Guardrail completely disabled, data exposed |
+| P2 (urgent) | Partial bypass, latency SLA exceeded, elevated errors | 1 hour | Block rate dropped 50%, specific attack getting through |
+| P3 (ticket) | Metric drift, false positives trending up, capacity approaching | 1 business day | FP rate increased from 3% to 5% over a week |
+| P4 (log) | Minor fluctuations, successful deployments, self-resolved | Review next business day | Brief latency spike that self-corrected |
 
 **Alert design principles:**
 - Every alert must have a documented runbook (what to do when it fires)

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 500" width="520" height="500">
+  <defs>
+    <marker id="arrow-down" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,7 L7,1" fill="none" stroke="#8b90a0" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <rect width="520" height="500" rx="8" fill="#1a1d27"/>
+
+  <text x="260" y="30" text-anchor="middle" fill="#e1e4eb" font-family="system-ui, sans-serif" font-size="14" font-weight="bold">Defense-in-Depth Guardrail Pipeline</text>
+
+  <!-- Layer 1: Input Guardrails (blue) -->
+  <rect x="60" y="50" width="400" height="48" rx="6" fill="none" stroke="#6c9fff" stroke-width="1.5"/>
+  <text x="260" y="68" text-anchor="middle" fill="#6c9fff" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Input Guardrails</text>
+  <text x="260" y="88" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Injection detection | Topic classification | Rate limiting</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="98" x2="260" y2="112" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 2: System-Level (gray) -->
+  <rect x="60" y="114" width="400" height="48" rx="6" fill="none" stroke="#8b90a0" stroke-width="1.5"/>
+  <text x="260" y="132" text-anchor="middle" fill="#8b90a0" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">System-Level Guardrails</text>
+  <text x="260" y="152" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">System prompt | Model routing | Memory management</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="162" x2="260" y2="176" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 3: Retrieval Guardrails (blue) -->
+  <rect x="60" y="178" width="400" height="48" rx="6" fill="none" stroke="#6c9fff" stroke-width="1.5"/>
+  <text x="260" y="196" text-anchor="middle" fill="#6c9fff" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Retrieval Guardrails</text>
+  <text x="260" y="216" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Access control | Relevance filtering | Injection scanning</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="226" x2="260" y2="240" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 4: Model Inference (distinct - white border) -->
+  <rect x="120" y="242" width="280" height="40" rx="6" fill="#2a2d37" stroke="#e1e4eb" stroke-width="2"/>
+  <text x="260" y="267" text-anchor="middle" fill="#e1e4eb" font-family="system-ui, sans-serif" font-size="13" font-weight="bold">AI Model Inference</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="282" x2="260" y2="296" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 5: Output Guardrails (green) -->
+  <rect x="60" y="298" width="400" height="48" rx="6" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="260" y="316" text-anchor="middle" fill="#4ade80" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Output Guardrails</text>
+  <text x="260" y="336" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Content filtering | PII redaction | Groundedness check</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="346" x2="260" y2="360" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 6: Agentic Guardrails (amber) -->
+  <rect x="60" y="362" width="400" height="48" rx="6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="260" y="380" text-anchor="middle" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Agentic Guardrails</text>
+  <text x="260" y="400" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Tool policies | Approval workflows | Scope limits</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="410" x2="260" y2="424" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-down)"/>
+
+  <!-- Layer 7: HITL (amber) -->
+  <rect x="60" y="426" width="400" height="48" rx="6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="260" y="444" text-anchor="middle" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="12" font-weight="bold">Human-in-the-Loop</text>
+  <text x="260" y="464" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">Escalation | Review queues | Override decisions</text>
+
+  <!-- Defense-in-depth label on the right side -->
+  <line x1="480" y1="60" x2="480" y2="466" stroke="#e1e4eb" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="498" y="270" text-anchor="middle" fill="#e1e4eb" font-family="system-ui, sans-serif" font-size="10" font-weight="bold" transform="rotate(90, 498, 270)">DEFENSE IN DEPTH</text>
+</svg>

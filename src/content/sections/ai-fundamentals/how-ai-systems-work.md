@@ -205,6 +205,8 @@ Through thousands of examples like this, the model learns the pattern: content a
 
 **Stage 3 — RLHF / preference training:** The model is further trained using human preference rankings, still in the chat template format. It learns to prefer responses that follow system instructions, refuse harmful requests, and stay within defined boundaries.
 
+![Training stages pipeline](/svg/training-stages-pipeline.svg)
+
 **The key insight for guardrail engineers:** The model's respect for role boundaries comes entirely from statistical patterns learned during stages 2 and 3. There is no parser that enforces "system messages have authority." There is no architectural separation between roles. The model learned that in the training data, text appearing after the `system` header reliably predicted certain assistant behaviors — and it reproduces that pattern. This is why:
 
 - **It usually works** — the pattern is strong from extensive training on millions of examples
@@ -225,38 +227,7 @@ Embeddings are the foundation of **Retrieval-Augmented Generation (RAG)**, a com
 5. Those chunks are included in the LLM's context as supporting information
 6. The LLM generates an answer grounded in the retrieved content
 
-```
-  Documents                           User Query
-     |                                    |
-     v                                    v
- +----------+                       +-----------+
- | Chunk &  |                       | Embed     |
- | Embed    |                       | Query     |
- +----+-----+                       +-----+-----+
-      |                                   |
-      v                                   |
- +------------+     similarity search     |
- | Vector DB  |<--------------------------+
- +-----+------+
-       | top-k chunks
-       v
- +--------------+  <-- GUARDRAIL: Access control
- | Relevance &  |  <-- GUARDRAIL: Relevance filter
- | Filtering    |  <-- GUARDRAIL: Injection scan
- +------+-------+
-        | filtered chunks
-        v
- +----------------------------------+
- | LLM Context                     |
- | [System Prompt] + [Chunks] +    |
- | [User Query]                    |
- +---------------+-----------------+
-                 |
-                 v
- +--------------+   <-- GUARDRAIL: Groundedness check
- |   Response   |   <-- GUARDRAIL: Citation verification
- +--------------+
-```
+![RAG pipeline with guardrail checkpoints](/svg/rag-pipeline-guardrails.svg)
 
 Guardrail implications of RAG:
 - Retrieved documents can contain **indirect prompt injections** — malicious instructions embedded in documents that the model reads and follows

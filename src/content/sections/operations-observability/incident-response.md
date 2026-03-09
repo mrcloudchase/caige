@@ -29,6 +29,16 @@ AI guardrail incidents differ from traditional security incidents in several way
 6. **Recover** — Restore normal operations and verify the fix
 7. **Review** — Conduct a post-incident review and update processes
 
+```
+Incident response workflow:
+
+[Detect] → [Triage] → [Contain] → [Investigate] → [Remediate] → [Recover] → [Review]
+              |                         |                                        |
+              v                         v                                        v
+         Assign severity          Root cause unclear?                    Feed findings back
+         (SEV-1/2/3/4)           → return to Contain                   into guardrail updates
+```
+
 ### 6.3.2 Severity Classification
 
 | Severity | Criteria | Example | Response Time |
@@ -53,6 +63,20 @@ Containment actions, ordered from least disruptive to most disruptive:
 9. **Take the AI system offline** — Last resort, when continued operation causes more harm than downtime
 
 The right containment action depends on severity, scope, and the specific failure mode. For SEV-1 incidents, err on the side of more aggressive containment.
+
+```
+Containment escalation (least → most disruptive):
+
+  Block specific inputs          ← Targeted, minimal impact
+  Increase guardrail sensitivity ← Broader, may increase false positives
+  Enable additional guardrails   ← More coverage, adds latency
+  Rate limit affected endpoints  ← Slows everyone on that endpoint
+  Require human review           ← Adds delay for all requests
+  Disable affected features      ← Feature unavailable
+  Block suspicious users/IPs     ← Blocks legitimate users if wrong
+  Roll back recent changes       ← Reverts good changes too
+  Take system offline            ← Full outage — last resort
+```
 
 ### 6.3.4 Communication
 
@@ -116,6 +140,8 @@ After the incident is resolved, conduct a blameless post-incident review:
 ### 6.3.6 Escalation Paths
 
 Know when to involve other teams:
+
+![Escalation paths](/svg/escalation-paths.svg)
 
 | Trigger | Escalate To | Why |
 |---------|------------|-----|

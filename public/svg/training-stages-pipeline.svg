@@ -1,0 +1,60 @@
+<svg viewBox="0 0 580 300" width="580" height="300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="tsp-a" viewBox="0 0 10 7" refX="10" refY="3.5" markerWidth="7" markerHeight="5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#8b90a0"/></marker>
+</defs>
+<g font-family="system-ui,sans-serif">
+
+<!-- Title -->
+<text x="290" y="20" fill="#e1e4eb" font-size="14" text-anchor="middle" font-weight="600">Training Stages: How the Chat Template Emerges</text>
+
+<!-- Stage 1: Pre-training -->
+<rect x="20" y="50" width="160" height="60" rx="6" fill="#1a1d27" stroke="#6c9fff" stroke-width="1.5"/>
+<text x="100" y="74" fill="#6c9fff" font-size="12" text-anchor="middle" font-weight="600">Pre-training</text>
+<text x="100" y="90" fill="#8b90a0" font-size="9" text-anchor="middle">Next-token prediction</text>
+<text x="100" y="102" fill="#8b90a0" font-size="9" text-anchor="middle">on raw text corpora</text>
+
+<!-- Annotation 1 -->
+<text x="100" y="130" fill="#e1e4eb" font-size="10" text-anchor="middle" font-weight="600">Base Model</text>
+<text x="100" y="144" fill="#8b90a0" font-size="9" text-anchor="middle">No chat template</text>
+<text x="100" y="157" fill="#8b90a0" font-size="9" text-anchor="middle">No concept of roles</text>
+<text x="100" y="170" fill="#8b90a0" font-size="9" text-anchor="middle">Pure text completion</text>
+
+<!-- Arrow 1 to 2 -->
+<line x1="180" y1="80" x2="208" y2="80" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tsp-a)"/>
+
+<!-- Stage 2: Instruction Tuning -->
+<rect x="215" y="50" width="160" height="60" rx="6" fill="#1a1d27" stroke="#fbbf24" stroke-width="1.5"/>
+<text x="295" y="74" fill="#fbbf24" font-size="12" text-anchor="middle" font-weight="600">Instruction Tuning</text>
+<text x="295" y="90" fill="#8b90a0" font-size="9" text-anchor="middle">Fine-tune on curated</text>
+<text x="295" y="102" fill="#8b90a0" font-size="9" text-anchor="middle">conversation datasets</text>
+
+<!-- Annotation 2 -->
+<text x="295" y="130" fill="#e1e4eb" font-size="10" text-anchor="middle" font-weight="600">Chat Model</text>
+<text x="295" y="144" fill="#fbbf24" font-size="9" text-anchor="middle">Chat template introduced</text>
+<text x="295" y="157" fill="#8b90a0" font-size="9" text-anchor="middle">Special role tokens added</text>
+<text x="295" y="170" fill="#8b90a0" font-size="9" text-anchor="middle">Learns instruction hierarchy</text>
+
+<!-- Arrow 2 to 3 -->
+<line x1="375" y1="80" x2="403" y2="80" stroke="#8b90a0" stroke-width="1.5" marker-end="url(#tsp-a)"/>
+
+<!-- Stage 3: RLHF -->
+<rect x="410" y="50" width="160" height="60" rx="6" fill="#1a1d27" stroke="#4ade80" stroke-width="1.5"/>
+<text x="490" y="74" fill="#4ade80" font-size="12" text-anchor="middle" font-weight="600">RLHF / Alignment</text>
+<text x="490" y="90" fill="#8b90a0" font-size="9" text-anchor="middle">Human preference</text>
+<text x="490" y="102" fill="#8b90a0" font-size="9" text-anchor="middle">rankings refine behavior</text>
+
+<!-- Annotation 3 -->
+<text x="490" y="130" fill="#e1e4eb" font-size="10" text-anchor="middle" font-weight="600">Aligned Model</text>
+<text x="490" y="144" fill="#4ade80" font-size="9" text-anchor="middle">Alignment refined</text>
+<text x="490" y="157" fill="#8b90a0" font-size="9" text-anchor="middle">Prefers safe responses</text>
+<text x="490" y="170" fill="#8b90a0" font-size="9" text-anchor="middle">Follows system instructions</text>
+
+<!-- Key insight box -->
+<rect x="40" y="200" width="500" height="80" rx="6" fill="#1a1d27" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,4"/>
+<text x="290" y="222" fill="#fbbf24" font-size="11" text-anchor="middle" font-weight="600">Key Insight for Guardrail Engineers</text>
+<text x="290" y="240" fill="#e1e4eb" font-size="10" text-anchor="middle">The chat template and role hierarchy only appear in stages 2 and 3.</text>
+<text x="290" y="256" fill="#e1e4eb" font-size="10" text-anchor="middle">They are learned statistical patterns, not architectural constraints.</text>
+<text x="290" y="272" fill="#8b90a0" font-size="9" text-anchor="middle">This is why prompt injection is a fundamental challenge, not a patchable bug.</text>
+
+</g>
+</svg>

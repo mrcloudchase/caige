@@ -31,6 +31,13 @@ Guardrails can both mitigate and introduce bias:
 - Review flagged content periodically to identify bias patterns
 - Involve diverse perspectives in guardrail design and testing
 
+| Bias Source | How Guardrails Introduce It | Affected Groups | Mitigation |
+|---|---|---|---|
+| Classifier training data | AAVE flagged as toxic at higher rates | Black English speakers | Test across demographics, diverse training data |
+| Language coverage gaps | Non-English content under-moderated | Non-English speakers | Invest in multi-language safety data |
+| Topic restrictions | Blocks on "drugs" catch harm reduction | Health communities | Context-aware classification, not keyword matching |
+| Keyword blocklists | Words with dual meanings blocked broadly | LGBTQ+, medical, cultural contexts | Use classifiers instead of keyword lists |
+
 ### 4.4.2 Fairness in Content Filtering
 
 Content filtering guardrails must balance safety with fairness:
@@ -76,6 +83,14 @@ How much should you tell users about your guardrails?
 - Provide helpful refusal messages that explain what the user can do differently
 - Publish a general AI safety policy without implementation details
 - Have a process for users to appeal guardrail decisions
+
+| Disclose | Do NOT Disclose |
+|---|---|
+| That guardrails exist and their general purpose | Specific detection methods or models used |
+| Why a request was blocked (general category) | Exact thresholds or scoring criteria |
+| How to rephrase or what alternatives exist | System prompt text |
+| General content policy | Known bypass techniques |
+| Appeal or feedback mechanisms | Internal escalation procedures |
 
 Example of good transparency:
 > "I'm not able to provide specific medical diagnoses. For medical questions, please consult a healthcare professional. I can help you understand general health concepts or find a doctor near you."

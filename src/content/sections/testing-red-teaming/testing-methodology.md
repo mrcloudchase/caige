@@ -9,6 +9,15 @@ description: "Section 2 of the testing red teaming module."
 
 Beyond adversarial testing, guardrails need systematic testing like any other software component.
 
+| Test Type | Scope | What It Catches | Frequency |
+|---|---|---|---|
+| Unit | Single guardrail component | Component bugs, edge cases | Every code change |
+| Integration | Full guardrail pipeline | Component interaction issues, wrong refusal messages | Every deployment |
+| Regression | All existing test cases | Regressions from updates, re-opened vulnerabilities | Every config change |
+| Edge case | Boundary and encoding variations | Encoding bypasses, language gaps, format exploits | Periodic + new patterns |
+| Performance | Latency, throughput, load | SLA violations, degradation under load | Pre-release + periodic |
+| A/B | Two configurations in parallel | Which config performs better on real traffic | When tuning thresholds |
+
 ### 5.2.1 Unit Testing Guardrail Components
 
 Each guardrail component should be tested independently:
@@ -125,6 +134,13 @@ Inputs at the boundaries of what guardrails should catch:
 - Maximum length inputs
 - Inputs just at the length limit
 
+| Variation Dimension | Examples | Why It Bypasses Guardrails |
+|---|---|---|
+| Encoding | Base64, URL encoding, hex, unicode, nested | Pattern-based detection can't match encoded text |
+| Language | Non-English, mixed-language, transliterated | Safety training often weaker in non-English |
+| Formatting | Whitespace injection, invisible unicode, markdown | Alters token boundaries, confuses classifiers |
+| Boundary length | Single word, at context limit, just over limit | Guardrails may skip very short or truncate very long |
+
 ### 5.2.5 Performance Testing
 
 Guardrails must perform under load:
@@ -175,5 +191,23 @@ A/B testing compares two guardrail configurations using real traffic to determin
 - Evaluating the impact of a new guardrail rule
 - Testing whether removing a guardrail (to reduce false positives) has acceptable safety impact
 - Not suitable for testing fundamentally new guardrail types (use shadow deployment instead)
+
+```
+A/B testing guardrail configurations:
+
+[Split traffic randomly] → Group A (control) / Group B (variant)
+         |
+    Run both simultaneously
+         |
+    Measure: block rate, FPR, latency, complaints
+         |
+    [Safety gate] Variant bypass rate below floor?
+         ├── No → Abort, revert to control
+         └── Yes → Continue
+         |
+    [Significance test] p < 0.05?
+         ├── No → No significant difference, keep control
+         └── Yes → Variant is better, deploy to all traffic
+```
 
 ---

@@ -64,6 +64,13 @@ Disadvantages: Expensive (full LLM call per evaluation), high latency (500ms+), 
 
 This way, the majority of benign requests pass through quickly, and expensive checks only run when needed.
 
+| Method | Cost | Latency | Coverage | False Positive Rate |
+|---|---|---|---|---|
+| Pattern-based | Very low | <1ms | Known patterns only | High |
+| Classifier-based | Low | 10-100ms | Trained patterns | Medium |
+| LLM-as-judge | High | 500ms+ | Context-aware, comprehensive | Low |
+| Layered (recommended) | Low-medium | <150ms avg | Multi-pass, high coverage | Low |
+
 ### 2.2.3 Input Schema Enforcement
 
 When your application expects structured input (not free-form chat), enforce a schema on what users can send:
@@ -126,6 +133,17 @@ Rate limiting is a guardrail that operates at the user/session level rather than
 - Gradual boundary pushing over long conversations
 
 **Adaptive rate limiting:** Increase restrictions for users who frequently trigger guardrails. If a user's block rate is unusually high, they may be probing for bypasses.
+
+```
+User request arrives
+    |
+    v
+Check user's recent block rate
+    |
+    ├── Low (<5% blocked) → Standard rate limit
+    ├── Medium (5-20%) → Reduced limit, flag for monitoring
+    └── High (>20%) → Strict limit (2/min), flag for review
+```
 
 ### 2.2.6 Identity and Access Control
 

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 420" width="580" height="420" font-family="system-ui, sans-serif">
+  <rect width="580" height="420" rx="8" fill="#1a1d27"/>
+
+  <!-- Title -->
+  <text x="290" y="30" text-anchor="middle" fill="#e1e4eb" font-size="14" font-weight="bold">Incident Escalation Paths</text>
+
+  <!-- Incident Commander (center) -->
+  <rect x="210" y="170" width="160" height="60" rx="6" fill="#6c9fff" opacity="0.15" stroke="#6c9fff" stroke-width="1.5"/>
+  <text x="290" y="193" text-anchor="middle" fill="#6c9fff" font-size="13" font-weight="bold">Incident Commander</text>
+  <text x="290" y="210" text-anchor="middle" fill="#8b90a0" font-size="10">Coordinates all response</text>
+
+  <!-- Security Team (top-left) -->
+  <rect x="20" y="40" width="170" height="70" rx="6" fill="#fbbf24" opacity="0.1" stroke="#fbbf24" stroke-width="1.2"/>
+  <text x="105" y="62" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">Security Team</text>
+  <text x="105" y="78" text-anchor="middle" fill="#8b90a0" font-size="9">Threat analysis</text>
+  <text x="105" y="92" text-anchor="middle" fill="#8b90a0" font-size="9">Attacker attribution</text>
+
+  <!-- Engineering Team (top-right) -->
+  <rect x="390" y="40" width="170" height="70" rx="6" fill="#4ade80" opacity="0.15" stroke="#4ade80" stroke-width="1.2"/>
+  <text x="475" y="62" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="bold">Engineering Team</text>
+  <text x="475" y="78" text-anchor="middle" fill="#8b90a0" font-size="9">Guardrail fixes</text>
+  <text x="475" y="92" text-anchor="middle" fill="#8b90a0" font-size="9">System remediation</text>
+
+  <!-- Legal / Compliance (left) -->
+  <rect x="20" y="175" width="170" height="70" rx="6" fill="#fbbf24" opacity="0.1" stroke="#fbbf24" stroke-width="1.2"/>
+  <text x="105" y="197" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">Legal / Compliance</text>
+  <text x="105" y="213" text-anchor="middle" fill="#8b90a0" font-size="9">Regulatory notifications</text>
+  <text x="105" y="227" text-anchor="middle" fill="#8b90a0" font-size="9">Liability assessment</text>
+
+  <!-- Communications (bottom-left) -->
+  <rect x="20" y="310" width="170" height="70" rx="6" fill="#6c9fff" opacity="0.1" stroke="#6c9fff" stroke-width="1.2"/>
+  <text x="105" y="332" text-anchor="middle" fill="#6c9fff" font-size="12" font-weight="bold">Communications</text>
+  <text x="105" y="348" text-anchor="middle" fill="#8b90a0" font-size="9">Public statements</text>
+  <text x="105" y="362" text-anchor="middle" fill="#8b90a0" font-size="9">Customer notification</text>
+
+  <!-- Leadership (bottom-right) -->
+  <rect x="390" y="310" width="170" height="70" rx="6" fill="#4ade80" opacity="0.15" stroke="#4ade80" stroke-width="1.2"/>
+  <text x="475" y="332" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="bold">Leadership</text>
+  <text x="475" y="348" text-anchor="middle" fill="#8b90a0" font-size="9">Resource allocation</text>
+  <text x="475" y="362" text-anchor="middle" fill="#8b90a0" font-size="9">Business decisions</text>
+
+  <!-- Arrow definitions -->
+  <defs>
+    <marker id="arrow-out" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#8b90a0"/>
+    </marker>
+    <marker id="arrow-in" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#8b90a0"/>
+    </marker>
+  </defs>
+
+  <!-- Arrows: Commander to Security Team (top-left) -->
+  <line x1="230" y1="170" x2="165" y2="110" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-out)"/>
+  <line x1="240" y1="170" x2="175" y2="110" stroke="#8b90a0" stroke-width="1.2" marker-start="url(#arrow-in)"/>
+
+  <!-- Arrows: Commander to Engineering Team (top-right) -->
+  <line x1="350" y1="170" x2="415" y2="110" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-out)"/>
+  <line x1="340" y1="170" x2="405" y2="110" stroke="#8b90a0" stroke-width="1.2" marker-start="url(#arrow-in)"/>
+
+  <!-- Arrows: Commander to Legal/Compliance (left) -->
+  <line x1="210" y1="195" x2="190" y2="200" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-out)"/>
+  <line x1="210" y1="210" x2="190" y2="215" stroke="#8b90a0" stroke-width="1.2" marker-start="url(#arrow-in)"/>
+
+  <!-- Arrows: Commander to Communications (bottom-left) -->
+  <line x1="230" y1="230" x2="165" y2="310" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-out)"/>
+  <line x1="240" y1="230" x2="175" y2="310" stroke="#8b90a0" stroke-width="1.2" marker-start="url(#arrow-in)"/>
+
+  <!-- Arrows: Commander to Leadership (bottom-right) -->
+  <line x1="350" y1="230" x2="415" y2="310" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arrow-out)"/>
+  <line x1="340" y1="230" x2="405" y2="310" stroke="#8b90a0" stroke-width="1.2" marker-start="url(#arrow-in)"/>
+
+  <!-- Legend -->
+  <text x="290" y="405" text-anchor="middle" fill="#8b90a0" font-size="9">Bidirectional arrows indicate two-way communication during incidents</text>
+</svg>

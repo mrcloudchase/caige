@@ -142,6 +142,14 @@ DIRECT INJECTION                INDIRECT INJECTION
 - **Session isolation** — ensuring strict separation between user sessions
 - **Access controls on retrieval** — enforcing permissions at the data layer, not the model layer
 
+| Leakage Type | Example | Primary Guardrail | Secondary Controls |
+|---|---|---|---|
+| System prompt exposure | Model reveals its instructions | Output scanning + instruction separation | Prompt protection techniques |
+| Training data extraction | Model reproduces training examples | Difficult to prevent (model property) | Confidence scoring, output monitoring |
+| Cross-tenant contamination | User A sees User B's data | Session isolation, data partitioning | Access controls, cache invalidation |
+| PII in responses | Output includes personal information | PII detection + redaction | Data minimization in prompts |
+| Context leakage | Earlier conversation influences later | Session isolation | Memory management, context refresh |
+
 **Severity:** Can be critical, especially in regulated industries (healthcare, finance) or when PII exposure creates legal liability.
 
 ### 1.2.5 Toxic and Harmful Output

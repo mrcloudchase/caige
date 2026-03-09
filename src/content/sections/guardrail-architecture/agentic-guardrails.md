@@ -64,6 +64,13 @@ Agent: This fund transfer of $50,000 requires manager approval.
 - Make confirmation prompts clear about what will happen (show the action, not just "proceed?")
 - Default to "don't execute" if confirmation is not received
 
+| Risk Level | Action Examples | Approval | Timeout Behavior |
+|---|---|---|---|
+| Low | Search, read data | Auto-approve | N/A |
+| Medium | Create draft, save file | Notify user, proceed | N/A |
+| High | Send email, update record | Require confirmation | Reject if no response |
+| Critical | Delete data, transfer funds | Multi-party approval | Escalate if no response |
+
 ### 2.6.3 Scope Limiting
 
 Constrain what an agent can do within a single session:
@@ -83,6 +90,18 @@ Constrain what an agent can do within a single session:
 **Domain restrictions:** Limit which systems, databases, or services the agent can interact with.
 - An agent helping with HR tasks shouldn't access financial systems
 - An agent helping with code review shouldn't have production deployment access
+
+```
+Agent session constraints (all enforced simultaneously):
+┌──────────────────────────────────────┐
+│  Action budget:  20 actions/session  │
+│  Time budget:    5 minutes           │
+│  Cost budget:    $10 max             │
+│  Domain scope:   HR system only      │
+│  Data access:    Read-only on DB A   │
+└──────────────────────────────────────┘
+Any limit reached → session terminates gracefully
+```
 
 ### 2.6.4 Sandboxing and Isolation
 
@@ -154,6 +173,12 @@ When an agent calls tools or accesses systems on behalf of a user, a critical qu
 - **Scoped service accounts** — The agent uses a service account, but its permissions are dynamically scoped to match the invoking user's authorization
 - **Per-action authorization** — Each tool call is individually authorized against the user's permissions before execution
 
+| Pattern | How Credentials Flow | Scope | Escalation Risk |
+|---|---|---|---|
+| Pass-through auth | User's token forwarded to tools | Exactly user's permissions | None |
+| Scoped service account | SA created per-session with user's scope | Limited to user's access level | Low (with audit) |
+| Per-action authorization | Each tool call individually authorized | Per-action validation | Low (highest control) |
+
 ### 2.6.8 Tool Integration Protocols (MCP)
 
 The Model Context Protocol (MCP) and similar protocols standardize how AI models connect to external tools. Understanding the guardrail implications of these protocols is essential.
@@ -198,6 +223,20 @@ MCP introduces a critical trust boundary between the AI application and external
 - What logging does the server perform? (Your data may be retained)
 - What happens if the server is compromised? (An attacker could modify tool behavior)
 - Evaluate third-party MCP servers the same way you evaluate any third-party dependency — review provenance, check permissions, limit data exposure, and monitor behavior
+
+```
+Your Application (trusted)
+    |
+    └── MCP Client (trusted)
+         |
+         ├── First-party MCP Server (trusted) → Your tools
+         |
+         └── Third-party MCP Server (UNTRUSTED) → External tools
+                 |
+                 └─→ Validate all results
+                 └─→ Limit data sent to server
+                 └─→ Monitor for anomalous behavior
+```
 
 ### 2.6.9 Multi-Agent Coordination
 

@@ -13,6 +13,12 @@ Protecting personally identifiable information is one of the most common guardra
 
 Not all PII is equally sensitive. A practical classification:
 
+| Sensitivity | Examples | Guardrail Response |
+|---|---|---|
+| High | SSN, credit card, passwords, medical records | Block or redact immediately, alert |
+| Medium | Full name + DOB, email, phone, address | Redact in most contexts |
+| Low | First name alone, job title, company name | Allow unless combined with other PII |
+
 **High sensitivity (immediate harm if exposed):**
 - Social Security Numbers / National ID numbers
 - Financial account numbers (credit cards, bank accounts)
@@ -72,6 +78,12 @@ Services and libraries specifically designed for PII detection across multiple c
 - Often include confidence scores per detection
 - Support for multiple languages and regional PII formats
 - Usually the best choice for production PII guardrails
+
+| Method | Speed | Accuracy | Handles Unstructured Text | Setup Effort |
+|---|---|---|---|---|
+| Regex patterns | Very fast | Low (structured PII only) | No | Low |
+| NER models | Fast | Medium | Yes | Medium (needs training data) |
+| Purpose-built PII detectors | Medium | High | Yes | Low (API/library) |
 
 ### 3.3.3 Handling Strategies
 

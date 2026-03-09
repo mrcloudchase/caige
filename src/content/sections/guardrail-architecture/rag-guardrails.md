@@ -27,6 +27,29 @@ The retrieval system must enforce permissions:
 
 Pre-filtering is preferred because it prevents unauthorized documents from being retrieved at all, reducing both security risk and wasted retrieval bandwidth.
 
+```
+PRE-FILTERING (preferred):
+  Query + User Permissions
+      |
+      v
+  [Retrieve only authorized documents]
+      |
+      v
+  Unauthorized content never enters context
+
+POST-FILTERING (less secure):
+  Query (no permission check)
+      |
+      v
+  [Retrieve from full corpus]
+      |
+      v
+  [Remove unauthorized results after retrieval]
+      |
+      v
+  Wasted bandwidth, brief exposure risk
+```
+
 ### 2.5.2 Relevance Filtering
 
 Not all retrieved documents are relevant. Irrelevant documents can:
@@ -76,6 +99,18 @@ User question: [Question here]
 
 **Provenance tracking:** Know where every document came from. Documents from trusted internal sources may need less screening than documents from user-submitted or public sources.
 
+```
+Defense-in-depth against indirect injection:
+
+[Layer 1: Ingestion Scanning]     -- Scan documents at upload time
+         |
+[Layer 2: Instruction Delimiters] -- Mark retrieved content as data-only
+         |
+[Layer 3: Injection Classifier]   -- Flag suspicious chunks at query time
+         |
+[Layer 4: Model Training]         -- Model trained to ignore embedded instructions
+```
+
 ### 2.5.4 Source Attribution and Traceability
 
 Users and auditors need to verify where information came from:
@@ -117,6 +152,14 @@ RAG systems split documents into chunks for embedding and retrieval. Guardrails 
 | Staleness check | At document level — based on document date | Rarely needed at chunk level |
 
 **Best practice:** Apply coarse guardrails at the document level during ingestion (access control, initial injection scan, classification) and fine-grained guardrails at the chunk level during retrieval (relevance filtering, per-chunk injection scanning, PII redaction). This layered approach catches issues early while maintaining precision at query time.
+
+```
+Ingestion phase (document-level):
+  New doc → [Access control tag] → [Injection scan] → [Classify] → Store
+
+Query phase (chunk-level):
+  User query → [Relevance filter] → [Chunk injection scan] → [PII redact] → Model
+```
 
 ### 2.5.6 Handling Contradictory Sources
 

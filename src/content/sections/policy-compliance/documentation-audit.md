@@ -31,6 +31,12 @@ For **leadership:**
 - Resource requirements (cost, headcount)
 - Incident summaries
 
+| Audience | What They Need | Format | Update Frequency |
+|---|---|---|---|
+| Auditors / Regulators | Compliance evidence, decision trails, policies | Formal reports, audit logs | Per audit cycle |
+| Engineering Teams | Implementation details, schemas, thresholds | Technical docs, runbooks | Every change |
+| Leadership | Risk posture, incident summaries, resource needs | Dashboards, executive briefs | Monthly/quarterly |
+
 ### 4.3.2 Model Cards and System Cards
 
 **Model cards** are standardized documents that describe a machine learning model:
@@ -76,6 +82,16 @@ An audit trail for guardrails should capture:
 - Raw user input containing PII (use hashed or redacted versions)
 - Full model outputs that may contain sensitive generated content
 - Internal system prompt text (reference by version, don't embed)
+
+| Data Category | Per-Request | Aggregate | Never Log |
+|---|---|---|---|
+| Timestamps, request IDs | ✓ | | |
+| Guardrail triggered, decision, reason | ✓ | | |
+| Latency per guardrail | ✓ | ✓ (percentiles) | |
+| Block rates, false positive rates | | ✓ | |
+| Raw user input content | | | ✓ |
+| Full model output text | | | ✓ |
+| System prompt text | | | ✓ |
 
 ### 4.3.4 Change Management
 

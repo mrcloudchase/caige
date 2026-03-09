@@ -138,6 +138,22 @@ The JSON must include these exact fields: product_name, price, reason.
 - Log retry events — a high retry rate indicates the prompt or model needs adjustment
 - Consider whether the model is fundamentally struggling with the format (indicating a prompt design issue) or just occasionally failing (indicating a normal variation)
 
+```
+Model generates output
+    |
+    v
+[Validate against schema]
+    |
+    ├── Valid → Return success
+    └── Invalid → Attempt 1: retry with error feedback
+        |
+        ├── Valid → Return success
+        └── Invalid → Attempt 2: retry with stricter constraints
+            |
+            ├── Valid → Return success
+            └── Invalid → Return graceful fallback response
+```
+
 **Building robust parsers:**
 
 Models frequently return structured output with minor formatting issues. Robust parsers handle these gracefully:
@@ -149,6 +165,15 @@ Models frequently return structured output with minor formatting issues. Robust 
 - **Partial output:** If the model hits a token limit mid-output, decide whether to retry or attempt partial parsing of the available data.
 
 The principle is: parse leniently, validate strictly. Accept format variations in the raw output, then validate the parsed result against your schema.
+
+```
+Common parsing fixes:
+
+Input:  ```json\n{"key": "value"}\n```    → Strip markdown fences → {"key": "value"}
+Input:  Some text {"key": "val"} more     → Extract JSON substring → {"key": "val"}
+Input:  {"key": "value",}                 → Remove trailing comma → {"key": "value"}
+Input:  {key: "value"}                    → Add missing quotes    → {"key": "value"}
+```
 
 ### 3.2.5 Constrained Decoding vs. Post-Hoc Validation
 
