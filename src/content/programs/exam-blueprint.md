@@ -25,7 +25,6 @@ description: "Exam structure, question types, detailed objectives, and scoring m
 | Passing score | 70% (53 of 75 scored questions) |
 | Delivery | Online proctored |
 | Prerequisites | None required to sit for the exam; completion of the cAIge training program (including AI Foundations prerequisites) is strongly recommended |
-| Recertification | Every 3 years |
 | Languages | English (additional languages planned) |
 
 ---
@@ -336,20 +335,3 @@ While there are no formal prerequisites to sit for the exam, the cAIge training 
 - Legal expertise (e.g., detailed regulatory interpretation)
 - Memorization of specific regulatory article numbers or section references
 
----
-
-## Recertification
-
-### Requirements
-- Recertification is required every 3 years
-- Options for recertification:
-  1. **Re-examination:** Take the current version of the cAIge exam
-  2. **Continuing education:** Accumulate 36 Continuing Professional Education (CPE) credits over 3 years
-     - Attending AI safety/security conferences (8 CPE per event, max 16)
-     - Publishing research or articles on AI guardrails (8 CPE per publication, max 16)
-     - Contributing to open-source guardrail projects (4 CPE per significant contribution, max 12)
-     - Completing approved advanced training courses (CPE varies by course length)
-     - Presenting on AI guardrails topics (4 CPE per presentation, max 12)
-
-### Rationale
-The AI guardrail landscape evolves rapidly. New attack techniques, frameworks, regulations, and best practices emerge continuously. Recertification ensures cAIge holders maintain current, relevant knowledge.

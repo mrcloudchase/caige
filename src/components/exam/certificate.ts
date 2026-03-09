@@ -163,14 +163,6 @@ export function downloadCertificate(
   ctx.font = '400 13px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
   ctx.fillText('Vendor-Agnostic AI Certification Programs', canvas.width / 2, 885);
 
-  // Validity
-  const expiryDate = new Date(today);
-  expiryDate.setFullYear(expiryDate.getFullYear() + 3);
-  const expiryStr = expiryDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  ctx.fillStyle = '#8b90a0';
-  ctx.font = '400 12px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('Valid through ' + expiryStr + ' | 3-year recertification required', canvas.width / 2, 920);
-
   // Download
   const link = document.createElement('a');
   link.download = 'cAIge-Certificate-' + candidateName.replace(/\s+/g, '-') + '.png';

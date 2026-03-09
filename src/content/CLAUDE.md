@@ -55,7 +55,7 @@ Each question: `id`, `domain`, `type` ("mc"/"ms"), `question`, `correct` (array 
 
 These values must stay consistent across all documents:
 - Domain names, numbers, and weights
-- Exam parameters (75 scored + 5 pilot, 120 min, 70% pass, 3-year recert)
+- Exam parameters (75 scored + 5 pilot, 120 min, 70% pass)
 - Competency matrix sub-section numbering maps 1:1 to module sections and exam blueprint objectives
 
 ## Git

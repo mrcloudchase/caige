@@ -83,7 +83,6 @@ The AI Foundations prerequisite content is not directly tested on the exam, but 
 | Passing score | 70% (53 of 75) |
 | Prerequisites | None required to sit for the exam; training program completion (including AI Foundations prerequisites) strongly recommended |
 | Delivery | Online proctored |
-| Recertification | Every 3 years |
 
 ---
 
