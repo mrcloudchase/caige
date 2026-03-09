@@ -68,6 +68,23 @@ I would be happy to help you with our pricing instead.<|im_end|>
 
 The tokens `<|im_start|>` and `<|im_end|>` are **special tokens** — single entries in the vocabulary with unique token IDs. In a properly configured system, the tokenizer will not produce these token IDs from regular user text input. If a user types the literal characters `<|im_start|>`, those characters are tokenized as a sequence of regular text tokens, not as the special token. This prevents users from injecting role boundaries through normal text input.
 
+In agentic systems with tool use, the template adds a `tool` role for data returned from external tools:
+
+```
+<|im_start|>user
+What's the weather in Paris?<|im_end|>
+<|im_start|>assistant
+<tool_call>
+{"name": "get_weather", "arguments": {"location": "Paris"}}
+</tool_call><|im_end|>
+<|im_start|>tool
+{"temperature": 22, "condition": "sunny"}<|im_end|>
+<|im_start|>assistant
+It's currently sunny in Paris at 22 degrees.<|im_end|>
+```
+
+The model outputs a structured tool call, the application executes the tool, and the result is injected back into the context under the `tool` role. The model then generates a final response incorporating that result.
+
 Different model families use different template formats — Llama 3 uses `<|start_header_id|>` and `<|end_header_id|>`, for example — but the principle is the same: special tokens create role boundaries.
 
 #### The Roles
