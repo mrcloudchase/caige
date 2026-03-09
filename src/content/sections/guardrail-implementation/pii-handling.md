@@ -9,6 +9,8 @@ description: "Section 3 of the guardrail implementation module."
 
 Protecting personally identifiable information is one of the most common guardrail requirements across industries.
 
+![PII detection and handling pipeline](/svg/pii-handling-pipeline.svg)
+
 ### 3.3.1 PII Categories and Sensitivity Levels
 
 Not all PII is equally sensitive. A practical classification:

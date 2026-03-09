@@ -228,24 +228,7 @@ Production guardrails typically combine multiple detection methods:
 
 **Layered pipeline (recommended architecture):**
 
-```
-Input arrives
-    |
-    v
-[Layer 1: Rules] -----> BLOCK (if matched)
-    |
-    | (passed)
-    v
-[Layer 2: Classifier] --> BLOCK (if high confidence)
-    |                  --> ESCALATE (if medium confidence)
-    |
-    | (passed or uncertain)
-    v
-[Layer 3: LLM-as-judge] --> BLOCK / ALLOW / ESCALATE
-    |
-    v
-Result
-```
+![Layered detection pipeline](/svg/layered-detection-pipeline.svg)
 
 **Design principles for hybrid pipelines:**
 - Cheap and fast layers first (rules catch obvious attacks in microseconds)
@@ -262,6 +245,8 @@ Result
 ### 3.1.6 Evaluation Metrics
 
 You must be able to measure how well your detection methods work:
+
+![Confusion matrix for guardrail detection](/svg/confusion-matrix.svg)
 
 **Precision:** Of the inputs the guardrail flagged, how many were actually harmful?
 ```

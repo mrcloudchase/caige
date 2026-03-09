@@ -158,4 +158,68 @@ Guardrail configurations should be managed like code:
 
 **Audit trail:** Every configuration change is tracked with who, when, why, and approval.
 
+#### Configuration-as-Code in Practice
+
+A guardrail configuration file defines rules, thresholds, and behaviors in a declarative format that can be version-controlled and reviewed:
+
+```yaml
+# guardrails.yaml — Declarative guardrail configuration
+version: "1.2"
+environment: production
+
+input_guardrails:
+  injection_detection:
+    enabled: true
+    layers:
+      - type: regex
+        patterns_file: "rules/injection-patterns.yaml"
+        action: block
+      - type: classifier
+        model: "injection-detect-v3"
+        threshold: 0.82
+        action: block
+      - type: llm_judge
+        model: "gpt-4o-mini"
+        trigger: "classifier_uncertain"
+        threshold: 0.70
+        action: escalate
+  topic_classification:
+    enabled: true
+    allowed_topics: ["billing", "technical_support", "returns"]
+    action_on_off_topic: refuse_with_redirect
+
+output_guardrails:
+  pii_detection:
+    enabled: true
+    sensitivity: high
+    action: redact
+    categories: ["ssn", "credit_card", "email", "phone", "person_name"]
+  toxicity:
+    enabled: true
+    threshold: 0.50
+    action: block
+  groundedness:
+    enabled: true
+    min_score: 0.80
+    action_below_threshold: flag_for_review
+
+rate_limiting:
+  per_user:
+    requests_per_minute: 10
+    requests_per_hour: 100
+  adaptive:
+    high_block_rate_threshold: 0.20
+    restricted_rate_per_minute: 2
+```
+
+**Why this format matters:**
+- Changes are diffable — a reviewer can see exactly what changed (a threshold moved from 0.75 to 0.82, a new pattern was added)
+- Environments share the same structure — staging might use `threshold: 0.70` while production uses `0.82`, but the structure is identical
+- Rollback is a git revert — if a new configuration causes problems, reverting to the previous version is immediate
+- CI/CD can validate the configuration — automated tests verify that thresholds are within valid ranges, referenced models exist, and pattern files are syntactically correct
+- Audit is built in — git history shows who changed what, when, and the pull request shows why
+
+**Configuration drift prevention:**
+The same configuration should drive both the guardrail runtime and the test suite. If the production configuration says the injection threshold is 0.82, the test suite should verify behavior at that threshold. A common failure mode is the test suite using hardcoded values that diverge from the deployed configuration over time.
+
 ---

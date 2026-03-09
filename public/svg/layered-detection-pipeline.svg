@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 400" width="560" height="400" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="arr-d" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M1,1 L4,7 L7,1" fill="none" stroke="#8b90a0" stroke-width="1.2"/>
+    </marker>
+    <marker id="arr-r" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1,1 L7,4 L1,7" fill="none" stroke="#8b90a0" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <rect width="560" height="400" rx="8" fill="#1a1d27"/>
+
+  <text x="280" y="28" text-anchor="middle" fill="#e1e4eb" font-size="14" font-weight="bold">Layered Detection Pipeline</text>
+
+  <!-- Input -->
+  <rect x="195" y="44" width="170" height="32" rx="6" fill="#2a2d37" stroke="#e1e4eb" stroke-width="2"/>
+  <text x="280" y="65" text-anchor="middle" fill="#e1e4eb" font-size="12" font-weight="bold">Input Arrives</text>
+
+  <!-- Arrow -->
+  <line x1="280" y1="76" x2="280" y2="96" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr-d)"/>
+
+  <!-- Layer 1: Rules -->
+  <rect x="140" y="98" width="280" height="44" rx="6" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+  <text x="280" y="116" text-anchor="middle" fill="#4ade80" font-size="12" font-weight="bold">Layer 1: Rule-Based</text>
+  <text x="280" y="132" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">&lt;1ms · regex, blocklists · catches known patterns</text>
+
+  <!-- Block arrow right from Layer 1 -->
+  <line x1="420" y1="120" x2="470" y2="120" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr-r)"/>
+  <rect x="472" y="106" width="70" height="28" rx="4" fill="#ef4444" opacity="0.15" stroke="#ef4444" stroke-width="1.2"/>
+  <text x="507" y="124" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">BLOCK</text>
+
+  <!-- Pass arrow down -->
+  <line x1="280" y1="142" x2="280" y2="162" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr-d)"/>
+  <text x="310" y="156" fill="#4ade80" font-size="8">pass</text>
+
+  <!-- Layer 2: Classifier -->
+  <rect x="140" y="164" width="280" height="44" rx="6" fill="none" stroke="#6c9fff" stroke-width="1.5"/>
+  <text x="280" y="182" text-anchor="middle" fill="#6c9fff" font-size="12" font-weight="bold">Layer 2: ML Classifier</text>
+  <text x="280" y="198" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">10-100ms · trained model · handles variation</text>
+
+  <!-- Block arrow right from Layer 2 -->
+  <line x1="420" y1="186" x2="470" y2="186" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr-r)"/>
+  <rect x="472" y="172" width="70" height="28" rx="4" fill="#ef4444" opacity="0.15" stroke="#ef4444" stroke-width="1.2"/>
+  <text x="507" y="190" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">BLOCK</text>
+
+  <!-- Short-circuit arrow (pass with high confidence) -->
+  <line x1="140" y1="186" x2="80" y2="186" stroke="#4ade80" stroke-width="1.2" marker-end="url(#arr-r)" transform="rotate(180, 110, 186)"/>
+  <rect x="10" y="172" width="70" height="28" rx="4" fill="#4ade80" opacity="0.15" stroke="#4ade80" stroke-width="1.2"/>
+  <text x="45" y="190" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="bold">ALLOW</text>
+  <text x="110" y="170" text-anchor="middle" fill="#4ade80" font-size="8">high conf</text>
+
+  <!-- Pass/uncertain arrow down -->
+  <line x1="280" y1="208" x2="280" y2="228" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr-d)"/>
+  <text x="316" y="222" fill="#fbbf24" font-size="8">uncertain</text>
+
+  <!-- Layer 3: LLM-as-Judge -->
+  <rect x="140" y="230" width="280" height="44" rx="6" fill="none" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="280" y="248" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="bold">Layer 3: LLM-as-Judge</text>
+  <text x="280" y="264" text-anchor="middle" fill="#8b90a0" font-family="'Courier New', monospace" font-size="9">500ms+ · full LLM call · context-aware</text>
+
+  <!-- Block arrow right from Layer 3 -->
+  <line x1="420" y1="252" x2="470" y2="252" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr-r)"/>
+  <rect x="472" y="238" width="70" height="28" rx="4" fill="#ef4444" opacity="0.15" stroke="#ef4444" stroke-width="1.2"/>
+  <text x="507" y="256" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">BLOCK</text>
+
+  <!-- Allow arrow left from Layer 3 -->
+  <line x1="140" y1="252" x2="80" y2="252" stroke="#4ade80" stroke-width="1.2" marker-end="url(#arr-r)" transform="rotate(180, 110, 252)"/>
+  <rect x="10" y="238" width="70" height="28" rx="4" fill="#4ade80" opacity="0.15" stroke="#4ade80" stroke-width="1.2"/>
+  <text x="45" y="256" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="bold">ALLOW</text>
+
+  <!-- Escalate arrow down from Layer 3 -->
+  <line x1="280" y1="274" x2="280" y2="294" stroke="#8b90a0" stroke-width="1.2" marker-end="url(#arr-d)"/>
+  <rect x="215" y="296" width="130" height="28" rx="4" fill="#fbbf24" opacity="0.12" stroke="#fbbf24" stroke-width="1.2"/>
+  <text x="280" y="314" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold">ESCALATE</text>
+
+  <!-- Cost annotation -->
+  <rect x="70" y="340" width="420" height="44" rx="4" fill="#2a2d37" stroke="none"/>
+  <text x="280" y="356" text-anchor="middle" fill="#8b90a0" font-size="9">Most inputs (benign) → cleared at Layer 1 or 2 in &lt;100ms</text>
+  <text x="280" y="372" text-anchor="middle" fill="#8b90a0" font-size="9">Only ambiguous inputs reach the expensive LLM-as-judge layer</text>
+
+  <!-- Vertical label -->
+  <line x1="132" y1="108" x2="132" y2="268" stroke="#e1e4eb" stroke-width="0.8" stroke-dasharray="3,3"/>
+  <text x="126" y="190" text-anchor="middle" fill="#e1e4eb" font-size="8" font-weight="bold" transform="rotate(-90, 126, 190)">INCREASING COST &amp; ACCURACY</text>
+</svg>

@@ -182,18 +182,53 @@ Two approaches to ensuring structured output:
 **Constrained decoding (generation-time):**
 Some model serving platforms support constraining the model's token generation to only produce valid output according to a grammar or schema. The model literally cannot produce invalid JSON because invalid tokens are masked during generation.
 
-Advantages: Guaranteed valid output on the first try, no retries needed
-Disadvantages: Not universally available, can slow generation, may produce technically valid but semantically wrong output
+**How constrained decoding works:**
+At each step of the autoregressive generation loop (as you learned in the prerequisites), the model produces a probability distribution over the entire vocabulary. Normally, any token can be selected. With constrained decoding, a **grammar** or **schema mask** is applied before token selection — tokens that would violate the schema are set to zero probability, so the model can only choose tokens that keep the output valid.
+
+```
+Normal generation:
+  Vocabulary: {  "  [  a  b  1  2  ...  }  ]  ,  :  ...
+  All tokens are candidates at every step
+
+Constrained generation (expecting JSON key after '{'):
+  Vocabulary: {  "  [  a  b  1  2  ...  }  ]  ,  :  ...
+                 ^
+                 Only '"' is valid here (JSON keys must be strings)
+                 All other tokens masked to probability 0
+```
+
+**Grammar-based generation** takes this further by defining a formal grammar (typically in BNF or a similar notation) that specifies the complete set of valid output sequences. The generation engine tracks the current position in the grammar and masks any token that would produce an invalid sequence. This can enforce not just JSON validity but domain-specific formats — for example, a grammar that only permits valid SQL SELECT statements, or a grammar that produces valid function call syntax with specific parameter types.
+
+```
+Example grammar (simplified BNF) for a product recommendation:
+  output     ::= "{" fields "}"
+  fields     ::= name "," price "," reason
+  name       ::= '"product_name"' ":" '"' text '"'
+  price      ::= '"price"' ":" number
+  reason     ::= '"reason"' ":" '"' text '"'
+  number     ::= digit+ ("." digit+)?
+  text       ::= [^"]{1,200}
+```
+
+Advantages: Guaranteed valid output on the first try, no retries needed, eliminates format-related failures entirely
+Disadvantages: Not universally available, can slow generation (grammar tracking adds overhead per token), may produce technically valid but semantically wrong output (valid JSON with nonsensical values), grammar authoring can be complex for rich schemas
 
 **Post-hoc validation (after generation):**
 Let the model generate freely, then validate the output against the schema. If invalid, retry or reject.
 
-Advantages: Works with any model, no special infrastructure needed, more flexible
-Disadvantages: May require retries, adds validation processing time
+Advantages: Works with any model, no special infrastructure needed, more flexible, can validate semantic content (not just format)
+Disadvantages: May require retries, adds validation processing time, cannot guarantee valid output within a fixed number of attempts
+
+**API-level structured output:**
+Some model providers offer structured output as an API feature — you pass a JSON schema with your request, and the API guarantees the response conforms to that schema. This is effectively constrained decoding provided as a service, abstracting away the grammar tracking. When available, this is often the simplest path to reliable structured output.
 
 **When to use which:**
-- Constrained decoding when available and the output format is critical (e.g., API responses that downstream systems parse)
-- Post-hoc validation when constrained decoding isn't available, or when you need to validate semantic content (not just format)
-- Both together for maximum reliability
+
+| Approach | Format Guarantee | Semantic Validation | Availability | Best For |
+|---|---|---|---|---|
+| Constrained decoding | Yes — enforced during generation | No — only format, not meaning | Requires compatible serving infrastructure | Critical format requirements, high-volume APIs |
+| API structured output | Yes — provider-managed | No — only format, not meaning | Depends on model provider | Standard JSON schemas with supported providers |
+| Post-hoc validation | No — may need retries | Yes — can check meaning and format | Works everywhere | Semantic validation, complex business rules |
+| Both combined | Yes | Yes | Requires compatible infrastructure | Maximum reliability for high-stakes applications |
 
 ---

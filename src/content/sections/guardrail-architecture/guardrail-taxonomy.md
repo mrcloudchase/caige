@@ -123,6 +123,8 @@ Human-in-the-loop (HITL) guardrails route decisions to a human when the AI syste
 - There must be a fallback for when no human is available
 - Track escalation volumes — if they are too high, the guardrail may need tuning
 
+![Human-in-the-loop escalation tiers](/svg/hitl-escalation-tiers.svg)
+
 #### Operating HITL at Scale
 
 When HITL guardrails handle significant volume, operational challenges emerge that are just as important as the initial design:
