@@ -18,74 +18,99 @@ function isActive(href: string) {
 }
 
 function isInModule(moduleSlug: string) {
-  return currentPath.startsWith(`/training/module/${moduleSlug}`);
+  const prefix = `/training/module/${moduleSlug}`;
+  return currentPath === prefix || currentPath.startsWith(`${prefix}/`);
 }
 
 const inProgram = programs.some(p => isActive(`/training/${p.data.slug}`));
 const inModules = currentPath.startsWith('/training/module/');
 ---
 
-<nav class="sidebar" id="sidebar">
-  <button class:list={['nav-section', 'nav-section-toggle', { collapsed: !inProgram }]} id="program-toggle" aria-expanded={inProgram ? 'true' : 'false'}>
+<nav class="sidebar" id="sidebar" aria-label="Training navigation">
+  <button
+    class:list={['nav-section', 'nav-section-toggle', { collapsed: !inProgram }]}
+    id="program-toggle"
+    aria-expanded={inProgram ? 'true' : 'false'}
+    aria-controls="program-items"
+  >
     <span>Program</span>
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <div class:list={['nav-section-items', { collapsed: !inProgram }]} id="program-items">
-    {programs.map((p) => (
-      <a
-        class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
-        href={`/training/${p.data.slug}`}
-      >
-        {p.data.title}
-      </a>
-    ))}
+  <div class:list={['nav-section-items', { collapsed: !inProgram }]} id="program-items" role="region" aria-labelledby="program-toggle">
+    <div class="nav-section-inner">
+      {programs.map((p) => (
+        <a
+          class:list={['nav-item', { active: isActive(`/training/${p.data.slug}`) }]}
+          href={`/training/${p.data.slug}`}
+          aria-current={isActive(`/training/${p.data.slug}`) ? 'page' : undefined}
+        >
+          {p.data.title}
+        </a>
+      ))}
+    </div>
   </div>
 
-  <button class:list={['nav-section', 'nav-section-toggle', { collapsed: !inModules }]} id="modules-toggle" aria-expanded={inModules ? 'true' : 'false'}>
+  <button
+    class:list={['nav-section', 'nav-section-toggle', { collapsed: !inModules }]}
+    id="modules-toggle"
+    aria-expanded={inModules ? 'true' : 'false'}
+    aria-controls="modules-items"
+  >
     <span>Training Modules</span>
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
-  <div class:list={['nav-section-items', { collapsed: !inModules }]} id="modules-items">
+  <div class:list={['nav-section-items', { collapsed: !inModules }]} id="modules-items" role="region" aria-labelledby="modules-toggle">
+  <div class="nav-section-inner">
   {modules.map((m) => {
     const moduleHref = `/training/module/${m.data.slug}`;
     const inModule = isInModule(m.data.slug);
     const moduleSections = allSections.filter(s => s.data.module === m.data.slug);
+    const subItemsId = `sub-${m.data.slug}`;
 
     return (
       <div class="nav-module-group" data-module={m.data.slug}>
         <div class:list={['nav-item', 'nav-module', { active: isActive(moduleHref), expanded: inModule }]}>
-          <a href={moduleHref} class="nav-module-link">
+          <a href={moduleHref} class="nav-module-link" aria-current={isActive(moduleHref) ? 'page' : undefined}>
             <span>{m.data.order === 0 ? m.data.title : `${m.data.order}. ${m.data.title}`}</span>
           </a>
           <div class="nav-module-right">
             <span class="nav-weight">{m.data.weight ?? '—'}</span>
-            <button class="nav-toggle" aria-label="Toggle sections" aria-expanded={inModule ? 'true' : 'false'}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <button
+              class="nav-toggle"
+              aria-label={`Toggle ${m.data.title} sections`}
+              aria-expanded={inModule ? 'true' : 'false'}
+              aria-controls={subItemsId}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
           </div>
         </div>
-        <div class:list={['nav-sub-items', { collapsed: !inModule }]}>
-          {moduleSections.map((s) => {
-            const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
-            return (
-              <a
-                class:list={['nav-item', 'nav-sub-item', { active: isActive(sectionHref) }]}
-                href={sectionHref}
-              >
-                {s.data.title}
-              </a>
-            );
-          })}
+        <div class:list={['nav-sub-items', { collapsed: !inModule }]} id={subItemsId} role="region">
+          <div class="nav-sub-inner">
+            {moduleSections.map((s) => {
+              const sectionHref = `/training/module/${m.data.slug}/${s.data.slug}`;
+              return (
+                <a
+                  class:list={['nav-item', 'nav-sub-item', { active: isActive(sectionHref) }]}
+                  href={sectionHref}
+                  aria-current={isActive(sectionHref) ? 'page' : undefined}
+                >
+                  {s.data.title}
+                </a>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
   })}
+  </div>
   </div>
 </nav>
 
@@ -116,4 +141,8 @@ const inModules = currentPath.startsWith('/training/module/');
       btn.setAttribute('aria-expanded', isCollapsed ? 'true' : 'false');
     });
   });
+
+  // Scroll the active nav item into view
+  const activeItem = document.querySelector('.nav-sub-item.active') || document.querySelector('.nav-item.active');
+  activeItem?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
 </script>

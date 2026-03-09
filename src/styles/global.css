@@ -13,6 +13,7 @@
   --color-yellow: #fbbf24;
   --color-red: #f87171;
   --color-code-bg: #141620;
+  --color-active-bg: rgba(108, 159, 255, 0.08);
 }
 
 /* Reset */
