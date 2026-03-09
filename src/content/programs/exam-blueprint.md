@@ -10,7 +10,7 @@ description: "Exam structure, question types, detailed objectives, and scoring m
 ## Certified AI Guardrail Engineer (cAIge) Examination
 
 **Version:** 1.0
-**Maintained by:** caigeai.dev
+**Maintained by:** caige.org
 
 ---
 

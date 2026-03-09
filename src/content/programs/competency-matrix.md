@@ -10,7 +10,7 @@ description: "Exhaustive knowledge areas and skills per domain for the cAIge cer
 ## Certified AI Guardrail Engineer (cAIge)
 
 **Version:** 1.0
-**Maintained by:** caigeai.dev
+**Maintained by:** caige.org
 
 ---
 

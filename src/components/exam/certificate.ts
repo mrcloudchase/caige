@@ -1,3 +1,5 @@
+const FONT = '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
+
 export function downloadCertificate(
   candidateName: string,
   correct: number,
@@ -6,178 +8,176 @@ export function downloadCertificate(
 ): void {
   const canvas = document.createElement('canvas');
   canvas.width = 1600;
-  canvas.height = 1100;
+  canvas.height = 900;
   const ctx = canvas.getContext('2d')!;
 
-  // Background
-  ctx.fillStyle = '#FFFDF7';
+  // Dark background
+  ctx.fillStyle = '#0f1117';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Decorative border
-  const borderMargin = 40;
-  ctx.strokeStyle = '#1a365d';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(borderMargin, borderMargin, canvas.width - borderMargin * 2, canvas.height - borderMargin * 2);
+  // Outer border
+  const m = 40;
+  ctx.strokeStyle = '#2a2e3a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(m, m, canvas.width - m * 2, canvas.height - m * 2);
 
-  // Inner border
-  const innerMargin = 52;
-  ctx.strokeStyle = '#6c9fff';
+  // Inner accent border
+  const im = 48;
+  ctx.strokeStyle = 'rgba(108, 159, 255, 0.2)';
   ctx.lineWidth = 1;
-  ctx.strokeRect(innerMargin, innerMargin, canvas.width - innerMargin * 2, canvas.height - innerMargin * 2);
+  ctx.strokeRect(im, im, canvas.width - im * 2, canvas.height - im * 2);
 
   // Corner accents
-  const cornerSize = 30;
+  const cs = 24;
   const corners: [number, number][] = [
-    [borderMargin, borderMargin],
-    [canvas.width - borderMargin, borderMargin],
-    [borderMargin, canvas.height - borderMargin],
-    [canvas.width - borderMargin, canvas.height - borderMargin],
+    [m, m], [canvas.width - m, m],
+    [m, canvas.height - m], [canvas.width - m, canvas.height - m],
   ];
-  ctx.strokeStyle = '#1a365d';
-  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#6c9fff';
+  ctx.lineWidth = 2;
   corners.forEach(([cx, cy]) => {
     const dx = cx < canvas.width / 2 ? 1 : -1;
     const dy = cy < canvas.height / 2 ? 1 : -1;
     ctx.beginPath();
-    ctx.moveTo(cx + dx * cornerSize, cy);
+    ctx.moveTo(cx + dx * cs, cy);
     ctx.lineTo(cx, cy);
-    ctx.lineTo(cx, cy + dy * cornerSize);
+    ctx.lineTo(cx, cy + dy * cs);
     ctx.stroke();
   });
 
-  // Decorative line
-  ctx.strokeStyle = '#d4af37';
-  ctx.lineWidth = 2;
+  ctx.textAlign = 'center';
+
+  // Header label
+  ctx.fillStyle = '#8b90a0';
+  ctx.font = `600 14px ${FONT}`;
+  ctx.letterSpacing = '6px';
+  ctx.fillText('CERTIFICATE OF ACHIEVEMENT', canvas.width / 2, 110);
+
+  // Accent line
+  ctx.strokeStyle = '#6c9fff';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(300, 160);
-  ctx.lineTo(canvas.width - 300, 160);
+  ctx.moveTo(500, 130);
+  ctx.lineTo(canvas.width - 500, 130);
   ctx.stroke();
 
-  // Header text
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '600 16px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.letterSpacing = '8px';
-  ctx.fillText('CERTIFICATE OF ACHIEVEMENT', canvas.width / 2, 140);
+  // cAIge logo text — draw each part separately for color
+  ctx.font = `700 72px ${FONT}`;
+  const logoX = canvas.width / 2;
+  const logoY = 210;
+  const cWidth = ctx.measureText('c').width;
+  const aiWidth = ctx.measureText('AI').width;
+  const geWidth = ctx.measureText('ge').width;
+  const totalWidth = cWidth + aiWidth + geWidth;
+  let x = logoX - totalWidth / 2;
 
-  // cAIge logo
-  ctx.fillStyle = '#1a365d';
-  ctx.font = '700 64px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('cAIge', canvas.width / 2, 240);
+  ctx.fillStyle = '#e1e4eb';
+  ctx.textAlign = 'left';
+  ctx.fillText('c', x, logoY);
+  x += cWidth;
+  ctx.fillStyle = '#6c9fff';
+  ctx.fillText('AI', x, logoY);
+  x += aiWidth;
+  ctx.fillStyle = '#e1e4eb';
+  ctx.fillText('ge', x, logoY);
+
+  ctx.textAlign = 'center';
 
   // Subtitle
   ctx.fillStyle = '#6c9fff';
-  ctx.font = '400 18px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('Certified AI Guardrail Engineer', canvas.width / 2, 280);
+  ctx.font = `400 20px ${FONT}`;
+  ctx.fillText('Certified AI Guardrail Engineer', canvas.width / 2, 250);
 
-  // Decorative line
-  ctx.strokeStyle = '#d4af37';
-  ctx.lineWidth = 2;
+  // Divider
+  ctx.strokeStyle = '#2a2e3a';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(400, 310);
-  ctx.lineTo(canvas.width - 400, 310);
+  ctx.moveTo(400, 280);
+  ctx.lineTo(canvas.width - 400, 280);
   ctx.stroke();
 
   // "This certifies that"
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '400 20px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('This certifies that', canvas.width / 2, 380);
+  ctx.fillStyle = '#8b90a0';
+  ctx.font = `400 18px ${FONT}`;
+  ctx.fillText('This certifies that', canvas.width / 2, 340);
 
-  // Name
-  ctx.fillStyle = '#1a365d';
-  ctx.font = '700 42px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText(candidateName, canvas.width / 2, 440);
+  // Candidate name
+  ctx.fillStyle = '#e1e4eb';
+  ctx.font = `700 48px ${FONT}`;
+  ctx.fillText(candidateName, canvas.width / 2, 400);
 
   // Name underline
-  const nameWidth = ctx.measureText(candidateName).width;
-  ctx.strokeStyle = '#1a365d';
+  const nameW = ctx.measureText(candidateName).width;
+  ctx.strokeStyle = '#6c9fff';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo((canvas.width - nameWidth) / 2 - 20, 455);
-  ctx.lineTo((canvas.width + nameWidth) / 2 + 20, 455);
+  ctx.moveTo((canvas.width - nameW) / 2 - 20, 415);
+  ctx.lineTo((canvas.width + nameW) / 2 + 20, 415);
   ctx.stroke();
 
   // Description
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '400 18px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('has successfully passed the Certified AI Guardrail Engineer (cAIge)', canvas.width / 2, 510);
-  ctx.fillText('examination, demonstrating proficiency in AI guardrail design,', canvas.width / 2, 540);
-  ctx.fillText('implementation, testing, and operations.', canvas.width / 2, 570);
+  ctx.fillStyle = '#8b90a0';
+  ctx.font = `400 17px ${FONT}`;
+  ctx.fillText('has successfully passed the Certified AI Guardrail Engineer (cAIge)', canvas.width / 2, 470);
+  ctx.fillText('examination, demonstrating proficiency in AI guardrail design,', canvas.width / 2, 498);
+  ctx.fillText('implementation, testing, and operations.', canvas.width / 2, 526);
 
-  // Score and Date
+  // Date and Score section
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Left column: Date
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '400 16px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Date of Certification', 450, 700);
-  ctx.fillStyle = '#1a365d';
-  ctx.font = '600 18px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText(dateStr, 450, 670);
-
-  ctx.strokeStyle = '#4a5568';
-  ctx.lineWidth = 1;
+  // Divider line above date/score
+  ctx.strokeStyle = '#2a2e3a';
   ctx.beginPath();
-  ctx.moveTo(300, 680);
-  ctx.lineTo(600, 680);
+  ctx.moveTo(300, 580);
+  ctx.lineTo(canvas.width - 300, 580);
   ctx.stroke();
 
-  // Right column: Score
-  ctx.fillStyle = '#4a5568';
-  ctx.font = '400 16px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('Examination Score', canvas.width - 450, 700);
-  ctx.fillStyle = '#1a365d';
-  ctx.font = '600 18px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText(`${correct} / ${total} (${pct}%)`, canvas.width - 450, 670);
-
-  ctx.strokeStyle = '#4a5568';
-  ctx.lineWidth = 1;
+  // Left: Date
+  ctx.fillStyle = '#e1e4eb';
+  ctx.font = `600 20px ${FONT}`;
+  ctx.fillText(dateStr, 450, 630);
+  ctx.strokeStyle = '#2a2e3a';
   ctx.beginPath();
-  ctx.moveTo(canvas.width - 600, 680);
-  ctx.lineTo(canvas.width - 300, 680);
+  ctx.moveTo(300, 642);
+  ctx.lineTo(600, 642);
   ctx.stroke();
-
-  // Certificate ID
-  const certId = generateCertId(candidateName, dateStr, pct);
   ctx.fillStyle = '#8b90a0';
-  ctx.font = '400 13px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Certificate ID: ' + certId, canvas.width / 2, 780);
+  ctx.font = `400 14px ${FONT}`;
+  ctx.fillText('Date of Certification', 450, 665);
 
-  // Decorative bottom line
-  ctx.strokeStyle = '#d4af37';
-  ctx.lineWidth = 2;
+  // Right: Score
+  ctx.fillStyle = '#e1e4eb';
+  ctx.font = `600 20px ${FONT}`;
+  ctx.fillText(`${correct} / ${total} (${pct}%)`, canvas.width - 450, 630);
+  ctx.strokeStyle = '#2a2e3a';
   ctx.beginPath();
-  ctx.moveTo(300, 820);
-  ctx.lineTo(canvas.width - 300, 820);
+  ctx.moveTo(canvas.width - 600, 642);
+  ctx.lineTo(canvas.width - 300, 642);
+  ctx.stroke();
+  ctx.fillStyle = '#8b90a0';
+  ctx.font = `400 14px ${FONT}`;
+  ctx.fillText('Examination Score', canvas.width - 450, 665);
+
+  // Bottom divider
+  ctx.strokeStyle = '#6c9fff';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(500, 730);
+  ctx.lineTo(canvas.width - 500, 730);
   ctx.stroke();
 
   // Organization
   ctx.fillStyle = '#6c9fff';
-  ctx.font = '600 16px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('caigeai.dev', canvas.width / 2, 860);
-
+  ctx.font = `600 16px ${FONT}`;
+  ctx.fillText('caige.org', canvas.width / 2, 770);
   ctx.fillStyle = '#8b90a0';
-  ctx.font = '400 13px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
-  ctx.fillText('Vendor-Agnostic AI Certification Programs', canvas.width / 2, 885);
+  ctx.font = `400 13px ${FONT}`;
+  ctx.fillText('Vendor-Agnostic AI Certification Programs', canvas.width / 2, 795);
 
   // Download
   const link = document.createElement('a');
   link.download = 'cAIge-Certificate-' + candidateName.replace(/\s+/g, '-') + '.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
-}
-
-function generateCertId(name: string, date: string, score: number): string {
-  const input = name + '|' + date + '|' + score;
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    const c = input.charCodeAt(i);
-    hash = ((hash << 5) - hash) + c;
-    hash |= 0;
-  }
-  const hex = Math.abs(hash).toString(16).toUpperCase().padStart(8, '0');
-  return 'CAIGE-' + hex.substring(0, 4) + '-' + hex.substring(4, 8) + '-' + Date.now().toString(36).toUpperCase().slice(-4);
 }
