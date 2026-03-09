@@ -106,7 +106,7 @@ Agentic guardrails control what actions an AI agent can take and under what cond
 
 ### 2.1.6 Human-in-the-Loop Guardrails
 
-Human-in-the-loop guardrails route decisions to a human when the AI system cannot or should not decide on its own.
+Human-in-the-loop (HITL) guardrails route decisions to a human when the AI system cannot or should not decide on its own.
 
 **Purpose:** Ensure human oversight for high-stakes or ambiguous situations.
 
@@ -122,6 +122,32 @@ Human-in-the-loop guardrails route decisions to a human when the AI system canno
 - The human must have enough context to make a good decision (show them the request, the guardrail's assessment, and relevant policy)
 - There must be a fallback for when no human is available
 - Track escalation volumes — if they are too high, the guardrail may need tuning
+
+#### Operating HITL at Scale
+
+When HITL guardrails handle significant volume, operational challenges emerge that are just as important as the initial design:
+
+**Queue management** — Escalated items need prioritization. A flat queue where items are processed first-in-first-out will create unacceptable delays for time-sensitive requests while reviewers spend time on low-urgency items. Design queues with severity tiers: critical escalations (potential data breach, active attack) should interrupt normal flow, while gray-area content decisions can wait. Set SLAs per tier and monitor queue depth as an operational metric.
+
+**Reviewer fatigue and accuracy** — Human reviewers who process hundreds of escalations per day experience decision fatigue. After extended review sessions, accuracy drops and reviewers tend toward rubber-stamping (either approving or denying everything without careful evaluation). Mitigate this with:
+- Session time limits and mandatory breaks
+- Rotation between review types to maintain attention
+- Inter-rater reliability checks (have multiple reviewers assess the same item periodically)
+- Monitoring per-reviewer metrics (review time, overturn rate) to detect fatigue patterns
+
+**Quality assurance of human decisions** — Human decisions are not automatically correct. A reviewer might approve a genuinely harmful request or block a legitimate one. Build QA processes:
+- Sample auditing — randomly re-review a percentage of completed escalations
+- Escalation of escalations — provide a path for complex cases to reach senior reviewers
+- Track overturn rates when users appeal human decisions
+- Document decision criteria so reviewers apply policy consistently
+
+**Feedback loops** — HITL systems generate valuable data. Every human decision on an escalation is a labeled example that can improve automated guardrails. Build pipelines that:
+- Collect human decisions alongside the original request and guardrail assessment
+- Periodically retrain or re-tune classifiers using these labeled examples
+- Track which categories of escalation decrease over time (indicating guardrail improvement) and which persist (indicating gaps in automation)
+- Alert when a new category of escalation appears that doesn't match existing policies
+
+**Availability and coverage** — If HITL guardrails are part of a real-time user experience, you need reviewer coverage during all operating hours. Design for the failure mode: what happens when the review queue is empty of reviewers? Options include holding the request (with a user-facing wait message), applying a conservative default (block by default for high-risk, allow by default for low-risk), or routing to an on-call escalation path.
 
 ### 2.1.7 Choosing and Combining Guardrail Types
 

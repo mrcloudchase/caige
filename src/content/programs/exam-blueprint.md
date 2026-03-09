@@ -101,10 +101,14 @@ Approximately **35%** of exam questions.
 
 ### Domain 1: AI System Fundamentals & Failure Modes (15%)
 
-**1.1 — Given an AI system architecture, identify where guardrails can be applied**
+**1.1 — Given an AI system architecture, identify where guardrails can be applied and explain how system characteristics affect guardrail requirements**
 - Locate input, processing, and output stages in an AI pipeline
 - Identify trust boundaries between components
 - Distinguish model-level safety from application-level guardrails
+- Describe how non-determinism impacts guardrail design
+- Explain how agentic capabilities expand the attack surface
+- Identify how multi-modal inputs create additional guardrail needs
+- Describe how context window limitations affect guardrail strategy
 
 **1.2 — Classify common AI failure modes and map them to guardrail strategies**
 - Identify hallucination, prompt injection, jailbreaking, data leakage, toxic output, and off-topic drift from examples
@@ -116,12 +120,6 @@ Approximately **35%** of exam questions.
 - Map attack surfaces in a given AI architecture
 - Prioritize threats by likelihood and impact
 - Identify trust boundaries and data flows that require guardrails
-
-**1.4 — Explain how AI system characteristics affect guardrail requirements**
-- Describe how non-determinism impacts guardrail design
-- Explain how agentic capabilities expand attack surface
-- Identify how multi-modal inputs create additional guardrail needs
-- Describe how context window limitations affect guardrail strategy
 
 ---
 

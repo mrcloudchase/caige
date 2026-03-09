@@ -1,5 +1,5 @@
 ---
-title: "AI Fundamentals & Failure Modes"
+title: "AI System Fundamentals & Failure Modes"
 slug: ai-fundamentals
 order: 1
 description: "AI system fundamentals, failure modes, and the risks that guardrails must address."
