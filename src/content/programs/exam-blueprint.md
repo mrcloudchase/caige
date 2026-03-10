@@ -24,7 +24,7 @@ description: "Exam structure, question types, detailed objectives, and scoring m
 | Time limit | 120 minutes |
 | Passing score | 70% (53 of 75 scored questions) |
 | Delivery | Online proctored |
-| Prerequisites | None required to sit for the exam; completion of the cAIge training program (including AI Foundations prerequisites) is strongly recommended |
+| Prerequisites | None required to sit for the exam; completion of the cAIge training program is strongly recommended |
 | Languages | English (additional languages planned) |
 
 ---
@@ -33,12 +33,11 @@ description: "Exam structure, question types, detailed objectives, and scoring m
 
 | Domain | Weight | Scored Questions | Approx. Count |
 |--------|--------|-----------------|----------------|
-| 1. AI System Fundamentals & Failure Modes | 15% | 11 | 11-12 |
-| 2. Guardrail Architecture & Design | 25% | 19 | 18-20 |
-| 3. Guardrail Implementation | 20% | 15 | 14-16 |
-| 4. Policy, Compliance & Governance | 15% | 11 | 11-12 |
-| 5. Testing & Red Teaming | 15% | 11 | 11-12 |
-| 6. Operations & Observability | 10% | 8 | 7-9 |
+| 1. AI Foundations | 15% | 11 | 11-12 |
+| 2. Understanding Failure Modes | 15% | 11 | 11-12 |
+| 3. Architecting Guardrails | 25% | 19 | 18-20 |
+| 4. Implementing Guardrails | 25% | 19 | 18-20 |
+| 5. Validating Guardrails | 20% | 15 | 14-16 |
 | **Total** | **100%** | **75** | |
 
 5 additional unscored pilot questions are distributed randomly throughout the exam. Candidates cannot distinguish pilot questions from scored questions.
@@ -99,185 +98,163 @@ Approximately **35%** of exam questions.
 
 ## Detailed Exam Objectives by Domain
 
-### Domain 1: AI System Fundamentals & Failure Modes (15%)
+### Domain 1: AI Foundations (15%)
 
-**1.1 — Given an AI system architecture, identify where guardrails can be applied and explain how system characteristics affect guardrail requirements**
-- Locate input, processing, and output stages in an AI pipeline
-- Identify trust boundaries between components
-- Distinguish model-level safety from application-level guardrails
-- Describe how non-determinism impacts guardrail design
-- Explain how agentic capabilities expand the attack surface
-- Identify how multi-modal inputs create additional guardrail needs
-- Describe how context window limitations affect guardrail strategy
+**1.1 — Explain how neural networks and LLMs work at a level sufficient to reason about guardrail requirements**
+- Describe how neural networks learn through the training loop and why knowledge is distributed across weights
+- Explain the transformer architecture, self-attention, and why it replaced sequential models
+- Articulate why LLMs are pattern-matching systems producing statistical predictions, not reasoning engines
+- Relate model scale to emergent capabilities and risk factors
 
-**1.2 — Classify common AI failure modes and map them to guardrail strategies**
-- Identify hallucination, prompt injection, jailbreaking, data leakage, toxic output, and off-topic drift from examples
-- Explain why each failure mode occurs
-- Recommend appropriate guardrail types for each failure mode
+**1.2 — Trace the complete LLM inference pipeline and identify guardrail interception points**
+- Trace data from raw text through tokenization, embedding, attention, and output generation
+- Explain how the attention mechanism processes all tokens without distinguishing trusted from untrusted input
+- Describe how temperature and sampling parameters affect output variability and non-determinism
+- Identify where in the inference pipeline guardrails can intercept or validate data
 
-**1.3 — Conduct threat modeling for AI applications**
-- Identify adversary profiles and motivations
-- Map attack surfaces in a given AI architecture
-- Prioritize threats by likelihood and impact
-- Identify trust boundaries and data flows that require guardrails
+**1.3 — Describe the LLM training pipeline and explain why training alone cannot eliminate risks**
+- Distinguish each stage of training (pre-training, instruction tuning, RLHF/DPO) and what each creates
+- Explain why instruction-following and safety behaviors are learned statistical preferences, not hard-coded rules
+- Identify which aspects of model behavior are controlled by the provider vs. the application developer
+- Articulate why training alone cannot eliminate hallucination, prompt injection, or jailbreaking
+
+**1.4 — Identify production AI system architecture patterns and map guardrail placement points**
+- Map the components of production AI applications (API gateways, orchestration, model routing)
+- Describe common patterns (simple chat, RAG, agentic, multi-model) and their data flows
+- Identify all guardrail placement points (pre-model, post-model, system-level, retrieval-level)
+- Distinguish between model provider safety controls and application-level guardrails
 
 ---
 
-### Domain 2: Guardrail Architecture & Design (25%)
+### Domain 2: Understanding Failure Modes (15%)
 
-**2.1 — Design a multi-layered guardrail strategy for a given use case**
-- Select appropriate input, output, and system-level guardrails
-- Layer cheap/fast checks before expensive checks
-- Balance security with usability and latency
+**2.1 — Map architectural properties of LLMs to the specific risks they create**
+- Connect attention mechanisms to prompt injection, distributed weights to data leakage, probabilistic generation to hallucination, and learned boundaries to jailbreaking
+- Identify trust boundaries in AI pipelines and explain why guardrails must exist at each
+- Explain how RAG and agentic patterns expand the attack surface
+- Articulate the defense-in-depth principle and why no single layer of defense is sufficient
+
+**2.2 — Classify common AI failure modes and map them to guardrail strategies**
+- Identify hallucination, prompt injection, jailbreaking, data leakage, toxic output, off-topic drift, over-reliance, cascading failures, and identity/access failures from examples
+- Explain why each failure mode occurs at a technical level
+- Categorize failure modes by severity and likelihood for a given use case
+- Recommend appropriate guardrail strategies for each failure mode
+
+**2.3 — Conduct threat modeling for AI applications**
+- Apply AI-specific threat modeling frameworks (including OWASP Top 10 for LLM Applications)
+- Identify adversary profiles, motivations, and capabilities
+- Map attack surfaces unique to AI (prompts, training data, retrieval corpora, tool integrations, MCP)
+- Assess supply chain risks (third-party models, poisoned datasets, untrusted tool servers)
+- Prioritize threats by likelihood and impact
+
+---
+
+### Domain 3: Architecting Guardrails (25%)
+
+**3.1 — Design multi-layered guardrail strategies using the guardrail taxonomy**
+- Classify guardrails by type (input, output, system-level, retrieval, agentic, human-in-the-loop)
+- Explain the tradeoffs between each type (latency, cost, coverage, false positive rate)
+- Design strategies that combine multiple guardrail types for defense in depth
 - Justify design decisions based on risk assessment
 
-**2.2 — Design input guardrail pipelines**
-- Select and sequence input validation techniques
-- Choose injection detection approaches based on risk tolerance
-- Define input schemas and constraints
-- Design rate limiting and abuse prevention
+**3.2 — Design input guardrail pipelines**
+- Select and sequence input validation techniques (sanitization, schema enforcement, injection detection)
+- Choose injection detection approaches (pattern-based, classifier-based, LLM-as-judge) based on risk tolerance
+- Design identity-aware guardrail systems with multi-tenant isolation
+- Layer cheap checks before expensive checks
 
-**2.3 — Design output guardrail pipelines**
-- Select content filtering approaches
+**3.3 — Design output guardrail pipelines**
+- Select content filtering approaches (toxicity, bias, appropriateness classifiers)
 - Design PII detection and redaction strategies
-- Implement groundedness and factuality checks
-- Design refusal responses that are helpful but secure
+- Implement groundedness and factuality checks for RAG systems
+- Design refusal responses that are helpful but do not reveal system internals
 
-**2.4 — Design system-level guardrails**
+**3.4 — Design system-level guardrails**
 - Write effective safety-oriented system prompts
-- Design fallback and circuit breaker patterns
-- Architect multi-model validation systems
-- Plan conversation memory management with safety in mind
+- Design fallback and circuit breaker patterns for graceful degradation
+- Architect multi-model validation systems (using one model to check another)
+- Plan conversation memory management, timeouts, and resource limits
 
-**2.5 — Design guardrails specific to RAG systems**
-- Implement retrieval-level access controls
+**3.5 — Design guardrails specific to RAG systems**
+- Implement retrieval-level access controls respecting user permissions
 - Defend against indirect prompt injection via retrieved documents
 - Design citation and attribution systems
-- Handle relevance filtering and source validation
+- Handle relevance filtering, contradictory sources, and knowledge base staleness
 
-**2.6 — Design guardrails for agentic AI systems**
-- Define tool access policies and approval workflows
-- Implement scope limiting and resource caps
-- Design audit trails for agent actions
-- Build rollback capabilities for agent-executed actions
+**3.6 — Design guardrails for agentic AI systems**
+- Define tool access policies and action confirmation workflows
+- Implement scope limiting, sandboxing, and resource caps
+- Design identity delegation models that prevent privilege escalation
+- Evaluate trust boundaries and security implications of tool integration protocols (MCP)
 
 ---
 
-### Domain 3: Guardrail Implementation (20%)
+### Domain 4: Implementing Guardrails (25%)
 
-**3.1 — Select and implement appropriate detection techniques**
-- Choose between rule-based, ML-based, and LLM-as-judge approaches
-- Combine detection methods for defense in depth
-- Tune detection thresholds for acceptable false positive/negative rates
-- Evaluate detection approaches on latency, cost, and accuracy
+**4.1 — Select and implement appropriate detection and classification techniques**
+- Choose between rule-based, ML-based, embedding-based, and LLM-as-judge approaches
+- Combine detection methods into layered pipelines (fast/cheap first, slow/expensive last)
+- Tune detection thresholds to balance false positives and false negatives
+- Evaluate approaches on latency, cost, accuracy, and maintainability
 
-**3.2 — Implement structured output enforcement**
-- Define and validate output schemas
-- Build retry and error recovery logic
-- Choose between constrained generation and post-hoc validation
+**4.2 — Implement structured output enforcement**
+- Define and validate output schemas (JSON schema, function call constraints)
+- Build retry and error recovery logic for malformed outputs
+- Choose between constrained decoding and post-hoc validation
 - Handle edge cases in AI-generated structured output
 
-**3.3 — Implement PII and sensitive data handling**
-- Deploy PII detection appropriate to sensitivity level
+**4.3 — Implement PII and sensitive data handling**
+- Deploy PII detection (regex, NER, purpose-built detectors) appropriate to sensitivity level
+- Choose between redaction, masking, and tokenization strategies
 - Design data flows that minimize model exposure to PII
 - Configure privacy-preserving logging
-- Apply data handling strategies based on classification level
 
-**3.4 — Evaluate and integrate guardrail tools and frameworks**
-- Assess guardrail tools against requirements
+**4.4 — Evaluate and integrate guardrail frameworks and tooling**
+- Assess guardrail tools against requirements (categories, not specific vendors)
 - Integrate guardrails at the appropriate layer (SDK, proxy, gateway)
 - Decide when to build custom vs. use existing solutions
-- Manage guardrail configuration as code
+- Manage guardrail configuration as code with version control
 
-**3.5 — Apply prompt engineering techniques for safety**
-- Write defensive system prompts
-- Structure prompts to minimize injection surface
-- Use few-shot examples for safe behavior guidance
-- Separate instructions from user-provided content
-
----
-
-### Domain 4: Policy, Compliance & Governance (15%)
-
-**4.1 — Map regulatory and framework requirements to guardrail implementations**
-- Identify applicable sections of EU AI Act, NIST AI RMF, ISO 42001
-- Apply OWASP Top 10 for LLM Applications to guardrail design
-- Determine risk classification and corresponding requirements
-- Stay current on evolving regulatory landscape
-
-**4.2 — Translate organizational policies into technical guardrails**
-- Read AI use policies and produce guardrail specifications
-- Identify policy gaps that leave guardrail decisions undefined
-- Recommend policy changes based on technical feasibility
-- Document policy-to-guardrail mappings
-
-**4.3 — Implement documentation and audit capabilities**
-- Create guardrail documentation for audit purposes
-- Maintain decision audit trails
-- Produce compliance reports on guardrail effectiveness
-- Document incidents with root cause and remediation
-
-**4.4 — Evaluate guardrails for ethical considerations**
-- Assess guardrails for unintended bias or disproportionate impact
-- Balance transparency with security in guardrail design
-- Adapt guardrails for multi-cultural and multi-lingual contexts
-- Consider accessibility in guardrail interactions
+**4.5 — Apply prompt engineering techniques for safety**
+- Write defensive system prompts with clear behavioral boundaries
+- Structure prompts to minimize injection surface (delimiters, separation of instructions and user content)
+- Use few-shot examples to demonstrate desired refusal behavior
+- Identify dynamic prompt construction risks and mitigations
 
 ---
 
-### Domain 5: Testing & Red Teaming (15%)
+### Domain 5: Validating Guardrails (20%)
 
-**5.1 — Plan and execute adversarial testing against AI guardrails**
-- Structure a red team engagement for an AI system
-- Apply known prompt injection and jailbreak techniques
-- Test guardrails with encoding, language, and formatting variations
-- Document and report findings actionably
+**5.1 — Plan and execute adversarial testing and red teaming against AI guardrails**
+- Structure a red team engagement for an AI system (planning, execution, reporting)
+- Apply known prompt injection, jailbreak, and encoding-based attack techniques
+- Distinguish between theoretical vulnerabilities and practically exploitable ones
+- Document and report findings in a format actionable by engineering teams
 
 **5.2 — Build and maintain guardrail test suites**
-- Create test cases covering known attack patterns
-- Build regression tests for guardrail changes
-- Design integration tests for end-to-end guardrail pipelines
-- Measure performance impact of guardrails under test conditions
+- Create unit tests for individual guardrail components (classifiers, filters, validators)
+- Build integration and regression tests for guardrail pipelines
+- Design edge case tests (encoding variations, language mixing, boundary inputs)
+- Measure performance impact of guardrails under load
 
 **5.3 — Define and measure guardrail effectiveness metrics**
 - Calculate precision, recall, and F1 for guardrail classifiers
-- Measure and report latency impact
-- Track false positive and false negative rates over time
+- Measure and report false positive rate (user friction) and false negative rate (safety gaps)
+- Track latency percentiles (p50, p95, p99) and cost per evaluation
 - Use metrics to drive guardrail tuning decisions
 
-**5.4 — Implement continuous validation processes**
-- Deploy canary tests for guardrail releases
-- Build automated adversarial probing systems
-- Incorporate new attack patterns from research and community
-- Re-validate guardrails after model updates
+**5.4 — Design monitoring and observability for guardrail systems**
+- Identify key operational metrics (block rate, bypass rate, latency, error rate)
+- Configure alerts that catch failures without creating alert fatigue
+- Design structured, privacy-preserving logging for guardrail events
+- Investigate anomalies and conduct forensic analysis of guardrail logs
 
----
-
-### Domain 6: Operations & Observability (10%)
-
-**6.1 — Design monitoring and alerting for guardrail systems**
-- Identify key operational metrics for guardrail health
-- Configure alerts for guardrail anomalies
-- Build operational dashboards
-- Investigate and resolve guardrail operational issues
-
-**6.2 — Implement logging that supports debugging and compliance**
-- Design guardrail event logging schemas
-- Balance logging detail with privacy requirements
-- Support forensic investigation through log design
-- Comply with data retention requirements
-
-**6.3 — Execute incident response for AI guardrail failures**
-- Classify AI guardrail incidents by severity
-- Contain guardrail failures quickly
-- Conduct post-incident reviews
-- Produce guardrail hardening recommendations from incidents
-
-**6.4 — Manage the guardrail lifecycle**
-- Plan for guardrail drift and degradation
-- Implement guardrail versioning and deployment strategies
-- Identify and remove redundant guardrails
-- Optimize guardrail cost and performance over time
+**5.5 — Implement continuous validation and lifecycle management**
+- Deploy canary tests and synthetic adversarial probes for guardrail releases
+- Re-validate guardrails after model updates or configuration changes
+- Plan for guardrail drift, versioning, and rollback
+- Execute incident response procedures for guardrail bypass events
+- Identify and address guardrail debt (outdated or redundant guardrails)
 
 ---
 
@@ -312,8 +289,8 @@ Approximately **35%** of exam questions.
 ## Candidate Preparation Guide
 
 ### Recommended Experience
-While there are no formal prerequisites to sit for the exam, the cAIge training program requires foundational knowledge of AI concepts (neural networks, transformer architecture, LLM training stages) covered in the AI Foundations prerequisites guide. Candidates are most successful with:
-- Completion of the cAIge training program, including the AI Foundations prerequisites
+While there are no formal prerequisites to sit for the exam, candidates are most successful with:
+- Completion of the cAIge training program (all five modules)
 - 1-2 years of experience working with AI/ML systems in any capacity
 - Basic understanding of software architecture and API design
 - Familiarity with at least one programming language
@@ -321,7 +298,7 @@ While there are no formal prerequisites to sit for the exam, the cAIge training 
 
 ### Study Approach
 1. Review the competency matrix to understand all knowledge areas and skills
-2. Complete the official cAIge training program (text-based modules with supporting video content)
+2. Complete the official cAIge training program (five text-based modules)
 3. Build hands-on experience by implementing guardrails in a practice environment
 4. Take practice exams to identify knowledge gaps
 5. Review areas of weakness against the competency matrix
@@ -332,4 +309,3 @@ While there are no formal prerequisites to sit for the exam, the cAIge training 
 - General software engineering skills (e.g., data structures, algorithms)
 - Legal expertise (e.g., detailed regulatory interpretation)
 - Memorization of specific regulatory article numbers or section references
-
