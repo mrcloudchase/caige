@@ -16,19 +16,17 @@ description: "Exhaustive knowledge areas and skills per domain for the cAIge cer
 
 ## Overview
 
-AI guardrails are the controls that prevent AI systems from being used in ways they shouldn't — whether that means producing harmful content, being exploited by adversarial users, leaking sensitive data, or taking unauthorized actions. The discipline spans three broad areas:
+AI guardrails are the technical controls that prevent AI systems from producing harmful content, being exploited by adversarial users, leaking sensitive data, or taking unauthorized actions. The cAIge certification focuses on the engineering discipline of designing, building, and validating these controls — specifically for applications powered by large language models (LLMs).
 
-- **Content Safety** — Preventing toxic, biased, or inappropriate outputs; enforcing topic boundaries and refusal behavior
-- **Security** — Defending against prompt injection, jailbreaking, data exfiltration, system prompt exposure, and unauthorized tool use
-- **Operational Safety** — Catching hallucinations, preventing cascading failures in agentic systems, enforcing resource limits, and maintaining graceful degradation
+The cAIge competency matrix defines what a Certified AI Guardrail Engineer must know and be able to do. It is organized into five domains that follow the guardrail engineering lifecycle:
 
-A Certified AI Guardrail Engineer works across all three areas. The cAIge competency matrix defines what they must know and be able to do. It is organized into six domains, each weighted by importance to the role. The matrix is vendor-agnostic — it tests understanding of concepts, patterns, and architectural thinking rather than specific product knowledge.
+1. **Understand the technology** — How LLMs and production AI systems work
+2. **Understand the failures** — What goes wrong, why, and how to model threats
+3. **Architect the defenses** — Design guardrail strategies and systems
+4. **Build the defenses** — Implement guardrails using proven techniques and tooling
+5. **Validate the defenses** — Test, measure, monitor, and maintain guardrail effectiveness
 
-A cAIge holder is qualified to design, implement, test, and maintain guardrail systems for AI-powered applications across any technology stack.
-
-### Foundational Knowledge
-
-The six scored domains below assume foundational understanding of AI concepts defined in Domain 0: AI Foundations. This foundational knowledge is covered in the prerequisites module of the cAIge training program. Domain 0 is not scored on the exam, but its concepts are assumed throughout all six scored domains.
+The matrix is vendor-agnostic — it tests understanding of concepts, patterns, and engineering thinking rather than specific product knowledge. A cAIge holder is qualified to engineer guardrail systems for LLM-powered applications across any technology stack.
 
 ---
 
@@ -36,21 +34,19 @@ The six scored domains below assume foundational understanding of AI concepts de
 
 | Domain | Weight | Description |
 |--------|--------|-------------|
-| 0. AI Foundations | — | Foundational AI knowledge (not scored, assumed throughout) |
-| 1. AI System Fundamentals & Failure Modes | 15% | Understanding the systems you are guarding |
-| 2. Guardrail Architecture & Design | 25% | Designing guardrail strategies and systems |
-| 3. Guardrail Implementation | 20% | Building and configuring guardrails |
-| 4. Policy, Compliance & Governance | 15% | Translating rules into technical controls |
-| 5. Testing & Red Teaming | 15% | Validating guardrails work under pressure |
-| 6. Operations & Observability | 10% | Running guardrails in production |
+| 1. AI Foundations | 15% | How LLMs and production AI systems work |
+| 2. Understanding Failure Modes | 15% | What goes wrong, why, and how to model threats |
+| 3. Architecting Guardrails | 25% | Designing guardrail strategies and systems |
+| 4. Implementing Guardrails | 25% | Building guardrails using proven techniques and tooling |
+| 5. Validating Guardrails | 20% | Testing, measuring, monitoring, and maintaining guardrails |
 
 ---
 
-## Domain 0: AI Foundations (Not Scored)
+## Domain 1: AI Foundations (15%)
 
-This domain defines the foundational AI knowledge assumed throughout the certification. It is not scored on the exam but is required prerequisite knowledge for all six scored domains.
+This domain covers the foundational knowledge of AI technology and production AI systems. A guardrail engineer must understand how the systems they are guarding actually work — from model internals to the production architecture that surrounds them.
 
-### 0.1 Neural Networks & Deep Learning
+### 1.1 Neural Networks & Deep Learning
 
 **Knowledge areas:**
 - Neural network architecture — input layers, hidden layers, output layers, nodes, and weighted connections
@@ -65,7 +61,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Relate model parameter count to model capacity and the implications for memorization and risk
 - Distinguish between training (weight adjustment) and inference (prediction using fixed weights)
 
-### 0.2 Large Language Models
+### 1.2 Large Language Models
 
 **Knowledge areas:**
 - The transformer architecture and how self-attention replaced sequential processing (RNNs, LSTMs)
@@ -73,6 +69,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Next-token prediction as the fundamental training objective
 - Scale — parameter counts, training data sizes, and the emergence of capabilities at scale
 - Mixture-of-Experts (MoE) and efficiency tradeoffs
+- Embedding models — dense vector representations, semantic similarity, and their role in retrieval and classification systems
 - What an LLM is not — not a database, not a search engine, not a reasoning engine
 
 **Skills — the candidate can:**
@@ -81,7 +78,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Relate model scale to emergent capabilities and risk factors (memorization, unpredictability)
 - Articulate why LLMs are pattern-matching systems producing statistical predictions, not reasoning engines with understanding
 
-### 0.3 LLM Inference & Text Generation
+### 1.3 LLM Inference & Text Generation
 
 **Knowledge areas:**
 - Tokenization — subword units, Byte Pair Encoding (BPE), vocabulary, special tokens
@@ -102,7 +99,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Describe how temperature and sampling parameters affect output variability and non-determinism
 - Identify where in the inference pipeline guardrails can intercept or validate data
 
-### 0.4 LLM Training Pipeline
+### 1.4 LLM Training Pipeline
 
 **Knowledge areas:**
 - Pre-training on massive text corpora — next-token prediction at scale, base models
@@ -121,44 +118,44 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Identify which aspects of model behavior are controlled by the provider vs. the application developer
 - Articulate why training alone cannot eliminate risks like hallucination, prompt injection, or jailbreaking
 
-### 0.5 Architectural Risk Factors
+### 1.5 Production AI System Architecture
 
 **Knowledge areas:**
-- The instruction hierarchy problem — learned compliance vs. enforced constraint
-- Architecture-to-risk mapping — attention enables prompt injection, distributed weights enable data leakage, probabilistic generation enables hallucination, learned boundaries enable jailbreaking
-- Expanded attack surfaces — RAG (retrieval poisoning, indirect injection, access control) and agentic systems (tool misuse, cascading failures, privilege escalation)
-- Embedding models, vector databases, and semantic search
-- Identity delegation — whose permissions an agent uses when calling tools
-- Trust boundaries — where data crosses from trusted to untrusted, and where guardrails belong
-- The three layers of defense — model training, system prompt, application-level guardrails
-- Adversary profiles — malicious users, automated attacks, insiders, researchers
-
-**Skills — the candidate can:**
-- Map each architectural property of an LLM to the specific risk it creates
-- Explain why RAG and agentic patterns expand the attack surface beyond simple chat applications
-- Identify trust boundaries in an AI system and explain why guardrails belong at each boundary
-- Articulate the defense-in-depth principle and why no single layer of defense is sufficient
-
----
-
-## Domain 1: AI System Fundamentals & Failure Modes (15%)
-
-### 1.1 Production AI System Architecture
-
-**Knowledge areas:**
-- How production AI applications are assembled — API gateways, orchestration layers, model routing, and where guardrails plug into the request/response pipeline
+- How production AI applications are assembled — API gateways, orchestration layers, model routing, and the request/response pipeline
+- Common production patterns — simple chat, RAG pipelines, agentic workflows, multi-model architectures — and how each pattern structures the data flow
 - Guardrail placement points — pre-processing (before the model), post-processing (after the model), system-level (around the model), and retrieval-level (before context injection)
 - The relationship between model provider safety features and application-level guardrails — what the provider handles vs. what you must build
 - Guardrail principles apply across modalities (text, image, audio, video); this program uses text as the primary example
-- How RAG and agentic patterns change the guardrail surface — additional insertion points for retrieval, tool calls, and multi-step reasoning
 
 **Skills — the candidate can:**
 - Map the components of a production AI application and identify where guardrails should be placed
 - Distinguish between model provider safety controls and application-level guardrails, and explain why both are necessary
-- Explain how adding RAG or agentic capabilities changes the guardrail requirements for an application
-- Evaluate an AI system architecture and identify unguarded trust boundaries
+- Describe how RAG, agentic, and multi-model patterns change the architectural complexity and guardrail insertion points
+- Identify all guardrail insertion points for a given AI system architecture
 
-### 1.2 Common Failure Modes
+---
+
+## Domain 2: Understanding Failure Modes (15%)
+
+This domain covers how and why AI systems fail — from the architectural properties that create vulnerabilities to the specific failure modes that guardrails must address. A guardrail engineer must understand the risk landscape before designing defenses.
+
+### 2.1 Architecture-to-Risk Mapping
+
+**Knowledge areas:**
+- The instruction hierarchy problem — why learned compliance is not enforced constraint, and what that means for guardrail design
+- Mapping architectural properties to specific risks — attention mechanisms enable prompt injection, distributed weights enable data leakage, probabilistic generation enables hallucination, learned safety boundaries enable jailbreaking
+- Trust boundaries — where data crosses from trusted to untrusted in an AI pipeline, and why guardrails must exist at each boundary
+- The three layers of defense — model training, system prompt, application-level guardrails — and why defense in depth is required
+- How RAG expands the attack surface — retrieval poisoning, indirect prompt injection through documents, document-level access control gaps
+- How agentic patterns expand the attack surface — tool misuse, cascading failures, privilege escalation, identity delegation
+
+**Skills — the candidate can:**
+- Map each architectural property of an LLM to the specific risk it creates
+- Identify trust boundaries in an AI system and explain why guardrails belong at each boundary
+- Explain why RAG and agentic patterns expand the attack surface beyond simple chat applications
+- Articulate the defense-in-depth principle and why no single layer of defense is sufficient
+
+### 2.2 Common Failure Modes
 
 **Knowledge areas:**
 - Hallucination — factual errors, fabricated citations, confident but wrong answers
@@ -177,10 +174,10 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Map failure modes to the guardrail strategies that mitigate them
 - Recognize novel failure patterns that don't fit existing categories
 
-### 1.3 Threat Modeling for AI Systems
+### 2.3 Threat Modeling for AI Systems
 
 **Knowledge areas:**
-- AI-specific threat modeling frameworks and approaches
+- AI-specific threat modeling frameworks and approaches (including OWASP Top 10 for LLM Applications)
 - Adversary profiles — who attacks AI systems and why (malicious users, competitors, researchers, insiders)
 - Attack surfaces unique to AI — prompts, training data, retrieval corpora, tool integrations, model APIs, tool integration protocols (MCP)
 - Supply chain risks — third-party models, fine-tuned weights, poisoned datasets, third-party MCP servers and tool providers
@@ -189,14 +186,16 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 **Skills — the candidate can:**
 - Conduct a threat model for an AI application identifying key risks and attack vectors
 - Prioritize guardrail investment based on threat severity and likelihood
-- Identify trust boundaries in an AI system architecture
+- Map adversary profiles to specific attack techniques and guardrail requirements
 - Document threat models in a format useful to engineering and security teams
 
 ---
 
-## Domain 2: Guardrail Architecture & Design (25%)
+## Domain 3: Architecting Guardrails (25%)
 
-### 2.1 Guardrail Taxonomy
+This domain covers the design of guardrail strategies and systems. A guardrail engineer must be able to architect multi-layered defenses that address the failure modes identified in Domain 2, selecting the right guardrail types for each use case and placement point.
+
+### 3.1 Guardrail Taxonomy
 
 **Knowledge areas:**
 - Input guardrails — controls applied before the AI processes a request
@@ -212,7 +211,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Design a multi-layered guardrail strategy that combines input, output, and system-level controls
 - Justify why certain use cases require specific guardrail types
 
-### 2.2 Input Guardrail Design
+### 3.2 Input Guardrail Design
 
 **Knowledge areas:**
 - Prompt validation and sanitization techniques
@@ -232,7 +231,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Implement layered input defenses (cheap checks first, expensive checks for edge cases)
 - Design identity-aware guardrail systems that enforce different policies based on user context
 
-### 2.3 Output Guardrail Design
+### 3.3 Output Guardrail Design
 
 **Knowledge areas:**
 - Content filtering — toxicity, bias, appropriateness classifiers
@@ -250,7 +249,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Build groundedness checks that verify AI output against retrieved sources
 - Design user-friendly refusal messages that are helpful without revealing system internals
 
-### 2.4 System-Level Guardrail Design
+### 3.4 System-Level Guardrail Design
 
 **Knowledge areas:**
 - System prompt engineering for safety — setting behavioral boundaries
@@ -267,7 +266,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Architect multi-model validation systems (e.g., a small classifier guarding a large generator)
 - Plan guardrail deployment strategies that minimize risk of breaking production
 
-### 2.5 RAG-Specific Guardrails
+### 3.5 RAG-Specific Guardrails
 
 **Knowledge areas:**
 - Source document access control — ensuring retrieved content respects permissions
@@ -284,7 +283,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Defend against indirect injection through retrieved content
 - Build citation systems that let users verify AI claims against sources
 
-### 2.6 Agentic System Guardrails
+### 3.6 Agentic System Guardrails
 
 **Knowledge areas:**
 - Tool use policies — which tools an agent can access and under what conditions
@@ -310,9 +309,11 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 
 ---
 
-## Domain 3: Guardrail Implementation (20%)
+## Domain 4: Implementing Guardrails (25%)
 
-### 3.1 Detection and Classification Techniques
+This domain covers the practical techniques and tooling used to build guardrails. A guardrail engineer must be able to select and combine detection methods, enforce output constraints, handle sensitive data, and integrate guardrails into application architectures.
+
+### 4.1 Detection and Classification Techniques
 
 **Knowledge areas:**
 - Rule-based detection — regex, keyword lists, blocklists/allowlists
@@ -328,7 +329,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Evaluate detection accuracy using precision, recall, and F1 metrics
 - Tune detection thresholds to balance false positives and false negatives
 
-### 3.2 Structured Output Enforcement
+### 4.2 Structured Output Enforcement
 
 **Knowledge areas:**
 - JSON schema validation for AI outputs
@@ -344,7 +345,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Implement retry strategies that don't degrade user experience
 - Choose between constrained generation and post-hoc validation based on use case
 
-### 3.3 PII and Sensitive Data Handling
+### 4.3 PII and Sensitive Data Handling
 
 **Knowledge areas:**
 - PII categories and sensitivity levels (names, emails, SSNs, medical records, financial data)
@@ -360,7 +361,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Configure logging systems that capture useful debugging info without storing PII
 - Apply different PII handling strategies based on data classification levels
 
-### 3.4 Guardrail Frameworks and Tooling
+### 4.4 Guardrail Frameworks and Tooling
 
 **Knowledge areas:**
 - Understanding of the guardrail tooling landscape (not vendor-specific configuration, but categories of tools)
@@ -376,7 +377,7 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Build custom guardrails when off-the-shelf solutions don't fit
 - Manage guardrail configurations as code with proper version control
 
-### 3.5 Prompt Engineering for Safety
+### 4.5 Prompt Engineering for Safety
 
 **Knowledge areas:**
 - Defensive system prompt techniques — clear boundaries, explicit refusal instructions
@@ -394,77 +395,11 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 
 ---
 
-## Domain 4: Policy, Compliance & Governance (15%)
+## Domain 5: Validating Guardrails (20%)
 
-### 4.1 AI Governance Frameworks
+This domain covers the complete validation lifecycle — from adversarial testing before deployment to ongoing monitoring in production. A guardrail engineer must be able to prove that guardrails work, measure their effectiveness, detect when they degrade, and respond when they fail.
 
-**Knowledge areas:**
-- NIST AI Risk Management Framework (AI RMF) — structure, core functions, profiles
-- ISO/IEC 42001 — AI management system standard
-- EU AI Act — risk categories, requirements for high-risk systems, prohibited practices
-- OWASP Top 10 for LLM Applications
-- Industry-specific guidance (healthcare, finance, government)
-- Responsible AI principles and how they translate to guardrails
-
-**Skills — the candidate can:**
-- Map guardrail requirements to specific regulatory and framework requirements
-- Determine which AI governance frameworks apply to a given deployment
-- Translate framework requirements into actionable technical guardrail specifications
-- Stay current on evolving regulatory requirements (knowing where to look, not memorizing law)
-
-### 4.2 Policy-to-Guardrail Translation
-
-**Knowledge areas:**
-- Organizational AI use policies — what they typically contain and how they're structured
-- Acceptable use policies for AI systems
-- Translating natural language policies into technical rules and classifiers
-- Handling ambiguity in policies — when rules don't clearly map to technical controls
-- Stakeholder communication — explaining guardrail capabilities and limitations to non-technical stakeholders
-- Policy versioning and change management
-
-**Skills — the candidate can:**
-- Read an organizational AI policy and produce a guardrail specification
-- Identify gaps in policies that leave guardrail decisions undefined
-- Recommend policy changes based on technical realities of guardrail enforcement
-- Document the mapping between policy requirements and technical implementations
-
-### 4.3 Documentation and Audit
-
-**Knowledge areas:**
-- Guardrail documentation standards — what to document and for whom
-- Model cards and system cards as guardrail documentation
-- Audit trail requirements — what regulators and auditors need to see
-- Change management for guardrail updates — who approves, how changes are tracked
-- Incident documentation for guardrail failures
-- Risk registers and how guardrails map to identified risks
-
-**Skills — the candidate can:**
-- Create guardrail documentation that satisfies audit requirements
-- Maintain audit trails that demonstrate guardrail effectiveness
-- Produce reports on guardrail performance for compliance and leadership audiences
-- Document guardrail incidents with root cause analysis and remediation steps
-
-### 4.4 Ethical Considerations
-
-**Knowledge areas:**
-- Bias in AI systems — how guardrails can both mitigate and introduce bias
-- Fairness considerations in content filtering (disproportionate impact on certain groups or languages)
-- Transparency vs. security — how much to reveal about guardrail mechanisms
-- User autonomy — balancing safety with user freedom
-- Accessibility — ensuring guardrails don't create barriers for users with disabilities
-- Cultural and linguistic considerations in global deployments
-
-**Skills — the candidate can:**
-- Evaluate guardrails for unintended bias or disproportionate impact
-- Design guardrail transparency disclosures that are honest without enabling bypass
-- Balance safety and usability in guardrail design decisions
-- Adapt guardrail strategies for multi-cultural and multi-lingual deployments
-
----
-
-## Domain 5: Testing & Red Teaming (15%)
-
-### 5.1 Adversarial Testing Fundamentals
+### 5.1 Adversarial Testing & Red Teaming
 
 **Knowledge areas:**
 - Red teaming methodology for AI systems — planning, execution, reporting
@@ -513,87 +448,44 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 - Use metrics to justify guardrail tuning decisions to stakeholders
 - Identify when metrics indicate a guardrail is underperforming
 
-### 5.4 Continuous Validation
-
-**Knowledge areas:**
-- Canary testing for guardrail deployments
-- Synthetic traffic and chaos testing for guardrail systems
-- Ongoing adversarial probing in production (automated red teaming)
-- Community and research-driven attack updates — staying current on new bypass techniques
-- Bug bounty programs for AI guardrails
-- Model update impact assessment — re-validating guardrails when underlying models change
-
-**Skills — the candidate can:**
-- Implement automated canary tests that validate guardrails on every deployment
-- Design synthetic adversarial traffic that continuously probes for weaknesses
-- Build processes that incorporate newly discovered attack patterns into test suites
-- Assess guardrail effectiveness after model updates or configuration changes
-
----
-
-## Domain 6: Operations & Observability (10%)
-
-### 6.1 Monitoring and Alerting
+### 5.4 Monitoring & Observability
 
 **Knowledge areas:**
 - Key metrics to monitor for guardrail systems (block rate, bypass rate, latency, error rate)
 - Anomaly detection for guardrail behavior — sudden spikes in blocks or passes
 - Alert design — what warrants a page vs. a ticket vs. a log entry
 - Dashboard design for guardrail operations
-- Correlation between guardrail events and downstream system behavior
+- Structured logging for guardrail events — decision, reasoning, input hash, output action, latency
+- Privacy-preserving logging — capturing enough for debugging without storing sensitive content
+- Log analysis and forensics for guardrail investigations
 
 **Skills — the candidate can:**
 - Design monitoring systems that surface guardrail health and effectiveness
 - Configure alerts that catch guardrail failures without creating alert fatigue
-- Build operational dashboards for day-to-day guardrail management
+- Design logging schemas that balance debugging utility with privacy requirements
 - Investigate anomalies in guardrail behavior and determine root causes
 
-### 6.2 Logging and Audit Trails
+### 5.5 Continuous Validation & Lifecycle Management
 
 **Knowledge areas:**
-- What to log for guardrail events (decision, reasoning, input hash, output action, latency)
-- Privacy-preserving logging — capturing enough for debugging without storing sensitive content
-- Log retention policies and compliance requirements
-- Structured logging formats for guardrail events
-- Log analysis and forensics for guardrail investigations
-
-**Skills — the candidate can:**
-- Design logging schemas for guardrail systems that balance utility with privacy
-- Implement log pipelines that support both real-time monitoring and historical analysis
-- Conduct forensic analysis of guardrail logs to investigate incidents
-- Ensure logging practices comply with data retention and privacy requirements
-
-### 6.3 Incident Response
-
-**Knowledge areas:**
-- AI-specific incident response procedures — guardrail bypass, data exposure, harmful output
-- Severity classification for AI guardrail incidents
-- Containment strategies — killing sessions, disabling features, rolling back models
-- Communication templates for AI incidents (internal and external)
-- Post-incident review and guardrail hardening
-- Escalation paths — when to involve security, legal, PR
-
-**Skills — the candidate can:**
-- Execute incident response procedures for common AI guardrail failure scenarios
-- Classify AI incidents by severity and determine appropriate response
-- Contain active guardrail failures quickly while minimizing user impact
-- Conduct blameless post-mortems that produce concrete guardrail improvements
-
-### 6.4 Lifecycle Management
-
-**Knowledge areas:**
+- Canary testing for guardrail deployments
+- Synthetic traffic and chaos testing for guardrail systems
+- Ongoing adversarial probing in production (automated red teaming)
+- Community and research-driven attack updates — staying current on new bypass techniques
+- Model update impact assessment — re-validating guardrails when underlying models change
 - Guardrail drift — why guardrails degrade over time (new attacks, model updates, data shifts)
 - Guardrail versioning and rollback strategies
-- Deprecation and migration of guardrail components
-- Capacity planning for guardrail systems (as traffic grows, guardrails must scale)
+- Incident response for guardrail failures — containment, classification, root cause analysis, hardening
 - Cost optimization — reducing guardrail spend without reducing coverage
 - Guardrail debt — accumulation of outdated or redundant guardrails
 
 **Skills — the candidate can:**
+- Implement automated canary tests that validate guardrails on every deployment
+- Design synthetic adversarial traffic that continuously probes for weaknesses
+- Build processes that incorporate newly discovered attack patterns into test suites
+- Execute incident response procedures for guardrail bypass events
 - Plan guardrail maintenance schedules that account for model and threat evolution
-- Implement blue-green or canary deployment strategies for guardrail updates
 - Identify and remove redundant or outdated guardrails
-- Project guardrail infrastructure costs and optimize for efficiency
 
 ---
 
@@ -603,6 +495,5 @@ These are not tested as separate domains but are expected throughout all areas:
 
 - **Vendor-agnostic thinking** — understanding patterns and principles rather than memorizing product-specific configurations
 - **Risk-based decision making** — always connecting guardrail decisions to actual risk levels
-- **Communication** — ability to explain guardrail decisions to technical and non-technical audiences
-- **Continuous learning** — awareness that the AI guardrail landscape evolves rapidly and commitment to staying current
 - **Systems thinking** — understanding how guardrails interact with the broader application, infrastructure, and organizational context
+- **Continuous learning** — awareness that the AI guardrail landscape evolves rapidly and commitment to staying current
