@@ -2,7 +2,6 @@
 title: "Threat Modeling for AI Systems"
 slug: "threat-modeling"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 3
 description: "Section 3 of the ai fundamentals module."
 ---

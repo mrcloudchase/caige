@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 4
 description: "Section 4 of the ai fundamentals module."
 ---

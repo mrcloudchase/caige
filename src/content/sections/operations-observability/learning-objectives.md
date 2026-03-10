@@ -2,7 +2,6 @@
 title: "Learning Objectives"
 slug: "learning-objectives"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 0
 description: "Section 0 of the operations observability module."
 ---

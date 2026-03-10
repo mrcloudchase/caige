@@ -2,7 +2,6 @@
 title: "Input Guardrail Design"
 slug: "input-guardrail-design"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 2
 description: "Section 2 of the guardrail architecture module."
 ---

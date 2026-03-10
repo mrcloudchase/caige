@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 5
 description: "Section 5 of the policy compliance module."
 ---

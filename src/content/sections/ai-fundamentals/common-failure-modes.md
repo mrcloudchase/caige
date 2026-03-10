@@ -2,7 +2,6 @@
 title: "Common Failure Modes"
 slug: "common-failure-modes"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 2
 description: "Section 2 of the ai fundamentals module."
 ---

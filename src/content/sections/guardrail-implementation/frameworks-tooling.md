@@ -2,7 +2,6 @@
 title: "Guardrail Frameworks and Tooling"
 slug: "frameworks-tooling"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 4
 description: "Section 4 of the guardrail implementation module."
 ---

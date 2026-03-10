@@ -2,7 +2,6 @@
 title: "Learning Objectives"
 slug: "learning-objectives"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 0
 description: "Section 0 of the ai fundamentals module."
 ---

@@ -2,7 +2,6 @@
 title: "Adversarial Testing Fundamentals"
 slug: "adversarial-testing"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 1
 description: "Section 1 of the testing red teaming module."
 ---

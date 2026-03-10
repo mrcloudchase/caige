@@ -2,7 +2,6 @@
 title: "Policy-to-Guardrail Translation"
 slug: "policy-translation"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 2
 description: "Section 2 of the policy compliance module."
 ---

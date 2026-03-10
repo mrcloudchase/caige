@@ -2,7 +2,6 @@
 title: "Documentation and Audit"
 slug: "documentation-audit"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 3
 description: "Section 3 of the policy compliance module."
 ---

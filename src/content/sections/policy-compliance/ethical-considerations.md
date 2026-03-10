@@ -2,7 +2,6 @@
 title: "Ethical Considerations"
 slug: "ethical-considerations"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 4
 description: "Section 4 of the policy compliance module."
 ---

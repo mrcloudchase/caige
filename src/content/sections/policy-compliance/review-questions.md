@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 6
 description: "Section 6 of the policy compliance module."
 ---

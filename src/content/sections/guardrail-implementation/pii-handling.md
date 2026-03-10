@@ -2,7 +2,6 @@
 title: "PII and Sensitive Data Handling"
 slug: "pii-handling"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 3
 description: "Section 3 of the guardrail implementation module."
 ---

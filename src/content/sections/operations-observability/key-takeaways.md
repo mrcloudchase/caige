@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 5
 description: "Section 5 of the operations observability module."
 ---

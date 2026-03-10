@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 6
 description: "Section 6 of the operations observability module."
 ---

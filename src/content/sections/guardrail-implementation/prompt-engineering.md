@@ -2,7 +2,6 @@
 title: "Prompt Engineering for Safety"
 slug: "prompt-engineering"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 5
 description: "Section 5 of the guardrail implementation module."
 ---

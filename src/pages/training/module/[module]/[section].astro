@@ -3,10 +3,11 @@ import { getCollection, render } from 'astro:content';
 import TrainingLayout from '../../../../layouts/TrainingLayout.astro';
 
 export async function getStaticPaths() {
-  const allSections = (await getCollection('sections')).sort(
-    (a, b) => a.data.moduleOrder - b.data.moduleOrder || a.data.sectionOrder - b.data.sectionOrder
-  );
   const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+  const moduleOrderMap = Object.fromEntries(modules.map(m => [m.data.slug, m.data.order]));
+  const allSections = (await getCollection('sections')).sort(
+    (a, b) => (moduleOrderMap[a.data.module] ?? 0) - (moduleOrderMap[b.data.module] ?? 0) || a.data.sectionOrder - b.data.sectionOrder
+  );
 
   return allSections.map((entry, i) => {
     // Prev: previous section, or module landing if first section
@@ -32,7 +33,7 @@ export async function getStaticPaths() {
       };
     } else {
       // Find next module
-      const currentModuleOrder = entry.data.moduleOrder;
+      const currentModuleOrder = moduleOrderMap[entry.data.module] ?? 0;
       const nextModule = modules.find(m => m.data.order === currentModuleOrder + 1);
       if (nextModule) {
         next = {

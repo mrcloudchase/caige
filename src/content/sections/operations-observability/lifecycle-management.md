@@ -2,7 +2,6 @@
 title: "Lifecycle Management"
 slug: "lifecycle-management"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 4
 description: "Section 4 of the operations observability module."
 ---

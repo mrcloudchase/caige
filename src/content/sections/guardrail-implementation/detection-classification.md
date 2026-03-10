@@ -2,7 +2,6 @@
 title: "Detection and Classification Techniques"
 slug: "detection-classification"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 1
 description: "Section 1 of the guardrail implementation module."
 ---

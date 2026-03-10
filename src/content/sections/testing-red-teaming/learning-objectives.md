@@ -2,7 +2,6 @@
 title: "Learning Objectives"
 slug: "learning-objectives"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 0
 description: "Section 0 of the testing red teaming module."
 ---

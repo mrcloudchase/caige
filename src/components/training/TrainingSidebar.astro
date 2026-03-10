@@ -9,8 +9,9 @@ const { currentPath } = Astro.props;
 
 const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
 const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+const moduleOrderMap = Object.fromEntries(modules.map(m => [m.data.slug, m.data.order]));
 const allSections = (await getCollection('sections')).sort(
-  (a, b) => a.data.moduleOrder - b.data.moduleOrder || a.data.sectionOrder - b.data.sectionOrder
+  (a, b) => (moduleOrderMap[a.data.module] ?? 0) - (moduleOrderMap[b.data.module] ?? 0) || a.data.sectionOrder - b.data.sectionOrder
 );
 
 function isActive(href: string) {

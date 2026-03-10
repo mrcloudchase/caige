@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 6
 description: "Section 6 of the guardrail implementation module."
 ---

@@ -2,7 +2,6 @@
 title: "What Is a Neural Network?"
 slug: "neural-networks"
 module: "prerequisites"
-moduleOrder: 0
 sectionOrder: 0
 description: "Section 0 of the prerequisites module."
 ---

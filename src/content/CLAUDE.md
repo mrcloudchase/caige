@@ -11,6 +11,7 @@ Also refer to the root [AGENTS.md](../../AGENTS.md) for project-wide context.
 - `programs/exam-blueprint.md` — Exam structure, question types, detailed objectives, scoring methodology
 - `modules/prerequisites.md` — Required AI Foundations prerequisite knowledge (not directly tested on exam)
 - `modules/module-{1-6}-*.md` — Six training modules, one per exam domain
+- `sections/{module-slug}/*.md` — Section content files organized by parent module
 
 All content is version 1.0. All files have YAML frontmatter validated by Zod schemas in `src/content.config.ts`.
 
@@ -26,6 +27,17 @@ domain?: number     # Exam domain number (1-6, absent for prerequisites)
 weight?: string     # Domain weight (e.g. "15%", absent for prerequisites)
 studyTime?: string  # Estimated study time (e.g. "3-4 hours")
 ```
+
+### Sections
+```yaml
+title: string       # Display title
+slug: string        # URL slug (used in /training/module/[module]/[slug])
+module: string      # Parent module slug (must match a module's slug field)
+sectionOrder: number # Sort order within the module (0=learning-objectives, etc.)
+description: string # Short description
+```
+
+Module ordering is resolved at build time from the parent module's `order` field — sections do NOT store module order.
 
 ### Programs
 ```yaml

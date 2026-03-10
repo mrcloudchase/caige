@@ -36,7 +36,9 @@ src/
       index.astro     — Redirects to /training/overview
       [slug].astro    — Program pages (overview, competency-matrix, exam-blueprint)
       module/
-        [slug].astro  — Module pages (prerequisites, ai-fundamentals, etc.)
+        [slug].astro  — Module landing pages (prerequisites, ai-fundamentals, etc.)
+        [module]/
+          [section].astro — Section pages within a module
   layouts/
     BaseLayout.astro  — HTML shell, head, Header, optional Footer
     TrainingLayout.astro — BaseLayout + sidebar + prev/next nav
@@ -56,8 +58,9 @@ src/
          SidePanel, PaletteBox, ResultsScreen, ConfirmModal, Timer)
   content/
     modules/           — 7 markdown files with Zod-validated frontmatter
+    sections/          — Section markdown files organized by module slug subdirectory
     programs/          — 3 markdown files (overview, competency-matrix, exam-blueprint)
-  content.config.ts    — Zod schemas for modules and programs collections
+  content.config.ts    — Zod schemas for modules, sections, and programs collections
   styles/
     global.css         — Tailwind 4 import + theme tokens + shared styles
     landing.css        — Landing page styles
@@ -79,8 +82,9 @@ public/
 
 ### Content Collections
 
-Two collections defined in `src/content.config.ts`:
+Three collections defined in `src/content.config.ts`:
 - **modules**: 7 files (prerequisites + 6 domain modules). Schema: title, slug, order, description, domain?, weight?, studyTime?
+- **sections**: Files in `sections/{module-slug}/`, one per topic. Schema: title, slug, module (parent module slug), sectionOrder, description. Module ordering is resolved at build time from the parent module's `order` field — sections do NOT store module order.
 - **programs**: 3 files (overview, competency-matrix, exam-blueprint). Schema: title, slug, order, description
 
 Pages use `getCollection()` and `render()` from `astro:content` to query and render entries.

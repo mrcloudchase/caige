@@ -2,7 +2,6 @@
 title: "Structured Output Enforcement"
 slug: "structured-output"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 2
 description: "Section 2 of the guardrail implementation module."
 ---

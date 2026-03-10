@@ -2,7 +2,6 @@
 title: "Logging and Audit Trails"
 slug: "logging-audit-trails"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 2
 description: "Section 2 of the operations observability module."
 ---

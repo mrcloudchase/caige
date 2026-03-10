@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 5
 description: "Section 5 of the testing red teaming module."
 ---

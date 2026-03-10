@@ -2,7 +2,6 @@
 title: "What Is a Large Language Model?"
 slug: "large-language-models"
 module: "prerequisites"
-moduleOrder: 0
 sectionOrder: 1
 description: "Section 1 of the prerequisites module."
 ---

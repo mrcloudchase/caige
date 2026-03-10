@@ -2,7 +2,6 @@
 title: "RAG-Specific Guardrails"
 slug: "rag-guardrails"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 5
 description: "Section 5 of the guardrail architecture module."
 ---

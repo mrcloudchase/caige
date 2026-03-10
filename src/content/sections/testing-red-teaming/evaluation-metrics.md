@@ -2,7 +2,6 @@
 title: "Evaluation Metrics"
 slug: "evaluation-metrics"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 3
 description: "Section 3 of the testing red teaming module."
 ---

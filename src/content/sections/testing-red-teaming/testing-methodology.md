@@ -2,7 +2,6 @@
 title: "Guardrail Testing Methodology"
 slug: "testing-methodology"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 2
 description: "Section 2 of the testing red teaming module."
 ---

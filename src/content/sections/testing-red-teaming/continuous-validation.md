@@ -2,7 +2,6 @@
 title: "Continuous Validation"
 slug: "continuous-validation"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 4
 description: "Section 4 of the testing red teaming module."
 ---

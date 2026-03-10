@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "testing-red-teaming"
-moduleOrder: 5
 sectionOrder: 6
 description: "Section 6 of the testing red teaming module."
 ---

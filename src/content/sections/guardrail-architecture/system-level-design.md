@@ -2,7 +2,6 @@
 title: "System-Level Guardrail Design"
 slug: "system-level-design"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 4
 description: "Section 4 of the guardrail architecture module."
 ---

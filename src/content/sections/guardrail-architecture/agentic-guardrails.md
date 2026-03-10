@@ -2,7 +2,6 @@
 title: "Agentic System Guardrails"
 slug: "agentic-guardrails"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 6
 description: "Section 6 of the guardrail architecture module."
 ---

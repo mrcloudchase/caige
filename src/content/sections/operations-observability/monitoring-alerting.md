@@ -2,7 +2,6 @@
 title: "Monitoring and Alerting"
 slug: "monitoring-alerting"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 1
 description: "Section 1 of the operations observability module."
 ---

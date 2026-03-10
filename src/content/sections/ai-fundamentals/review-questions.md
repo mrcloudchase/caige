@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 5
 description: "Section 5 of the ai fundamentals module."
 ---

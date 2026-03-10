@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 8
 description: "Section 8 of the guardrail architecture module."
 ---

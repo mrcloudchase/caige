@@ -2,7 +2,6 @@
 title: "How AI Systems Work"
 slug: "how-ai-systems-work"
 module: "ai-fundamentals"
-moduleOrder: 1
 sectionOrder: 1
 description: "Section 1 of the ai fundamentals module."
 ---

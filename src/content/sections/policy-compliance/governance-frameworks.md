@@ -2,7 +2,6 @@
 title: "AI Governance Frameworks"
 slug: "governance-frameworks"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 1
 description: "Section 1 of the policy compliance module."
 ---

@@ -2,7 +2,6 @@
 title: "Key Takeaways"
 slug: "key-takeaways"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 7
 description: "Section 7 of the guardrail architecture module."
 ---

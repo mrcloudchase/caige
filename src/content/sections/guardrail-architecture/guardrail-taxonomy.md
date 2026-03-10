@@ -2,7 +2,6 @@
 title: "Guardrail Taxonomy"
 slug: "guardrail-taxonomy"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 1
 description: "Section 1 of the guardrail architecture module."
 ---

@@ -2,7 +2,6 @@
 title: "Learning Objectives"
 slug: "learning-objectives"
 module: "policy-compliance"
-moduleOrder: 4
 sectionOrder: 0
 description: "Section 0 of the policy compliance module."
 ---

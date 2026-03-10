@@ -2,7 +2,6 @@
 title: "Review Questions"
 slug: "review-questions"
 module: "guardrail-implementation"
-moduleOrder: 3
 sectionOrder: 7
 description: "Section 7 of the guardrail implementation module."
 ---

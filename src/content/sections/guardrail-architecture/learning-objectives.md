@@ -2,7 +2,6 @@
 title: "Learning Objectives"
 slug: "learning-objectives"
 module: "guardrail-architecture"
-moduleOrder: 2
 sectionOrder: 0
 description: "Section 0 of the guardrail architecture module."
 ---

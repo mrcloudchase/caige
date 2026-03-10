@@ -28,7 +28,6 @@ const sections = defineCollection({
     title: z.string(),
     slug: z.string(),
     module: z.string(),
-    moduleOrder: z.number(),
     sectionOrder: z.number(),
     description: z.string(),
   }),

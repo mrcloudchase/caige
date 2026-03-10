@@ -2,7 +2,6 @@
 title: "Key Vocabulary"
 slug: "key-vocabulary"
 module: "prerequisites"
-moduleOrder: 0
 sectionOrder: 5
 description: "Section 5 of the prerequisites module."
 ---

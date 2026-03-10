@@ -2,7 +2,6 @@
 title: "Incident Response"
 slug: "incident-response"
 module: "operations-observability"
-moduleOrder: 6
 sectionOrder: 3
 description: "Section 3 of the operations observability module."
 ---
