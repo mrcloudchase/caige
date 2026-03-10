@@ -61,12 +61,7 @@ const moduleOrder = entry.data.order;
     {sections.map((s, i) => (
       <a href={`/training/module/${moduleSlug}/${s.data.slug}`} class="section-tile">
         <span class="section-tile-number">
-          {moduleOrder === 0
-            ? `Part ${i + 1}`
-            : s.data.slug === 'learning-objectives' ? ''
-            : s.data.slug === 'key-takeaways' ? ''
-            : s.data.slug === 'review-questions' ? ''
-            : `${moduleOrder}.${i}`}
+          {`Section ${s.data.sectionOrder}`}
         </span>
         <span class="section-tile-title">{s.data.title}</span>
       </a>
