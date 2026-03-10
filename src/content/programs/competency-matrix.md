@@ -143,21 +143,20 @@ This domain defines the foundational AI knowledge assumed throughout the certifi
 
 ## Domain 1: AI System Fundamentals & Failure Modes (15%)
 
-### 1.1 How AI Systems Work
+### 1.1 Production AI System Architecture
 
 **Knowledge areas:**
-- Large language model architecture at a conceptual level (tokens, context windows, attention, probability distributions)
-- How model inference works — temperature, sampling, top-k/top-p and their impact on output predictability
-- The role of system prompts, user prompts, and assistant responses in a conversation loop
-- Embedding models and their role in retrieval and similarity search
-- Multi-modal AI systems (text, image, audio) and their unique guardrail considerations
-- Agentic AI systems — tool use, function calling, multi-step reasoning, and autonomous action
+- How production AI applications are assembled — API gateways, orchestration layers, model routing, and where guardrails plug into the request/response pipeline
+- Guardrail placement points — pre-processing (before the model), post-processing (after the model), system-level (around the model), and retrieval-level (before context injection)
+- The relationship between model provider safety features and application-level guardrails — what the provider handles vs. what you must build
+- Guardrail principles apply across modalities (text, image, audio, video); this program uses text as the primary example
+- How RAG and agentic patterns change the guardrail surface — additional insertion points for retrieval, tool calls, and multi-step reasoning
 
 **Skills — the candidate can:**
-- Explain why LLMs produce non-deterministic outputs and what that means for guardrail design
-- Identify where in an AI system's architecture guardrails can be applied
-- Distinguish between model-level safety training and application-level guardrails
-- Describe how agentic systems expand the attack surface compared to simple chat interfaces
+- Map the components of a production AI application and identify where guardrails should be placed
+- Distinguish between model provider safety controls and application-level guardrails, and explain why both are necessary
+- Explain how adding RAG or agentic capabilities changes the guardrail requirements for an application
+- Evaluate an AI system architecture and identify unguarded trust boundaries
 
 ### 1.2 Common Failure Modes
 
