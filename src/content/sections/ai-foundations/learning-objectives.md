@@ -8,6 +8,8 @@ description: "What you will be able to do after completing the AI Foundations mo
 
 ## Domain 1: AI Foundations — Learning Objectives
 
+Throughout this program, **guardrails** refers to the technical controls — input validators, output filters, classifiers, circuit breakers, monitoring systems, and other mechanisms — that operate around an AI model to prevent it from producing harmful, incorrect, or unauthorized outputs. Guardrail engineering is the discipline of designing, building, and validating these controls.
+
 After completing this module, you will be able to:
 
 - **Explain how neural networks learn** by describing the training loop (forward pass, loss computation, backpropagation, weight update) and why knowledge is distributed across billions of parameters rather than stored in discrete, inspectable locations.

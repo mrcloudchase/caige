@@ -38,7 +38,7 @@ def check_injection_patterns(text: str) -> list[dict]:
     findings = []
     for pattern in INJECTION_PATTERNS:
         matches = re.finditer(pattern, text)
-        for match in findings:
+        for match in matches:
             findings.append({
                 "pattern": pattern,
                 "matched_text": match.group(),
