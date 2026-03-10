@@ -2,7 +2,7 @@
 title: "How LLMs Are Trained"
 slug: "llm-training"
 module: "prerequisites"
-sectionOrder: 3
+sectionOrder: 4
 description: "Section 3 of the prerequisites module."
 ---
 

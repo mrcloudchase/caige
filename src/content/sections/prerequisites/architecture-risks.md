@@ -2,7 +2,7 @@
 title: "Why This Architecture Is Dangerous"
 slug: "architecture-risks"
 module: "prerequisites"
-sectionOrder: 4
+sectionOrder: 5
 description: "Section 4 of the prerequisites module."
 ---
 

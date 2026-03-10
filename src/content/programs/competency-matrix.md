@@ -26,9 +26,9 @@ A Certified AI Guardrail Engineer works across all three areas. The cAIge compet
 
 A cAIge holder is qualified to design, implement, test, and maintain guardrail systems for AI-powered applications across any technology stack.
 
-### Assumed Foundational Knowledge
+### Foundational Knowledge
 
-The six domains below assume foundational understanding of AI concepts: neural network basics, tokenization and context windows, the transformer architecture, how LLMs are trained (pre-training, instruction tuning, RLHF, RL for reasoning), chat templates and role boundaries, inference and text generation (including reasoning models and chain-of-thought), embedding models and RAG, and agentic system patterns. This foundational knowledge is covered in the AI Foundations prerequisites guide included with the cAIge training program and is not tested as a separate domain, but is assumed throughout all six domains.
+The six scored domains below assume foundational understanding of AI concepts defined in Domain 0: AI Foundations. This foundational knowledge is covered in the prerequisites module of the cAIge training program. Domain 0 is not scored on the exam, but its concepts are assumed throughout all six scored domains.
 
 ---
 
@@ -36,12 +36,108 @@ The six domains below assume foundational understanding of AI concepts: neural n
 
 | Domain | Weight | Description |
 |--------|--------|-------------|
+| 0. AI Foundations | — | Foundational AI knowledge (not scored, assumed throughout) |
 | 1. AI System Fundamentals & Failure Modes | 15% | Understanding the systems you are guarding |
 | 2. Guardrail Architecture & Design | 25% | Designing guardrail strategies and systems |
 | 3. Guardrail Implementation | 20% | Building and configuring guardrails |
 | 4. Policy, Compliance & Governance | 15% | Translating rules into technical controls |
 | 5. Testing & Red Teaming | 15% | Validating guardrails work under pressure |
 | 6. Operations & Observability | 10% | Running guardrails in production |
+
+---
+
+## Domain 0: AI Foundations (Not Scored)
+
+This domain defines the foundational AI knowledge assumed throughout the certification. It is not scored on the exam but is required prerequisite knowledge for all six scored domains.
+
+### 0.1 Neural Networks & Deep Learning
+
+**Knowledge areas:**
+- Neural network architecture — input layers, hidden layers, output layers, nodes, and weighted connections
+- How weights (parameters) determine a network's behavior and what "model size" means
+- The training loop — forward pass, loss calculation, backpropagation, and weight update
+- Activation functions and why non-linearity is necessary for learning complex patterns
+- Why knowledge is distributed across weights and cannot be inspected, queried, or selectively removed
+
+**Skills — the candidate can:**
+- Explain how a neural network learns patterns from data through iterative weight adjustment
+- Describe why knowledge stored in neural network weights cannot be inspected or selectively removed
+- Relate model parameter count to model capacity and the implications for memorization and risk
+- Distinguish between training (weight adjustment) and inference (prediction using fixed weights)
+
+### 0.2 Large Language Models
+
+**Knowledge areas:**
+- The transformer architecture and how self-attention replaced sequential processing (RNNs, LSTMs)
+- Encoder-decoder vs. decoder-only architecture and why modern LLMs use decoder-only
+- Next-token prediction as the fundamental training objective
+- Scale — parameter counts, training data sizes, and the emergence of capabilities at scale
+- Mixture-of-Experts (MoE) and efficiency tradeoffs
+- What an LLM is not — not a database, not a search engine, not a reasoning engine
+
+**Skills — the candidate can:**
+- Explain why the transformer architecture replaced sequential models and what self-attention enables
+- Describe the next-token prediction objective and why it produces general-purpose capabilities
+- Relate model scale to emergent capabilities and risk factors (memorization, unpredictability)
+- Articulate why LLMs are pattern-matching systems producing statistical predictions, not reasoning engines with understanding
+
+### 0.3 LLM Inference & Text Generation
+
+**Knowledge areas:**
+- Tokenization — subword units, Byte Pair Encoding (BPE), vocabulary, special tokens
+- The context window as working memory and the token budget tradeoff
+- The embedding layer — converting token IDs to dense learned vectors
+- Positional encoding — adding sequence order information to embeddings
+- Masked self-attention — queries, keys, values, multi-head attention, and the causal mask
+- Feed-forward networks and their role in storing factual knowledge
+- Residual connections and layer normalization for training stability
+- The output head — logits, softmax, and probability distributions over the vocabulary
+- The autoregressive generation loop — producing one token at a time
+- Temperature, top-k, top-p sampling and their effect on output variability
+- Reasoning models, chain-of-thought, and inference-time scaling
+
+**Skills — the candidate can:**
+- Trace the complete data path from raw text through tokenization, embedding, transformer layers, and output generation
+- Explain how the attention mechanism processes all tokens in parallel without distinguishing trusted from untrusted input
+- Describe how temperature and sampling parameters affect output variability and non-determinism
+- Identify where in the inference pipeline guardrails can intercept or validate data
+
+### 0.4 LLM Training Pipeline
+
+**Knowledge areas:**
+- Pre-training on massive text corpora — next-token prediction at scale, base models
+- Instruction tuning — fine-tuning on conversation data, chat templates with role boundaries (system, user, assistant, tool)
+- The instruction hierarchy as a learned statistical preference, not an enforced constraint
+- RLHF — reward models, Proximal Policy Optimization (PPO), and alignment training
+- Alternatives to RLHF — Constitutional AI, Direct Preference Optimization (DPO)
+- RL for reasoning — training models to produce step-by-step thinking tokens
+- Distillation — training smaller models to replicate larger model behavior
+- What each training stage creates and what can go wrong at each stage
+- What the application developer can and cannot control
+
+**Skills — the candidate can:**
+- Describe each stage of LLM training and the capabilities and risks each introduces
+- Explain why instruction-following and safety behaviors are learned statistical preferences, not hard-coded rules
+- Identify which aspects of model behavior are controlled by the provider vs. the application developer
+- Articulate why training alone cannot eliminate risks like hallucination, prompt injection, or jailbreaking
+
+### 0.5 Architectural Risk Factors
+
+**Knowledge areas:**
+- The instruction hierarchy problem — learned compliance vs. enforced constraint
+- Architecture-to-risk mapping — attention enables prompt injection, distributed weights enable data leakage, probabilistic generation enables hallucination, learned boundaries enable jailbreaking
+- Expanded attack surfaces — RAG (retrieval poisoning, indirect injection, access control) and agentic systems (tool misuse, cascading failures, privilege escalation)
+- Embedding models, vector databases, and semantic search
+- Identity delegation — whose permissions an agent uses when calling tools
+- Trust boundaries — where data crosses from trusted to untrusted, and where guardrails belong
+- The three layers of defense — model training, system prompt, application-level guardrails
+- Adversary profiles — malicious users, automated attacks, insiders, researchers
+
+**Skills — the candidate can:**
+- Map each architectural property of an LLM to the specific risk it creates
+- Explain why RAG and agentic patterns expand the attack surface beyond simple chat applications
+- Identify trust boundaries in an AI system and explain why guardrails belong at each boundary
+- Articulate the defense-in-depth principle and why no single layer of defense is sufficient
 
 ---
 

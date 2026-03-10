@@ -2,7 +2,7 @@
 title: "How an LLM Works"
 slug: "how-llms-work"
 module: "prerequisites"
-sectionOrder: 2
+sectionOrder: 3
 description: "Section 2 of the prerequisites module."
 ---
 
