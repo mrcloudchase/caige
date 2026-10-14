@@ -1,0 +1,322 @@
+{
+  "domain": 7,
+  "questions": [
+    {
+      "id": "D7-001",
+      "objective": "7.1",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "A support assistant's guardrail block rate has averaged 3.0% for months. Over the last 24 hours it is 1.2% across 30,000 requests. Guardrail error rate is zero and latency is normal. The old alert used a fixed band of 1% to 10%, so nothing fired. What is the best next action?",
+      "options": [
+        "Take no action, because the block rate is still inside the normal band and nothing is erroring",
+        "Treat it as a page: check detection probe results and coverage by route to see whether some traffic is now unguarded",
+        "Lower the classifier thresholds until the block rate returns to 3.0%",
+        "Open a low-priority ticket for the weekly review, since a falling block rate with zero errors and normal latency most often means attack traffic has dropped off"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "The ratio is 0.4x of baseline, a large relative drop, and a falling block rate is the dangerous direction because it can mean silent failure or coverage loss. Probes and coverage distinguish a broken guardrail from a genuine drop in attacks. Lowering thresholds blindly hides the cause and raises false positives, and assuming fewer attacks is the least likely and least safe explanation."
+    },
+    {
+      "id": "D7-002",
+      "objective": "7.1",
+      "category": "cross-cutting",
+      "type": "ms",
+      "question": "Your team needs real prompts and responses for false negative review and judge calibration. Which design choices belong in a governed sample store? (Choose 2)",
+      "options": [
+        "Store user identity as a keyed HMAC pseudonym, with the key held in a secrets manager outside the store",
+        "Store sha256(user_id) as the identifier, since hashed values are anonymized",
+        "Delete samples automatically after a defined retention period, with legal holds for records tied to an incident",
+        "Write full prompts and responses to the general application logs so every engineer can debug",
+        "Sample only blocked requests, since allowed traffic is low risk"
+      ],
+      "correct": [
+        0,
+        2
+      ],
+      "explanation": "Keyed pseudonyms and enforced retention with incident holds are core properties of a governed store. An unkeyed hash is not anonymization because candidate IDs can be hashed and matched. General logs give content access to everyone with log access. Sampling only blocked traffic cannot estimate the false negative rate, which requires a random sample of allowed traffic."
+    },
+    {
+      "id": "D7-003",
+      "objective": "7.1",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "Under a policy that pages only on signals that need immediate action and tickets the rest, which of these signals most clearly justifies waking someone up?",
+      "options": [
+        "Block-rate ratio rose to 2.3x of the same-hour baseline over the last hour, with all critical detection probes still passing on every route",
+        "p95 guardrail latency has been above its SLO for 30 minutes",
+        "Coverage fell to 98.9% over 15 minutes, meaning some model calls have no guardrail decision",
+        "Refusal-rate ratio fell to 0.45x of baseline after a prompt change"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Missing coverage means some traffic reaches the model with no guardrail at all, so users may be unprotected right now. A rising block rate with passing probes usually means more blocking, which hurts usability but keeps protection. Latency and refusal-rate shifts matter but can wait for business hours."
+    },
+    {
+      "id": "D7-004",
+      "objective": "7.1",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "Your new relative block-rate alert pages whenever the ratio to baseline falls to 0.5x or below. It now pages most nights around 3 a.m., when an internal tool sees about 40 requests per hour and often blocks none of them. What is the best fix?",
+      "options": [
+        "Require a minimum request volume before trusting the ratio, and evaluate low-traffic routes over longer windows",
+        "Switch back to absolute percentage-point thresholds, which are more stable at night",
+        "Disable block-rate alerts on that route between midnight and 6 a.m., when traffic is too light for the ratio to mean anything and on-call fatigue is highest",
+        "Lower the paging ratio to 0.1x so that only extreme drops page"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "With 40 requests, a zero block count is expected noise, so the ratio should not be trusted below a volume floor; aggregating over longer windows keeps the signal for quiet routes. Absolute thresholds hide large relative changes at low base rates. Disabling night alerts or lowering the ratio would also hide real silent failures."
+    },
+    {
+      "id": "D7-005",
+      "objective": "7.2",
+      "category": "security",
+      "type": "mc",
+      "question": "A customer service agent can call an issue_refund tool. Attackers are sending emails containing instructions that cause the agent, when it reads them, to issue refunds. The injection classifier is running normally and allowing these requests. Refund volume is 5x baseline. Which action contains the exposure?",
+      "options": [
+        "Switch the injection classifier to fail-closed",
+        "Rate-limit issue_refund calls to ten per minute per customer account, so that the volume of fraudulent refunds drops back toward the normal baseline",
+        "Disable model-initiated issue_refund calls, or hold each one for human approval, until a deterministic check is in place",
+        "Add a system prompt instruction telling the agent never to follow instructions in emails"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Disabling the tool or routing the action to human review stops unauthorized refunds regardless of how the injection is phrased. Fail-closed only changes behavior when the classifier errors, and it is not erroring. A rate limit slows abuse but every refund that gets through is still unguarded, and a prompt instruction is a request the attacker's text competes with."
+    },
+    {
+      "id": "D7-006",
+      "objective": "7.2",
+      "category": "containment",
+      "type": "ms",
+      "question": "You are scoping an incident in which an agent may have sent customer records to an external address. Which sources should you rely on to determine what happened? (Choose 2)",
+      "options": [
+        "Tool-call and egress audit records written by the harness to a store the model cannot write to",
+        "The agent's answer when asked to list every email it sent during the incident window",
+        "The mail system's own sent-message records, joined to guardrail decision records by request ID",
+        "The model's reasoning trace explaining why it chose each action",
+        "Re-running today's guardrail configuration over the suspect prompts to see what would have been blocked"
+      ],
+      "correct": [
+        0,
+        2
+      ],
+      "explanation": "Scope comes from records the model cannot alter and from downstream systems of record. The agent's self-report and reasoning trace are outputs of the system under investigation, not evidence. Re-running today's configuration shows current behavior, not what the configuration in force at the time actually did; use the config_version on each decision record instead."
+    },
+    {
+      "id": "D7-007",
+      "objective": "7.2",
+      "category": "security",
+      "type": "mc",
+      "question": "An external researcher reports a jailbreak against your assistant. You confirm it, and your testing shows it also works against the upstream model your provider offers to other customers. You have contained it in your own system. What is the best disclosure approach?",
+      "options": [
+        "Publish the full technique on your engineering blog right away so other deployers can protect themselves",
+        "Report it privately to the model provider, agree on timing, then share a sanitized write-up through channels such as MITRE ATLAS case studies or sector sharing groups",
+        "Keep the finding internal indefinitely, since disclosing a weakness in a provider's model could create legal exposure and invite copycat attacks against your system",
+        "File it in the company's general issue tracker so every team can see the exploit and check their own products"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Coordinated disclosure lets the upstream vendor fix the weakness before attackers learn it, and sanitized sharing helps the wider industry. Publishing immediately hands unpatched deployments a working exploit. Silence leaves others exposed, and exploit details belong in a restricted security tracker, not a general one."
+    },
+    {
+      "id": "D7-008",
+      "objective": "7.2",
+      "category": "containment",
+      "type": "ms",
+      "question": "Which practices make an emergency brake drill credible evidence that the brake works? (Choose 3)",
+      "options": [
+        "The brake is pulled without warning by a person who holds stop authority on the register",
+        "The drill measures time to stop and confirms in-flight actions reached a safe state and credentials were revoked",
+        "The team talks through the brake procedure in a tabletop meeting without touching the system",
+        "The drill includes restoring the system and measures how long recovery takes",
+        "The system's own team schedules the drill in advance and prepares the environment beforehand"
+      ],
+      "correct": [
+        0,
+        1,
+        3
+      ],
+      "explanation": "An unannounced pull by an authorized holder tests the people and the mechanism together, and measuring stop, safe state, revocation, and restore shows whether it works end to end. A tabletop never exercises the real lever. A drill the team prepares for in advance can pass while the real brake would fail."
+    },
+    {
+      "id": "D7-009",
+      "objective": "7.3",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "A classifier threshold change is on a 5% canary with over 2,000 requests per arm. The control arm blocks 3.0% of requests and the canary blocks 12.9%. The team's existing rule rolls back only if the absolute difference exceeds 10 percentage points. What should happen?",
+      "options": [
+        "Promote, since the 9.9-point difference is inside the rollback limit",
+        "Hold the canary for another full day of traffic and promote it if the absolute difference between the arms stays under the 10-point limit",
+        "Promote, but tighten the absolute limit to 5 points for future changes",
+        "Roll back, because the canary's block rate is about 4.3x the control's, well above a 2.0x relative limit"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "At a 3% base rate, a 9.9-point difference is a 4.3x jump, which signals a false positive wave. Relative criteria catch this; absolute deltas hide large relative changes at low base rates. Tightening the absolute limit only moves the blind spot to other base rates."
+    },
+    {
+      "id": "D7-010",
+      "objective": "7.3",
+      "category": "cross-cutting",
+      "type": "ms",
+      "question": "A retrained injection classifier is on canary. Block-rate ratio against the control is 1.05x, error rate and latency are normal. Which checks should also pass before promotion? (Choose 2)",
+      "options": [
+        "Labeled critical attack probes sent through the canary path pass at the required rate, with no probe that passes on control failing on canary",
+        "Benign probes pass and the refusal-rate ratio stays within limits",
+        "The absolute difference in block rate between arms is under one percentage point",
+        "The canary model's own assessment of whether it is safer than the previous version",
+        "The canary is expanded to 50% of traffic so block rate alone has more statistical power"
+      ],
+      "correct": [
+        0,
+        1
+      ],
+      "explanation": "A steady block rate says nothing about whether the right inputs are blocked; attack probes measure detection directly and benign probes and refusal ratio measure over-blocking. Absolute deltas repeat the base-rate blind spot, a model cannot verify its own safety, and attacks are too rare in traffic for block rate to reveal a recall loss even at 50%."
+    },
+    {
+      "id": "D7-011",
+      "objective": "7.3",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "You want to replace an existing enforcing injection rule with a new candidate rule. Which rollout plan is correct?",
+      "options": [
+        "Keep the existing rule enforcing, run the candidate in monitor-only on the same traffic, then canary it with probes before switching",
+        "Move the existing rule to monitor-only and enforce the candidate, so both are measured on live traffic",
+        "Put both rules in monitor-only for a week to compare them fairly",
+        "Deploy the candidate to all traffic at once, keeping the previous configuration bundle deployable so that a rollback takes minutes if metrics move"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Monitor-only for the candidate costs nothing in protection while the existing rule keeps enforcing; a canary with probes then measures detection before full rollout. Moving the existing rule to monitor-only, or both rules, removes protection during the test. Skipping straight to full rollout relies on detecting problems after users are exposed."
+    },
+    {
+      "id": "D7-012",
+      "objective": "7.4",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "Three days before launch, the critical-harm false negative rate is 14% against a blocking criterion of 10% set months earlier. A vice president replies 'ok to ship' with a thumbs-up in the launch channel and the agent ships. What governance artifact was missing?",
+      "options": [
+        "A revised criterion of 15%, so the system would have passed",
+        "A sign-off from the guardrail engineer who ran the evaluation, accepting the gap on behalf of the business",
+        "A risk acceptance record naming the gap, evidence, compensating controls, an authorized signer who owns the consequence, the guardrail team's position, and an expiry",
+        "A re-run of the evaluation with a different sample until the rate fell under 10%"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "A failed blocking criterion needs a written risk acceptance signed by someone authorized to accept that risk, with compensating controls and an expiry. Moving the threshold after seeing results defeats the gate, and re-sampling until it passes is the same problem. The engineer who measured the gap does not own the business consequence and should record a position, not sign for the business."
+    },
+    {
+      "id": "D7-013",
+      "objective": "7.4",
+      "category": "containment",
+      "type": "mc",
+      "question": "You are writing the stop authority register for an agent that can take actions in customer accounts. Which design is best?",
+      "options": [
+        "Stopping requires a vice president's approval to avoid unnecessary outages; resuming can be done by any on-call engineer",
+        "Any named holder on the register may stop the system without prior approval; resuming requires both the system owner and the guardrail owner",
+        "Any on-call engineer may stop or resume the system at their own discretion",
+        "Only the guardrail owner may stop or resume the system, so that a single named person is clearly accountable for every brake decision and its consequences"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Stopping is time-sensitive and reversible, so it should be cheap for anyone authorized; resuming reintroduces risk, so it needs evidence and accountable approval. Requiring executive approval to stop delays action while harm continues. A single holder is a single point of failure, and letting anyone resume undoes the stop without review."
+    },
+    {
+      "id": "D7-014",
+      "objective": "7.4",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "A release gate script is being reviewed. Which behavior should it have for a blocking criterion?",
+      "options": [
+        "Missing evidence fails the criterion unless an unexpired, unrevoked risk acceptance signed by an authorized role covers it",
+        "Missing evidence passes the criterion if it passed at the previous release",
+        "Any risk acceptance on file for that criterion waives it, whoever signed it, since the gate's job is to confirm that someone took responsibility for the gap",
+        "A failing blocking criterion is reported as a warning and the release continues"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Treating missing evidence as failure prevents a broken pipeline from producing a go, and only a valid acceptance from an authorized signer should waive a blocking criterion. Carrying forward an old pass ignores what changed. Accepting any signer lets accountability land on someone who does not own the risk, and downgrading to a warning makes the criterion advisory."
+    },
+    {
+      "id": "D7-015",
+      "objective": "7.5",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "In October 2026, an EU customer asks when the EU AI Act's high-risk obligations apply to your stand-alone AI tool that screens job applicants, an Annex III employment use. What is the correct answer?",
+      "options": [
+        "August 2, 2026, the Act's general application date, when obligations for high-risk systems listed in Annex III were originally scheduled to begin",
+        "August 2, 2028, the date for AI embedded in products under Annex I",
+        "February 2, 2025, when the Act's first obligations applied",
+        "December 2, 2027, after the Digital Omnibus on AI (Regulation (EU) 2026/1744) deferred Annex III obligations"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Regulation (EU) 2026/1744, in force since July 27, 2026, moved stand-alone Annex III high-risk obligations from August 2, 2026 to December 2, 2027. August 2, 2028 is the new date for Annex I product-embedded AI. February 2, 2025 is when prohibitions and AI literacy applied; Article 50 transparency duties still applied from August 2, 2026."
+    },
+    {
+      "id": "D7-016",
+      "objective": "7.5",
+      "category": "cross-cutting",
+      "type": "ms",
+      "question": "Your team is designing guardrail logging for EU users. Which statements about the GDPR are correct? (Choose 2)",
+      "options": [
+        "Consent is one of six lawful bases, and processing for security may rest on another basis such as legitimate interests, as counsel determines",
+        "Consent must be collected for every prompt that is logged, because it is the only lawful basis for processing user content",
+        "Data pseudonymized with a keyed HMAC is still personal data, though the pseudonymization reduces risk",
+        "Storing an unkeyed SHA-256 hash of each email address makes the log anonymous and outside the GDPR",
+        "Once a lawful basis is chosen, data minimization and storage limitation no longer apply"
+      ],
+      "correct": [
+        0,
+        2
+      ],
+      "explanation": "Article 6 lists six lawful bases, and consent is often a poor fit for security processing because it can be withdrawn. Pseudonymized data remains personal data. An unkeyed hash can be reversed by hashing candidate values, so it is not anonymization, and minimization and storage limitation apply whatever the lawful basis."
+    },
+    {
+      "id": "D7-017",
+      "objective": "7.5",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "An auditor asks you to demonstrate that human oversight of your agent works in practice. Which evidence is strongest?",
+      "options": [
+        "Brake drill records with measured stop times, approval logs for gated actions, and the current stop authority register",
+        "The approved AI governance policy, signed by the executive team, which states that human oversight is in place for all agents that act on customer accounts",
+        "A transcript in which the agent explains how it defers to human operators",
+        "The launch presentation describing the oversight design"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Auditors give most weight to records the system produced at the time, which show the control operating. A policy states intent, a launch deck describes a design, and the model's own explanation is not evidence of anything the harness enforced."
+    },
+    {
+      "id": "D7-018",
+      "objective": "7.5",
+      "category": "cross-cutting",
+      "type": "mc",
+      "question": "A large customer's procurement team wants independent, third-party assurance of your organization's AI governance processes, not a self-assessment. What should you pursue?",
+      "options": [
+        "NIST AI RMF certification issued by NIST",
+        "A NIST AI 600-1 attestation letter from NIST",
+        "ISO/IEC 42001:2023 certification from an accredited body, with a scope that includes the systems the customer uses",
+        "A self-declared mapping of every control to the four NIST AI RMF functions, published on your trust page and refreshed after each release"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "ISO/IEC 42001:2023 is a certifiable AI management system standard, audited by accredited certification bodies with surveillance audits, and its scope must cover the relevant systems. The NIST AI RMF and AI 600-1 are voluntary frameworks with no NIST certification. A self-declared mapping is useful but is exactly the self-assessment the customer said was not enough."
+    }
+  ]
+}
