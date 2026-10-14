@@ -255,7 +255,7 @@ The tenant comes from the authenticated principal, not from the model's request 
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.4 has you exploit the lab chat UI with a reference-style markdown image that exfiltrates a secret, then close it with HTML sanitization, a URL allowlist, and a content security policy, and route the agent's fetch tool through the lab's egress proxy.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.4 has you encode model output for its renderer, block images and links to hosts outside an allowlist, and enforce the same allowlist at the network layer, with tests showing unapproved URLs in output are neutralized.
 
 ## Check your understanding
 

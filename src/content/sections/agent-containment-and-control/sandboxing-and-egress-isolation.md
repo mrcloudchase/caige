@@ -183,7 +183,7 @@ The sandbox can ask the gateway to perform an action. It never holds the key tha
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.2 has you move a code-execution tool from a plain container into a gVisor or microVM sandbox with no network, then add an egress proxy and show that requests to the metadata address, a private IP, and a non-allowlisted host are all refused and logged.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.2 has you run your agent's code-execution or browsing tool in an isolated environment with default-deny egress and no mounted secrets, then show with a test that connections to unapproved hosts (including the metadata address and private IPs) fail.
 
 ## Check your understanding
 

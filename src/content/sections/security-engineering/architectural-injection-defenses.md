@@ -201,7 +201,7 @@ Two limits show up in practice. Labels propagate conservatively, so a summary th
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.2 has you identify the lethal trifecta in the lab agent, then add a taint-tracking policy so that an injected instruction to email retrieved private data to an external address is blocked in code.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.2 has you pick one lethal-trifecta flow from your Lab 2 threat model and break it architecturally, for example by removing the outbound tool from the step that reads untrusted content or by separating a privileged planner from a quarantined reader, then show the flow can no longer exfiltrate even when the injection itself succeeds.
 
 ## Check your understanding
 

@@ -77,7 +77,7 @@ Request the narrowest scopes the current task needs, and step up when a privileg
 
 ### 4. Short-lived, audience-bound tokens (deterministic)
 
-- **Audience-bound**: the token names the one resource server it is for. The MCP authorization specification (2025-06-18) requires clients to send the RFC 8707 `resource` parameter identifying the target MCP server, and requires servers to validate that tokens were issued specifically for them. A token for the calendar server cannot be replayed at the file server.
+- **Audience-bound**: the token names the one resource server it is for. The MCP authorization specification (2025-06-18) requires clients to send the RFC 8707 `resource` parameter identifying the target MCP server, and requires servers to validate that tokens were issued specifically for them. If every server checks the audience, a token for the calendar server cannot be replayed at the file server.
 - **Short-lived**: the specification says authorization servers should issue short-lived access tokens, and must rotate refresh tokens for public clients. Minutes, not days.
 
 ### 5. No token passthrough; use token exchange (deterministic)
@@ -203,7 +203,7 @@ def recipient_allowed(address: str) -> bool:
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.6 has you replace the lab agent's shared service key and model-supplied `user_id` with audience-checked per-user tokens validated in the tool backend, and fix its suffix-matching email allowlist.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.6 has you make every tool call carry the end user's identity with narrowly scoped, short-lived credentials, enforce authorization in the tool backend, and make recipient allowlists exact-match on parsed domains, with tests that include look-alike domains.
 
 ## Check your understanding
 

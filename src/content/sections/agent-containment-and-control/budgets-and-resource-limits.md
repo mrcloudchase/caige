@@ -179,7 +179,7 @@ Set limits from observed distributions, not guesses. Run the agent on a represen
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.4 gives you an agent with a paginating tool that loops. You add a run ledger with reserve-and-settle accounting, a loop detector, and a per-tenant quota keyed on the authenticated tenant, then show the run stops within a few iterations with a structured status.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.4 has you enforce step, token, cost, and time budgets in your orchestrator and show, with a test, that a looping task is stopped at its budget with a structured status.
 
 ## Check your understanding
 

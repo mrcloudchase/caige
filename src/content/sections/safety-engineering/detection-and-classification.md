@@ -38,7 +38,7 @@ lastReviewed: "2026-10-14"
 
 A team ships a support assistant with a four-stage input pipeline: regex rules, a toxicity classifier, an embedding similarity check against known jailbreaks, and an LLM judge. The design document says "cheap checks first, expensive checks only for the hard cases." Three weeks later the judge bill is larger than the bill for the assistant itself, and p95 latency has doubled.
 
-The cause is one line of code. Every request that passed the first three stages went to the judge. The pipeline had a decision value called `ESCALATE` that nothing ever returned. The cheap stages could block, but they could not *clear*, so the expensive stage saw nearly all traffic.
+Every request that passed the first three stages went to the judge. The pipeline's `ESCALATE` decision was never returned: the cheap stages could block but not *clear*, so the expensive stage saw nearly all traffic.
 
 The same review found three more problems. The keyword filter returned "allow" as soon as an allowlisted phrase appeared anywhere in the text, so "bomb calorimeter" in one sentence suppressed a blocklist hit in the next. Every regex match was logged with `confidence=1.0`, including a pattern as broad as `you are now a`. And the judge prompt wrapped the user's text in `<content>` tags, so a message containing `</content>` followed by new instructions could tell the judge what to answer.
 
@@ -46,8 +46,8 @@ The same review found three more problems. The keyword filter returned "allow" a
 
 Detectors differ in what they see and how they fail.
 
-- **Rules** (regex, keyword lists) match surface strings. They are fast, cheap, explainable, and exact. They miss paraphrase, other languages, and encodings, and broad patterns match benign text. Their precision depends entirely on how narrow each pattern is.
-- **ML classifiers** learn a decision boundary from labeled data. They generalize to paraphrases of what they were trained on and fail on categories, styles, or languages they were not. A classifier trained on toxic forum comments says little about medical misinformation. Purpose-built safety classifiers (for example, Llama Guard-style models that take a policy taxonomy as input; [Inan et al., 2023](https://arxiv.org/abs/2312.06674)) and prompt-injection classifiers (for example, Prompt Guard-style models) are better starting points than repurposing a general model. A general natural-language-inference model used zero-shot as an injection detector was not trained for the task and is a weak substitute.
+- **Rules** (regex, keyword lists) match surface strings. They are fast, cheap, and explainable. They miss paraphrase, other languages, and encodings, and broad patterns match benign text.
+- **ML classifiers** learn a decision boundary from labeled data. They generalize to paraphrases of what they were trained on and fail on categories, styles, or languages they were not. Purpose-built safety classifiers (for example, Llama Guard-style models that take a policy taxonomy as input; [Inan et al., 2023](https://arxiv.org/abs/2312.06674)) and prompt-injection classifiers (for example, Prompt Guard-style models) are better starting points than repurposing a general model. A general natural-language-inference model used zero-shot as an injection detector was not trained for the task and is a weak substitute.
 - **Embedding similarity** compares an input's vector to vectors of known examples. It catches close paraphrases of things you have already seen and is useful for topic boundaries. It does not detect a new attack that is not near any stored example, and a cosine similarity is a distance, not a probability.
 - **LLM judges** read the content and a rubric and return a decision. They handle nuance and context the other methods miss. They are the slowest and most expensive per call, show systematic biases such as position and verbosity effects ([Zheng et al., 2023](https://arxiv.org/abs/2306.05685)), vary between runs even at temperature 0 on hosted APIs (see [1.1](/training/module/how-ai-systems-behave/tokens-context-sampling)), and can be instructed by the content they are judging.
 
@@ -80,7 +80,7 @@ Calibrate each classifier on a labeled sample of your own traffic, using Platt s
 - At or above the **block threshold**, the stage blocks. Choose it from the precision you need: of the requests it blocks, what fraction must be true violations.
 - Between them is the **ambiguous band**, which goes to the next, more expensive stage.
 
-Moving the allow threshold down sends more traffic to the judge (more cost, fewer misses). Moving the block threshold up blocks fewer legitimate requests but sends more to the judge. Where you set them depends on the costs of each error type for this category (a missed self-harm signal and a missed rude word do not cost the same) and on the base rate in production. A threshold that gives 95% precision on a balanced test set can give far lower precision when violations are rare, because the benign false positives outnumber the true positives. The arithmetic is in [6.2 Metrics and Statistics](/training/module/evaluation-and-red-teaming/metrics-and-statistics); the design consequence here is that thresholds are set per category from your data, not copied from a vendor default.
+Lowering the allow threshold or raising the block threshold sends more traffic to the judge: more cost, fewer errors. Where you set them depends on the costs of each error type for this category (a missed self-harm signal and a missed rude word do not cost the same) and on the base rate in production. A threshold that gives 95% precision on a balanced test set can give far lower precision when violations are rare, because the benign false positives outnumber the true positives. The arithmetic is in [6.2 Metrics and Statistics](/training/module/evaluation-and-red-teaming/metrics-and-statistics); the design consequence here is that thresholds are set per category from your data, not copied from a vendor default.
 
 ### 4. A layered pipeline that routes only the ambiguous band
 
@@ -112,7 +112,7 @@ request
 
 Embedding similarity sits beside the classifier rather than as a separate blocking stage because a similarity score is not a calibrated probability. A close match to a known attack pushes the request into the judge's band; it does not block on its own unless you have measured its precision as you would a block rule.
 
-The judge is reserved for the band where it adds information. How wide that band is determines your judge cost, so measure the fraction of traffic that lands in it and alert when it changes.
+The width of the band determines judge cost, so monitor the fraction of traffic that lands in it.
 
 ### 5. Judges that resist the content they judge
 
@@ -138,7 +138,7 @@ Where detection runs decides what it covers and how easily it is skipped.
 
 Gateway enforcement is real only when the network and the credentials make it the only path. Changing DNS or publishing a recommended endpoint does not stop a team that holds its own API key. Many organizations combine a gateway for baseline policy (rate limits, logging, common categories) with in-application checks for policy that needs application context.
 
-Some checks can run after delivery instead of in the request path, such as auditing a sample of conversations for policy drift. That is acceptable only for categories where late detection is tolerable, and the audit pipeline must not become its own data-handling problem (see Implementation).
+Some checks can run after delivery instead of in the request path, such as auditing a sample of conversations for policy drift. That is acceptable only for categories where late detection is tolerable.
 
 ### 7. Build or buy by tool category
 
@@ -151,7 +151,7 @@ Some checks can run after delivery instead of in the request path, such as audit
 | Guardrail framework or orchestration library | Adopt (open source or commercial) | Whether it fails closed by default, how it logs, whether you can see and test each check |
 | Gateway | Buy or adopt | Whether it can be made mandatory with your network and credential setup |
 
-No category is uniformly better. A vendor classifier tuned for general toxicity may perform poorly on your policy's needs-care medical tier, and your own fine-tuned classifier will lag on attack styles the vendor sees across many customers. Measure each candidate on your evaluation set before deciding.
+No category is uniformly better. Measure each candidate on your own evaluation set before deciding.
 
 ## Implementation
 
@@ -336,46 +336,7 @@ def choose_bands(scores: list[float], labels: list[bool],
 
 The loop keeps the lowest qualifying score, which blocks as much as possible while meeting the precision target. `min_blocked` stops a threshold being chosen from a handful of examples.
 
-When some checks can run after delivery, the auditor should hold record identifiers, not raw content; keep slow synchronous classifiers off the event loop; and survive a failing record:
-
-```python
-import asyncio
-import logging
-
-log = logging.getLogger("guardrail.audit")
-
-
-class AsyncAuditor:
-    def __init__(self, fetch_record, check, on_violation, maxsize: int = 10_000):
-        self._queue: asyncio.Queue[str] = asyncio.Queue(maxsize=maxsize)
-        self._fetch = fetch_record        # async; reads from the access-controlled log store
-        self._check = check               # sync classifier
-        self._on_violation = on_violation  # async
-        self.dropped = 0
-        self.failed = 0
-
-    def submit(self, record_id: str) -> None:
-        try:
-            self._queue.put_nowait(record_id)
-        except asyncio.QueueFull:
-            self.dropped += 1  # exported as a metric; alert if it grows
-
-    async def run(self) -> None:
-        while True:
-            record_id = await self._queue.get()
-            try:
-                content = await self._fetch(record_id)
-                result = await asyncio.to_thread(self._check, content)
-                if result.violation:
-                    await self._on_violation(record_id, result.category)
-            except Exception:
-                self.failed += 1
-                log.exception("audit failed for record %s", record_id)
-            finally:
-                self._queue.task_done()
-```
-
-The content stays in the governed store described in [7.1](/training/module/operations-and-governance/monitoring-and-alerting); the queue carries only identifiers.
+When some checks run after delivery instead (pattern 6), build the auditor so that it queues record identifiers rather than raw content (the content stays in the access-controlled store described in [7.1](/training/module/operations-and-governance/monitoring-and-alerting)), runs synchronous classifiers off the event loop (for example with `asyncio.to_thread`), catches and counts failures per record so one bad record does not stop the worker, and uses a bounded queue whose drops are exported as a metric.
 
 ## Where it breaks
 
@@ -415,10 +376,4 @@ Content containing `</content>` can close the tag and inject instructions; use a
 <summary>4. A platform team says its AI gateway is mandatory because the internal DNS name for the provider now points at the gateway. Is it?</summary>
 
 No. Any team holding a provider API key can call the provider's public endpoint directly. The gateway is mandatory only when egress rules block direct access to provider endpoints and the provider credentials are held only by the gateway.
-</details>
-
-<details>
-<summary>5. A classifier has 95% precision on a balanced test set. Violations are 0.5% of production traffic. Why might auto-blocking at that threshold be a bad idea?</summary>
-
-Precision depends on the base rate. With violations this rare, even a small false-positive rate on the much larger benign population can produce more false blocks than true ones. Measure precision at the production base rate (see 6.2) before enabling auto-block.
 </details>

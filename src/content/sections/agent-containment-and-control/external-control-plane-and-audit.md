@@ -239,7 +239,7 @@ An event, as the gateway writes it:
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.6 has you route all of an agent's tool calls through a gateway that writes to a hash-chained log with an external anchor, then tamper with an entry and show that verification detects it, and reconcile an agent's claimed outcome against the database's own audit records.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.6 has you write every meaningful action to an append-only log the agent cannot modify, then reconstruct one task from the log and resource records alone, without using the model's own account.
 
 ## Check your understanding
 

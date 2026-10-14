@@ -88,16 +88,16 @@ Ordered from strongest to weakest.
 ### A read-only database role
 
 ```sql
--- Role used only by the agent's query tool. No login password lives in the sandbox;
--- the tool gateway connects with this role on the agent's behalf.
-CREATE ROLE agent_reader NOLOGIN;
-REVOKE ALL ON ALL TABLES IN SCHEMA public FROM agent_reader;
-REVOKE CREATE ON SCHEMA public FROM agent_reader;
+-- A login role used only by the agent's query tool. Its credential (password or client
+-- certificate) is held by the tool gateway, never placed in the sandbox. Connect as this
+-- role directly rather than using SET ROLE from a privileged login, which RESET ROLE undoes.
+CREATE ROLE agent_reader LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC;          -- default since PostgreSQL 15
 GRANT USAGE ON SCHEMA reporting TO agent_reader;
 GRANT SELECT ON reporting.order_status, reporting.product_catalog TO agent_reader;
 ```
 
-Two details matter. First, grant on narrow views in a separate schema, so a new table in `public` does not become readable by default. Second, do not rely on `default_transaction_read_only`. It sets the default for new transactions, and a session can change it with `SET`, so it is a convenience, not a boundary ([PostgreSQL docs](https://www.postgresql.org/docs/current/runtime-config-client.html)). The privilege grant is the boundary ([PostgreSQL GRANT](https://www.postgresql.org/docs/current/sql-grant.html)).
+Three details matter. First, grant on narrow views in a separate schema, so new tables do not become readable by default. Second, check what the role can do through `PUBLIC`: functions are executable by `PUBLIC` by default, so a `SELECT` that calls a side-effecting function runs with whatever that function does; review `SECURITY DEFINER` functions in particular. Third, do not rely on `default_transaction_read_only`. It sets the default for new transactions, and a session can change it with `SET`, so it is a convenience, not a boundary ([PostgreSQL docs](https://www.postgresql.org/docs/current/runtime-config-client.html)). The privilege grant is the boundary ([PostgreSQL GRANT](https://www.postgresql.org/docs/current/sql-grant.html)).
 
 ### An exact-match recipient check in the email backend
 
@@ -209,7 +209,7 @@ With `max_actions=10`, exactly ten calls run. A blocked call neither consumes th
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.1 gives you an over-privileged support agent. You replace its parameter checks with a read-only role and an exact-match recipient allowlist enforced in the backend, then add session taint tracking and show that an injected "email this to me" instruction is blocked after a CRM read.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.1 has you cut each step of your own agent down to the tools it needs and move parameter limits into the backends, for example a read-only database role and an exact-match recipient allowlist. The outcome is a before-and-after tool and permission matrix.
 
 ## Check your understanding
 

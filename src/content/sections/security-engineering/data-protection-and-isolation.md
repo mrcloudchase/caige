@@ -302,7 +302,7 @@ def log_pii_decision(user_id: str, findings: list[Finding], action: str, key: by
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.5 has you show that the lab agent's retrieval returns another tenant's document, move the authorization filter into the search query using the verified principal, and add validated PII detection and HMAC-pseudonymized logging to its request path.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.5 has you move tenant and permission filtering into the retrieval query using the authenticated identity, add PII detection with validation, and switch logging to keyed pseudonymization, with cross-tenant retrieval tests and logs free of raw PII.
 
 ## Check your understanding
 

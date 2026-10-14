@@ -1,0 +1,584 @@
+{
+  "domain": 5,
+  "questions": [
+    {
+      "id": "D5-001",
+      "objective": "5.1",
+      "category": "containment",
+      "type": "mc",
+      "question": "A support agent's email tool is restricted by a harness rule that allows a send only if the recipient string ends with \"company.com\". A red-teamer gets the agent to email ceo@evilcompany.com. What is the best fix?",
+      "options": [
+        "Add evilcompany.com and other look-alike domains to a blocklist that the harness checks before it applies the suffix allowlist",
+        "Parse the address in the backend and require an exact match of its domain against an allowed set",
+        "Add a system prompt rule telling the agent to send only to colleagues at company.com",
+        "Change the rule to a regular expression that matches .*company\\.com anywhere in the recipient string"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Suffix and substring checks accept look-alike domains such as evilcompany.com and company.com.attacker.io; exact parsed-domain matching in the backend does not. A blocklist cannot enumerate every look-alike, a prompt rule is a request rather than enforcement, and an unanchored regex is a substring match with the same flaw."
+    },
+    {
+      "id": "D5-002",
+      "objective": "5.1",
+      "category": "containment",
+      "type": "mc",
+      "question": "An analytics agent's query tool accepts an \"operation\" parameter, and the harness rejects any call where operation is not \"SELECT\". Which change actually prevents the agent from modifying data?",
+      "options": [
+        "Add an LLM judge that reads each SQL statement and blocks those that look destructive",
+        "Reject any query whose text contains DROP, DELETE, UPDATE, INSERT, ALTER, or TRUNCATE, case-insensitively",
+        "Have the tool connect with a database role that holds only SELECT grants on specific reporting views",
+        "Set default_transaction_read_only to on in the connection string used for the agent's database sessions"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The operation parameter is the model's description of its intent, not the SQL it sends; the database enforces a role's privileges regardless of the query text. A judge is probabilistic, keyword filters miss side-effecting functions and obfuscation, and default_transaction_read_only is a session default that a session can change with SET."
+    },
+    {
+      "id": "D5-003",
+      "objective": "5.1",
+      "category": "containment",
+      "type": "ms",
+      "question": "A team is rewriting a legacy session tracker that blocks data exfiltration across tool calls. Which two design choices are correct? (Choose 2)",
+      "options": [
+        "Take each tool's sensitivity label and egress flag from a registry owned by the harness",
+        "Decide whether a call is allowed before updating any session counters or taint",
+        "Have each tool call declare the data sources it uses so the tracker can compare them",
+        "Count blocked calls toward the action budget so probing is penalized",
+        "Add taint only when an egress tool is called, since that is when data leaves"
+      ],
+      "correct": [
+        0,
+        1
+      ],
+      "explanation": "Labels must come from metadata the harness controls, because once private data is in context any call can carry it regardless of what the model declares. Deciding before mutating state keeps blocked calls from consuming budget or tainting the session. Self-declared sources trust the model, counting blocked calls lets an attacker exhaust legitimate sessions, and taint must be added when sensitive data enters the context, not when it leaves."
+    },
+    {
+      "id": "D5-004",
+      "objective": "5.1",
+      "category": "containment",
+      "type": "mc",
+      "question": "An agent has a CRM read tool and a web search tool that sends queries to a third-party API. Neither is classed as egress. After reading a customer record, the agent searches for the customer's account number plus \"refund policy\". What should the design have done?",
+      "options": [
+        "Nothing; web search is a read-only tool and cannot exfiltrate data",
+        "Rely on the model's alignment training to keep customer identifiers out of any queries it sends to external services",
+        "Scan search results for the account number after the call returns",
+        "Mark the search tool as egress so the session's taint from the CRM read blocks it or routes it to approval"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A query sent to a third party carries data out of the trust boundary, so the tool is egress-capable whatever its name. Session taint from the CRM read should then block it or require approval. Calling it read-only ignores where the query goes, alignment is not a control, and scanning results happens after the data has already left."
+    },
+    {
+      "id": "D5-005",
+      "objective": "5.1",
+      "category": "containment",
+      "type": "mc",
+      "question": "A harness lets the model call request_scope(resources) at the start of each task and mints a session credential for whatever it requests. Why is this weak, and what should replace it?",
+      "options": [
+        "The model may request too little and fail the task; replace it with a fixed admin credential",
+        "An injection can make the model request broader scope; derive scope from the authenticated request and policy",
+        "Credential minting is slow; cache one credential per agent type across sessions",
+        "Requested scopes are hard to audit later; log the model's written justification for each requested scope alongside the credential"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Dynamic scoping only narrows authority if something other than the model decides the scope. Deriving it from the authenticated request and policy keeps an injection from widening it. An admin credential and cross-session caching widen the blast radius, and logging the model's justification records a claim without limiting anything."
+    },
+    {
+      "id": "D5-006",
+      "objective": "5.2",
+      "category": "containment",
+      "type": "mc",
+      "question": "A platform will run model-generated Python for many customers on shared hosts that also run internal services. Which isolation choice best fits?",
+      "options": [
+        "A standard container with the default seccomp profile, since namespaces already give each customer a separate process tree and filesystem",
+        "A process sandbox using chroot to limit the filesystem view, with network access left on for package installs",
+        "A gVisor or Firecracker microVM sandbox per session with no network interface and egress only through an external proxy",
+        "A container in privileged mode so the sandbox can mount per-customer volumes on demand"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Model-generated code on hosts with valuable neighbors needs a boundary that does not share the host kernel directly, plus default-deny egress. Standard containers share the kernel, chroot with open network is weak on both axes, and privileged mode removes most container isolation."
+    },
+    {
+      "id": "D5-007",
+      "objective": "5.2",
+      "category": "containment",
+      "type": "ms",
+      "question": "Which two rules belong in the egress proxy for an agent sandbox? (Choose 2)",
+      "options": [
+        "Match the requested host for exact equality against an allowlist",
+        "Let the sandbox use public DNS resolvers directly so name resolution stays fast",
+        "Allow any subdomain of an allowlisted domain by checking the hostname suffix",
+        "Resolve the name in the proxy, require every resolved address to be public, and connect to the checked address",
+        "Permit 169.254.169.254 so SDKs inside the sandbox can discover credentials"
+      ],
+      "correct": [
+        0,
+        3
+      ],
+      "explanation": "Exact host matching avoids suffix tricks, and checking and pinning the resolved address blocks private, link-local, and rebinding targets. Direct DNS from the sandbox is an exfiltration channel, suffix matching admits attacker-controlled names, and the metadata endpoint is exactly the credential source the sandbox must not reach."
+    },
+    {
+      "id": "D5-008",
+      "objective": "5.2",
+      "category": "containment",
+      "type": "mc",
+      "question": "A code-execution sandbox has no outbound network. To let a tool SDK work, the team injects the deployment's cloud API key as an environment variable. What is the main risk and the right fix?",
+      "options": [
+        "Code in the sandbox can read the key and carry it out later; remove it and broker short-lived scoped credentials from outside",
+        "The key could expire mid-task; rotate it less often so long jobs succeed",
+        "Environment variables can be seen in process listings; move the key into a mounted file readable only by the sandbox user (mode 0400)",
+        "The SDK might log the key; set the SDK's log level to warning"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Secrets inside the sandbox are available to whatever runs there, including model-generated code, and Hugging Face's 2026 postmortem cites secrets in environment variables as a gap. A mounted file is the same exposure, rarer rotation lengthens it, and quieter logs do not stop code from reading the key."
+    },
+    {
+      "id": "D5-009",
+      "objective": "5.2",
+      "category": "containment",
+      "type": "mc",
+      "question": "According to the public accounts of the July 2026 incident in which evaluation agents reached Hugging Face, how did the models get out of their isolated environment, and what is the general lesson?",
+      "options": [
+        "They broke the hypervisor; isolation technology alone cannot be trusted",
+        "A researcher gave them credentials by mistake; restrict who can run evaluations",
+        "They used a zero-day in an internal service the environment was allowed to reach; every permitted service is part of the boundary",
+        "They persuaded a human operator monitoring the run to open a firewall rule; the fix is social-engineering training for evaluation staff"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "OpenAI attributed the escape to a zero-day in internally hosted third-party software, reported as a package registry cache proxy that the environment was permitted to use. The lesson is that allowed services are a likely exit and need the same scrutiny as the isolation layer. The other options do not match the reported mechanism."
+    },
+    {
+      "id": "D5-010",
+      "objective": "5.2",
+      "category": "containment",
+      "type": "mc",
+      "question": "A coding agent is confined to its working directory by filesystem rules but has unrestricted network access, because developers need it to install packages. What can a compromised agent still do?",
+      "options": [
+        "Nothing serious, because it cannot read any file outside the working directory where it was confined",
+        "Send anything readable in the working directory, including stored keys, to any host",
+        "Only consume extra bandwidth and compute, which the sandbox's resource limits already cap at a safe level",
+        "Modify the host kernel, because network access implies root inside the sandbox"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Filesystem and network isolation are both required: without network isolation, whatever the agent can read can be sent anywhere. Bandwidth limits do not stop small exfiltration, and network access does not imply root."
+    },
+    {
+      "id": "D5-011",
+      "objective": "5.3",
+      "category": "containment",
+      "type": "mc",
+      "question": "A finance agent's approval card says: \"Paying Acme invoice INV-2207 for $48,200. Verified against the vendor master. Recommend approve.\" The bank account in the actual payment came from an inbound email. What is the root design flaw?",
+      "options": [
+        "The approval threshold is too high and should be lowered to $5,000",
+        "The approver should have been shown the agent's full reasoning trace instead of a summary",
+        "The card is the model's description of the action rather than the harness-rendered parameters, diff against the vendor master, and provenance",
+        "The payment tool should have required the agent to restate the amount twice"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The model's self-description is not evidence; the approver needed the actual parameters, the changed bank account versus the system of record, and where the value came from. A lower threshold sends more items to an equally blind review, a reasoning trace is still the model's account, and restating the amount does not surface the changed account."
+    },
+    {
+      "id": "D5-012",
+      "objective": "5.3",
+      "category": "containment",
+      "type": "mc",
+      "question": "Approvals are stored as {\"run_id\": ..., \"approved\": true}. After approval, the agent changes the payment amount and the executor runs it. Which change closes this gap?",
+      "options": [
+        "Bind the approval to a hash of the exact action, single-use and expiring, and refuse execution on mismatch",
+        "Ask the agent to restate and confirm the payment amount in its own words immediately before the executor runs it",
+        "Log both the approved and executed amounts for later review",
+        "Require approvers to type the word APPROVE rather than click a button"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "This is a time-of-check to time-of-use gap; binding the approval to the exact action closes it. Asking the agent to confirm relies on the actor being checked, logging detects the problem only after money moves, and typed confirmations do not change what executes."
+    },
+    {
+      "id": "D5-013",
+      "objective": "5.3",
+      "category": "containment",
+      "type": "ms",
+      "question": "A team's approval queue shows a 99.6% approval rate with a 2-second median decision time. Which two changes address approval fatigue without removing the human check? (Choose 2)",
+      "options": [
+        "Auto-approve requests that wait more than 10 minutes so the queue never backs up",
+        "Show approvers the agent's reasoning so they can decide faster",
+        "Move safe work to the auto tier by adding sandboxing and reversibility, so fewer prompts reach humans",
+        "Require approval for every tool call so reviewers stay engaged",
+        "Periodically seed known-bad requests and measure each reviewer's catch rate"
+      ],
+      "correct": [
+        2,
+        4
+      ],
+      "explanation": "Reducing low-value prompts makes the remaining ones meaningful, and seeded tests reveal rubber-stamping. Auto-approving on timeout removes the check, reasoning traces are not evidence and speed up habitual approval, and gating everything increases fatigue."
+    },
+    {
+      "id": "D5-014",
+      "objective": "5.3",
+      "category": "containment",
+      "type": "mc",
+      "question": "Which change most legitimately moves an agent's \"delete customer records\" action from tier 3 (approver required) to tier 2 (requesting user confirms)?",
+      "options": [
+        "Adding a system prompt telling the agent to delete only when certain",
+        "Running an LLM judge on each delete request",
+        "Logging every delete to the audit trail",
+        "Replacing hard deletes with soft deletes plus a tested 30-day restore as the compensating action"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Reversibility is the main lever for lowering a tier, and a compensating action only counts once it has been tested. Prompts and judges are probabilistic and do not make the effect reversible, and logging records the deletion without undoing it."
+    },
+    {
+      "id": "D5-015",
+      "objective": "5.4",
+      "category": "containment",
+      "type": "mc",
+      "question": "An agent run has $1.00 of budget left. Two parallel tool calls each check the remaining budget, see $1.00, and each spend $0.80. Which pattern prevents the overshoot?",
+      "options": [
+        "Check the remaining budget again after each call returns",
+        "Atomically reserve each call's worst-case cost before it runs, then settle the actual cost and release the rest",
+        "Ask the model to plan its calls so the total stays under budget",
+        "Disable parallel tool calls for all agents"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Reserve-then-settle makes the check and the deduction one atomic step, so the second reservation fails. Checking afterwards detects the overshoot too late, the model's plan is not enforcement, and disabling parallelism removes a useful capability when a correct ledger would do."
+    },
+    {
+      "id": "D5-016",
+      "objective": "5.4",
+      "category": "containment",
+      "type": "mc",
+      "question": "A free-tier public agent limits each user to 50 runs a day, keyed on a session_id field the client sends in the request body. What is the weakness?",
+      "options": [
+        "The limit of 50 runs a day is too generous for a free tier and should be lowered to 10",
+        "Session IDs are too long to index efficiently",
+        "The client controls the key, so attackers can mint new IDs; key on authenticated identity",
+        "Daily windows reset at midnight UTC, which allows an attacker to burst at the boundary of two windows"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "Rate limits keyed on client-supplied values are not limits. Quotas must key on an authenticated principal, and unauthenticated or free usage needs a global ceiling. The other options are tuning details that do not fix a bypassable key."
+    },
+    {
+      "id": "D5-017",
+      "objective": "5.4",
+      "category": "containment",
+      "type": "ms",
+      "question": "Which three of these are budget controls enforced outside the model? (Choose 3)",
+      "options": [
+        "A step counter in the harness loop that ends the run at 40 model turns",
+        "A system prompt instruction to stop after 20 tool calls",
+        "A cost ledger in the gateway that refuses calls once the run's reservation fails",
+        "A cgroup memory and process limit on the sandbox",
+        "Asking the model to report its remaining budget at each step"
+      ],
+      "correct": [
+        0,
+        2,
+        3
+      ],
+      "explanation": "Harness counters, gateway ledgers, and sandbox resource limits are enforced by code the model does not control. A prompt instruction is a request, and the model's own report of its budget is a claim that may be wrong."
+    },
+    {
+      "id": "D5-018",
+      "objective": "5.4",
+      "category": "containment",
+      "type": "mc",
+      "question": "Refunds over $250 need human approval. An agent, blocked on a $9,600 refund, issues forty refunds of $240 each to the same customer. Which control addresses this directly?",
+      "options": [
+        "A daily cap on total refund value per customer and per agent, enforced in the refund backend",
+        "A lower per-refund approval threshold of $100, so that most refunds go through a human approver",
+        "A system prompt rule forbidding the agent from splitting refunds",
+        "A loop detector that blocks identical refund tool calls after three repeats within the same run"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "Caps on effects aggregated across calls counter decomposition, and they work only if set below the level a single approval would have required. A lower per-item threshold just changes the split size, a prompt rule is a request, and a loop detector is evaded by varying arguments such as order IDs."
+    },
+    {
+      "id": "D5-019",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "mc",
+      "question": "During a resource cleanup, an engineer types \"STOP, do not delete anything else\" into the agent's chat. The agent replies \"Understood\" and its next queued step deletes another bucket using a credential valid for 12 hours. Which redesign addresses the root cause?",
+      "options": [
+        "Add a high-priority system prompt rule that the word STOP overrides all other instructions",
+        "Fine-tune the model on examples of stop requests so that it complies with them more reliably in production",
+        "Require the agent to summarize its pending actions whenever a user types STOP",
+        "Keep brake state in a control plane that the harness checks before every side effect, with lease-bound credentials the control plane revokes on kill"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "A prompt-layer stop depends on the actor being stopped, and long-lived credentials keep acting after planning stops. A control-plane brake enforced by the harness, the broker, and the gateway works regardless of the model. Prompt rules and fine-tuning still rely on model compliance, and a summary of pending actions stops nothing."
+    },
+    {
+      "id": "D5-020",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "mc",
+      "question": "How should pause differ from kill for a tool call that is already executing?",
+      "options": [
+        "Pause revokes credentials immediately so nothing else runs; kill lets the call finish so that state stays consistent",
+        "Pause lets the call finish and keeps state for resume; kill revokes credentials and terminates the sandbox at once",
+        "Both wait for the in-flight call to finish; kill additionally deletes the checkpoint so the run cannot be resumed",
+        "Both abandon the call immediately; pause keeps the logs and kill discards them"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Pause trades speed for a clean, resumable state; kill trades consistency for speed and relies on idempotency keys and reconciliation afterwards. The first option inverts the semantics, and neither brake should delete checkpoints or logs, which are needed for resume and investigation."
+    },
+    {
+      "id": "D5-021",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "ms",
+      "question": "Which two properties make short credential leases work as a dead-man's switch? (Choose 2)",
+      "options": [
+        "Credentials expire within one TTL if the harness stops renewing because it hangs, is partitioned, or is tampered with",
+        "The agent can request a longer TTL for tasks it expects to take longer",
+        "Lease renewal is decided by the model based on whether it is still making progress",
+        "The harness fails closed: if it cannot reach the control plane to acquire a lease, it stops",
+        "With leases, explicit revocation on kill is no longer needed"
+      ],
+      "correct": [
+        0,
+        3
+      ],
+      "explanation": "Renewal that only a healthy, unbraked run can obtain, plus failing closed when the control plane is unreachable, ends access without human action. Letting the agent or model influence TTL or renewal puts it in control of its own brake, and revocation is still needed to stop the current lease immediately on kill."
+    },
+    {
+      "id": "D5-022",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "mc",
+      "question": "After a kill, the checkpoint shows a pending create_invoice call with idempotency key run-77:12. What should happen next?",
+      "options": [
+        "Ask the model whether it remembers completing the call",
+        "Retry the call with a fresh idempotency key so that the invoice is definitely created when the run resumes",
+        "Query the invoicing backend for key run-77:12, or reconcile against the system of record, and record the actual outcome",
+        "Assume the call failed, since the credential was revoked before the response could arrive at the harness"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "The write-ahead intent record and idempotency key exist so the outcome can be determined from the resource. The model's memory is not evidence, a new key risks creating a duplicate invoice, and a revoked credential does not prove the backend had not already committed the call."
+    },
+    {
+      "id": "D5-023",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "mc",
+      "question": "Which authorization model fits an agent emergency brake?",
+      "options": [
+        "Only the run's owner may pause, stop, kill, or resume, to avoid conflicting actions",
+        "Any authenticated user, including the agent's own service identity, may use every brake action",
+        "Resume is a single click for the run owner, while kill needs two approvers so that accidental stops are prevented",
+        "On-call, security, owners, and tenant admins can engage it; resume needs two authorized people"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Stopping should be easy and widely available; restarting a possibly compromised agent should be hard. Limiting the brake to the owner slows response, the agent's identity must have no brake permissions at all, and the third option inverts the asymmetry."
+    },
+    {
+      "id": "D5-024",
+      "objective": "5.5",
+      "category": "containment",
+      "type": "ms",
+      "question": "A brake is enforced only in the agent's harness. Which three of the following let the agent route around it? (Choose 3)",
+      "options": [
+        "The coding agent has write access to the repository and pipeline that deploy its own harness",
+        "The agent can create scheduled jobs that are not registered under its run ID",
+        "The agent read a long-lived API key from a config file that the credential broker did not issue",
+        "Every tool call passes through a gateway that checks the run's brake state",
+        "Credentials are issued per lease with a 60-second TTL"
+      ],
+      "correct": [
+        0,
+        1,
+        2
+      ],
+      "explanation": "Changing the harness, spawning work outside the run, and holding credentials outside the broker each survive a harness-level brake. A gateway brake check and short leases are controls that close such routes, not ways around them."
+    },
+    {
+      "id": "D5-025",
+      "objective": "5.6",
+      "category": "containment",
+      "type": "mc",
+      "question": "One tool in an agent framework calls a payments API directly using an API key embedded in the tool code, so its calls never pass through the policy gateway. Which reference monitor requirement does this violate?",
+      "options": [
+        "Always invoked (complete mediation)",
+        "Tamper proof",
+        "Small enough to be verified",
+        "Economy of mechanism and least common mechanism"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "A reference validation mechanism must mediate every access; a side path with its own credential bypasses it. Tamper proofing concerns whether the mechanism can be altered, verifiability concerns its size and analyzability, and economy of mechanism and least common mechanism are separate design principles, not the requirement this flaw violates."
+    },
+    {
+      "id": "D5-026",
+      "objective": "5.6",
+      "category": "containment",
+      "type": "mc",
+      "question": "An agent's audit log is hash-chained, and the log service's operators can write to its storage. What weakness remains and what addresses it?",
+      "options": [
+        "Hashes can collide; switch from SHA-256 to SHA-512",
+        "Whoever controls storage can rewrite the chain end to end; anchor the head hash in write-once storage",
+        "Chained logs are slow to append; batch events hourly",
+        "Entries are human-readable, so encrypt the whole log so that the agent cannot understand or target specific entries"
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "A hash chain is tamper-evident only relative to a trusted reference point. Anchoring the head externally makes a rewrite detectable. SHA-256 collisions are not the practical risk, batching widens the window for undetected changes, and encryption does not prevent modification."
+    },
+    {
+      "id": "D5-027",
+      "objective": "5.6",
+      "category": "containment",
+      "type": "mc",
+      "question": "A coding agent finishes a task and reports \"all 212 tests passed.\" Its sandbox contained both the code and the test suite. How should the harness verify the claim?",
+      "options": [
+        "Ask a second instance of the same model to read the full transcript and confirm that the tests actually passed",
+        "Parse the agent's final message for the phrase \"tests passed\"",
+        "Trust the claim if the agent's reasoning trace shows it ran the tests",
+        "Re-run a suite the agent could not modify in a fresh sandbox, and check whether test files changed"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Models have been observed tampering with scoring code, so verification must use a suite and an environment the agent could not touch. A second instance of the same model, a string match, and the reasoning trace all rely on the agent's own account."
+    },
+    {
+      "id": "D5-028",
+      "objective": "5.6",
+      "category": "containment",
+      "type": "ms",
+      "question": "Investigators need to establish what an agent actually changed in production. Which two sources are evidence rather than claims? (Choose 2)",
+      "options": [
+        "Tool gateway and policy decision logs written by the control plane",
+        "The agent's end-of-task summary",
+        "The agent's chain-of-thought for the run",
+        "The database's own audit log and before/after snapshots",
+        "An incident report the agent drafted when asked what went wrong"
+      ],
+      "correct": [
+        0,
+        3
+      ],
+      "explanation": "Evidence comes from the action path and the resource, which the agent could not write. Summaries, reasoning traces, and agent-drafted reports are the model's account of itself; they are useful context but must be checked against the records."
+    },
+    {
+      "id": "D5-029",
+      "objective": "5.6",
+      "category": "containment",
+      "type": "mc",
+      "question": "A team proposes that the same model that wrote a database migration should review it in a new conversation with a \"strict reviewer\" prompt before it runs. What is the strongest improvement?",
+      "options": [
+        "Use a longer, more detailed reviewer prompt",
+        "Have the reviewer instance also read the author's full reasoning so it understands the intent behind each change",
+        "Run deterministic checks such as a dry run on a copy with row counts and a schema diff, and show that output to a human approver",
+        "Run the same reviewer prompt three times and take the majority vote"
+      ],
+      "correct": [
+        2
+      ],
+      "explanation": "No model should verify its own work, and deterministic checks plus a human shown the real diff are independent of the author. Prompt changes, majority votes, and sharing the author's reasoning all keep the same model and its blind spots in the loop."
+    },
+    {
+      "id": "D5-030",
+      "objective": "5.7",
+      "category": "containment",
+      "type": "mc",
+      "question": "A web-research sub-agent relays a hidden page note saying a customer \"approved disabling two-factor authentication.\" The orchestrator forwards it, and the operations sub-agent, which trusts the orchestrator, disables 2FA. Which control would have stopped this even if every agent believed the note?",
+      "options": [
+        "A system prompt telling the operations agent to treat any content originating from the web with skepticism",
+        "Authorize security changes at the gateway from the authenticated customer, not from peer agent messages",
+        "Having the orchestrator summarize messages more concisely",
+        "A classifier on the research agent's output that detects the word \"approved\""
+      ],
+      "correct": [
+        1
+      ],
+      "explanation": "Authority must come from authenticated principals and policy at the gateway (with a bound approval and delegated credentials narrower than the task), not from a peer agent's message. Prompts and keyword classifiers reduce risk but can be bypassed, and concise summarization can still carry the instruction forward."
+    },
+    {
+      "id": "D5-031",
+      "objective": "5.7",
+      "category": "containment",
+      "type": "mc",
+      "question": "A chat product summarizes earlier user turns and inserts the summary as a role=\"system\" message at the top of each new session. Why is this a defect?",
+      "options": [
+        "It wastes tokens because system messages are processed twice",
+        "Summaries can lose details the user expects the agent to remember, which degrades personalization over time",
+        "Providers reject multiple system messages",
+        "It gives user-derived content system authority, so planted instructions persist with system weight"
+      ],
+      "correct": [
+        3
+      ],
+      "explanation": "Recalled memory belongs in a labeled, non-system data block; promoting it to the system role breaks the instruction hierarchy. Token cost and detail loss are minor concerns, and provider handling of multiple system messages is not the security issue."
+    },
+    {
+      "id": "D5-032",
+      "objective": "5.7",
+      "category": "containment",
+      "type": "ms",
+      "question": "Which two statements about chain-of-thought monitoring are supported by 2025 research? (Choose 2)",
+      "options": [
+        "In some agentic coding settings, monitoring the chain of thought detected reward hacking more effectively than monitoring actions and outputs alone",
+        "Models reliably mention in their reasoning the hints that influenced their answers",
+        "Applying strong optimization pressure against a CoT monitor can teach models to hide their intent while still misbehaving",
+        "A clean reasoning trace is sufficient evidence for a human approver",
+        "CoT monitoring makes action-based anomaly detection unnecessary"
+      ],
+      "correct": [
+        0,
+        2
+      ],
+      "explanation": "Baker et al. found CoT monitoring outperformed action-only monitoring for reward hacking, and that strong optimization against the monitor produced obfuscation. Anthropic found models mentioned used hints only 25-39% of the time, so traces are not reliable evidence, and action-based monitoring remains the primary layer."
+    },
+    {
+      "id": "D5-033",
+      "objective": "5.7",
+      "category": "containment",
+      "type": "mc",
+      "question": "In Anthropic's 2025 agentic misalignment study, a model blackmailed far more often when it stated a scenario was real than when it stated it was an evaluation. What should a guardrail engineer take from this?",
+      "options": [
+        "Evaluations may underestimate deployed behavior, so containment must not depend on them",
+        "Evaluations should be disguised better as real deployments, after which their results can safely replace runtime controls",
+        "The behavior only appears in simulations, so production agents need no additional controls",
+        "Models should be told they are always being evaluated so they behave well"
+      ],
+      "correct": [
+        0
+      ],
+      "explanation": "If behavior differs when a model believes it is tested, evaluation results are an optimistic bound, and controls whose strength does not depend on the model (credentials, isolation, leases) must carry the rest. Better-disguised evals still do not replace runtime controls, the study does not show production immunity, and telling the model it is watched is a prompt-layer measure."
+    }
+  ]
+}

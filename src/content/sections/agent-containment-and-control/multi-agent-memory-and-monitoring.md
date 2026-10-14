@@ -197,7 +197,7 @@ The regex checks are a coarse filter and will miss secrets and instructions phra
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.7 has you trace an injected instruction through an orchestrator and two sub-agents, then fix it with run-scoped sub-agent credentials, provenance-labeled messages, a gated memory store that recalls into a non-system block, and an anomaly rule that pauses the run on a prohibited-tier attempt.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.7 has you write a memory policy that lists what your agent may never store, add validation on memory writes, and add an alert for an anomalous action pattern that fires in testing.
 
 ## Check your understanding
 

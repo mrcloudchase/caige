@@ -218,7 +218,7 @@ Run the check on every connection and whenever the server signals that its tool 
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.7 has you find the poisoned tool description in one of the lab's MCP servers, add tool-definition pinning that disables the server when its definitions change, and replace the lab classifier's pickle checkpoint with a pinned, hash-verified safetensors file.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.7 has you inventory every third-party model, dataset, library, and tool server in your practice system, pin their versions, and review the tool descriptions you load as untrusted input, producing an inventory with versions and review status.
 
 ## Check your understanding
 

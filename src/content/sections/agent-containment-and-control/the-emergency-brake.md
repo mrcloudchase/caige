@@ -293,7 +293,7 @@ Test the brake like a fire alarm, on a schedule and after each significant chang
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.5 has you add a control-plane brake and lease-bound credentials to an agent harness, then run a drill: kill the agent mid-tool-call, show that its credential is rejected at the resource, and resume a paused run with two approvers without executing the pending call twice.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.5 has you build pause, stop, and kill in a control plane, with kill revoking the agent's credentials, name who is authorized to use each, and record a drill in which you pull the brake mid-task and show that no further actions occur.
 
 ## Check your understanding
 

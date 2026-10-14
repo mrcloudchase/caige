@@ -195,7 +195,7 @@ PAYMENT  $48,200.00 to Acme Ltd (vendor V-1182)      executes as: svc-ap-agent
 
 ## Lab exercise
 
-In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.3 has you replace a model-written approval message with a harness-rendered card that shows the real parameters and a diff, bind approvals to an action hash, and demonstrate that an action modified after approval is refused.
+In [Lab 5](/labs/lab-5-containment-and-brake), Task 5.3 has you classify your agent's actions by risk and reversibility, require approval for the high-impact ones, and build an approval screen or log entry that shows the reviewer the exact action and data rather than the model's explanation.
 
 ## Check your understanding
 
