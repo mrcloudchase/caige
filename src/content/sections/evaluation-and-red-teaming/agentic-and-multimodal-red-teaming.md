@@ -236,7 +236,7 @@ The 0.5-second bound and the drain time are examples; set them from your brake's
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.5** has you plant indirect injections (in a document, a web page, and an image) in the lab agent's environment, measure targeted ASR and utility under attack with state-based oracles, run the compromised-model harness against the tool backends, and verify that the brake stops the agent mid-task.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.5**, you plant instructions in documents or tool results, measure whether they lead to harmful actions (action-level attack success rate, judged from environment state), and test that the brake and approval flows hold under attack.
 
 ## Check your understanding
 

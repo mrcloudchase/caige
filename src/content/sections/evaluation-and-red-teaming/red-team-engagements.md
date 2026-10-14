@@ -281,7 +281,7 @@ Group the attempts by (goal, technique) and compute ASR with a Wilson interval u
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.4** has you write a short engagement plan for the lab assistant, run manual and automated attacks (including a multi-turn escalation and an encoding attack) for multiple trials, judge success on the responses, and write two findings with exploitability and severity ratings.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.4**, you write a one-page scope and rules of engagement, run a time-boxed engagement against your own system that combines automated tools with manual testing, and rate each finding by exploitability and severity.
 
 ## Check your understanding
 

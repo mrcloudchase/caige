@@ -303,7 +303,7 @@ Run this on a calibration split, then report FPR and recall at the chosen thresh
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.2** has you compute the confusion-matrix metrics for the lab's input classifier on the evaluation sets, project precision to a stated production prevalence, choose a threshold under an FPR budget, and report rates with Wilson intervals.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.2**, you report precision, recall, false positive rate, and attack success rate (over at least five trials per case), each with a Wilson 95% interval, and show how precision changes at a realistic attack base rate.
 
 ## Check your understanding
 

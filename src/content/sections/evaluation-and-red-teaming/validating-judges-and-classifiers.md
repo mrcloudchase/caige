@@ -209,7 +209,7 @@ Because judges sample, run each check more than once (or at temperature 0 with t
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.3** has you validate the lab's LLM judge against a human-labeled set (per-class recall, FPR, and kappa), run a position-swap and padding test, and measure its flip rate when grader-directed instructions are appended to harmful responses.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.3**, you compare your LLM judge with human labels and test it for position and verbosity bias by swapping response order and padding length.
 
 ## Check your understanding
 

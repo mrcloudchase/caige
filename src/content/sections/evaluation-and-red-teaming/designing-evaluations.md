@@ -64,7 +64,7 @@ Four mechanisms account for most broken evaluations:
 
 1. **Unrepresentative benign data.** Engineers write clean, short, English prompts. Real users write long, misspelled, multilingual, multi-turn messages full of domain vocabulary ("execute the order", "shoot me the file", "overdose threshold for acetaminophen" from a pharmacist). Over-refusal lives in exactly that overlap, so a clean benign set hides it.
 2. **Wrong class balance.** Evaluation sets are often balanced 50/50 for convenience. Accuracy and precision measured on a balanced set do not transfer to production, where attacks may be one request in a thousand. Section [6.2](/training/module/evaluation-and-red-teaming/metrics-and-statistics) works through the arithmetic.
-3. **Unreliable labels.** "Harmful" is not self-evident. If two annotators disagree on 15% of items, a classifier cannot be measured more precisely than that disagreement allows, and its "errors" may be labeling noise.
+3. **Unreliable labels.** "Harmful" is not self-evident. If two annotators disagree on 15% of items, the precision with which a classifier can be measured is limited by that disagreement, and some of its "errors" may be labeling noise.
 4. **Contamination.** If evaluation items have been seen by the thing being evaluated, scores go up and mean less. Contamination paths include public benchmark prompts in model pre-training data, eval items copied into few-shot examples in the system prompt, eval items used to fine-tune or calibrate a classifier, and near-duplicates split across train and test.
 
 ## Control patterns
@@ -268,7 +268,7 @@ Dashboards and alert rules then filter on `traffic:production`. The enforcement 
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.1** has you assemble a stratified benign, borderline, and adversarial evaluation set for the lab's assistant, double-label a subset against a short guideline and compute Cohen's kappa, and run a contamination check against the assistant's prompt assets.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.1**, you write labeling guidelines for your benign and policy sets, have a second person label 50 items independently and compute Cohen's kappa, and tag every synthetic probe so it can be excluded from production metrics.
 
 ## Check your understanding
 

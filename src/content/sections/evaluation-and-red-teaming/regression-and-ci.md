@@ -325,7 +325,7 @@ Analyze disagreements by reviewing samples from a governed store ([7.1](/trainin
 
 ## Lab exercise
 
-In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.6** has you fix a provided guardrail test suite whose tests cannot fail, add a mock-based ordering test and a strict xfail for a known gap, turn one of your Task 6.4 findings into a regression test, and replace an off-by-one percentile calculation with a warmed-up benchmark.
+In [Lab 6](/labs/lab-6-red-team-and-measure), **Task 6.6**, you turn every Lab 6 finding into a regression test that can fail, add a fast tier that runs on every commit and a full tier that runs nightly, and measure latency with a warm-up and correct percentiles.
 
 ## Check your understanding
 
