@@ -112,7 +112,7 @@ Use both lists for agentic systems. The agentic list covers what the LLM list le
 
 ### MITRE ATLAS
 
-ATLAS (Adversarial Threat Landscape for AI Systems) follows the structure of MITRE ATT&CK: tactics (the attacker's goal at each stage, such as Reconnaissance, Initial Access, Exfiltration, Impact), techniques with stable IDs, and documented case studies. Red teams use it to plan scenarios and to describe findings in a common language. Detection engineers use it to decide what to log. Technique IDs relevant to the catalog, as listed in ATLAS data release 5.6.0 (check atlas.mitre.org for the current release before citing):
+ATLAS (Adversarial Threat Landscape for AI Systems) follows the structure of MITRE ATT&CK: tactics (the attacker's goal at each stage, such as Reconnaissance, Initial Access, Exfiltration, Impact), techniques with stable IDs, and documented case studies. Red teams use it to plan scenarios and to describe findings in a common language. Detection engineers use it to decide what to log. Technique IDs relevant to the catalog, as listed in ATLAS data release v2026.09 (September 2026). ATLAS now publishes date-versioned releases, so check for the current one before citing:
 
 | ATLAS ID | Technique | Catalog entry |
 |---|---|---|
@@ -121,7 +121,7 @@ ATLAS (Adversarial Threat Landscape for AI Systems) follows the structure of MIT
 | AML.T0056 | Extract LLM System Prompt | System prompt leakage |
 | AML.T0057 | LLM Data Leakage | Context leakage, training data extraction |
 | AML.T0070 | RAG Poisoning | Poisoning (retrieval) |
-| AML.T0020 | Poison Training Data | Poisoning (training) |
+| AML.T0020 | Training Data Poisoning | Poisoning (training) |
 | AML.T0080.000 | AI Agent Context Poisoning: Memory | Memory poisoning |
 | AML.T0086 | Exfiltration via AI Agent Tool Invocation | Exfiltration through tools |
 | AML.T0010 | AI Supply Chain Compromise | Supply-chain compromise |
