@@ -1,125 +1,83 @@
 # AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents (such as Claude Code) working in this repository.
 
 ## Project
 
-cAIge (Certified AI Guardrail Engineer) — a vendor-agnostic AI certification platform at caige.org. Built with Astro, React islands, Tailwind CSS 4, and TypeScript. Deployed via GitHub Actions to GitHub Pages from the `mrcloudchase/caige` repo.
+cAIge (Certified AI Guardrail Engineer) is a free, vendor-agnostic program that trains and certifies engineers to guard AI systems against safety and security risks. The repo contains:
+
+- the program website at caige.org (Astro, React islands, Tailwind CSS 4, TypeScript), deployed by GitHub Actions to GitHub Pages;
+- the training content;
+- the practice exam;
+- the lab guides (`lab/labs/`).
+
+Version 2.0. The v1.0 program is archived at the `v1.0` git tag.
 
 ## Development
 
 ```bash
 npm install          # install dependencies
-npm run dev          # start dev server (localhost:4321)
-npm run build        # production build -> dist/
-npm run preview      # preview production build
+npm run dev          # dev server (localhost:4321); regenerates the question bank first
+npm run build        # production build -> dist/ (regenerates the question bank first)
+npm run validate     # cross-reference checks + code-block syntax checks
+npm run check        # validate + build; run this before pushing
 ```
 
-Node 22 (see `.nvmrc`). No test framework currently.
+Node 22 (see `.nvmrc`). Python 3.11+ for the code-block checker.
 
 ## Git
 
 Never include "Co-Authored-By" or any AI attribution in commit messages.
 
+## Source of truth
+
+`src/data/curriculum.json` is the spine of the program. It defines:
+
+- exam parameters;
+- the 7 domains (slug, title, weight, exam question count, question pool target, lab slug, study time);
+- the 43 sections (id `D.S`, slug, title, scope).
+
+Everything else must agree with it, and `scripts/validate.mjs` enforces that:
+
+- `src/content/modules/d<N>-<slug>.md`: one per domain.
+- `src/content/sections/<domain-slug>/<section-slug>.md`: one per section. Frontmatter carries `id`, `category`, `controlLayers`, `knowledge`, `skills`, `sources`, `lastReviewed`.
+- `lab/labs/<lab-slug>.md`: one per domain, with a `## Task D.S` heading for every section.
+- `exam/questions/d<N>.json`: the question pool for each domain. Every question has an `objective` (section id).
+
+The competency matrix and the exam objectives are **generated** from section frontmatter (`src/components/training/CompetencyMatrix.astro`, `BlueprintTables.astro`). Do not hand-write them in Markdown.
+
 ## Architecture
-
-Astro static site with React islands for the exam engine. Content collections for training material. Zero client-side JS on content pages — React only loads on `/exam`.
-
-### Directory Structure
 
 ```
 src/
-  pages/              — Astro page routes
-    index.astro       — Landing page
-    exam.astro        — Exam page (loads React ExamApp)
-    training/
-      index.astro     — Redirects to /training/overview
-      [slug].astro    — Program pages (overview, competency-matrix, exam-blueprint)
-      module/
-        [slug].astro  — Module landing pages (prerequisites, ai-fundamentals, etc.)
-        [module]/
-          [section].astro — Section pages within a module
-  layouts/
-    BaseLayout.astro  — HTML shell, head, Header, optional Footer
-    TrainingLayout.astro — BaseLayout + sidebar + prev/next nav
-  components/
-    Header.astro      — Site header with nav links and optional timer
-    Footer.astro      — Site footer
-    training/
-      TrainingSidebar.astro — Sidebar nav querying content collections
-      PrevNext.astro   — Prev/next module navigation
-    exam/              — React components (client:load island)
-      ExamApp.tsx      — Top-level exam orchestrator
-      types.ts         — TypeScript interfaces
-      useExamState.ts  — useReducer hook for exam state
-      questionBank.ts  — Fetch and select questions
-      certificate.ts   — Canvas PNG certificate generator
-      (+ IntroScreen, ExamScreen, QuestionPanel, OptionItem,
-         SidePanel, PaletteBox, ResultsScreen, ConfirmModal, Timer)
+  data/curriculum.json         Program spine (see above)
+  content.config.ts            Zod schemas: modules, sections, programs, incidents, labs, pages
   content/
-    modules/           — 7 markdown files with Zod-validated frontmatter
-    sections/          — Section markdown files organized by module slug subdirectory
-    programs/          — 3 markdown files (overview, competency-matrix, exam-blueprint)
-  content.config.ts    — Zod schemas for modules, sections, and programs collections
-  styles/
-    global.css         — Tailwind 4 import + theme tokens + shared styles
-    landing.css        — Landing page styles
-    training.css       — Training page + prose content styles
-    exam.css           — Exam engine styles
-public/
-  CNAME               — caige.org
-  svg/                 — 14 SVG diagrams
-  data/
-    question-bank.json — Exam questions
+    programs/                  overview, competency-matrix, exam-blueprint, glossary (/training/<slug>)
+    modules/                   7 domain landing pages (/training/module/<slug>)
+    sections/<domain-slug>/    43 section pages (/training/module/<domain>/<section>)
+    incidents/                 Incident case studies (/incidents/<slug>)
+    pages/                     standard.md (/standard), certifications/*.md (/certifications/<slug>)
+  pages/                       Astro routes, including labs/, incidents/, practice-exam.astro, 404.astro
+  components/training/         Sidebar, prev/next, section metadata, sources, generated matrix and blueprint
+  components/exam/             React practice exam (client:load island on /practice-exam only)
+  styles/                      global.css (theme tokens), landing.css, training.css, exam.css
+exam/questions/d<N>.json       Question pools (source)
+public/data/question-bank.json Generated by scripts/build-question-bank.mjs (gitignored)
+lab/labs/                      Lab guides, one per domain (rendered at /labs)
+scripts/                       validate.mjs, build-question-bank.mjs, check-code-blocks.py
+docs/style-guide.md            Content rules: framework, section skeleton, accuracy, code, voice
 ```
 
-### Data Flow
-
-- Content collections (`src/content/`) are the source of truth for training content. Frontmatter defines metadata (title, slug, order, domain, weight).
-- `src/content.config.ts` defines Zod schemas validated at build time.
-- `public/data/question-bank.json` holds exam questions, fetched at runtime by the React exam engine.
-- Theme tokens defined as CSS custom properties in `src/styles/global.css`.
-
-### Content Collections
-
-Three collections defined in `src/content.config.ts`:
-- **modules**: 7 files (prerequisites + 6 domain modules). Schema: title, slug, order, description, domain?, weight?, studyTime?
-- **sections**: Files in `sections/{module-slug}/`, one per topic. Schema: title, slug, module (parent module slug), sectionOrder, description. Module ordering is resolved at build time from the parent module's `order` field — sections do NOT store module order.
-- **programs**: 3 files (overview, competency-matrix, exam-blueprint). Schema: title, slug, order, description
-
-Pages use `getCollection()` and `render()` from `astro:content` to query and render entries.
-
-### Exam Engine
-
-React island loaded only on `/exam` via `client:load`. State managed via `useReducer` in `useExamState.ts`. Key flow:
-1. IntroScreen: name input → load question bank → prepare (shuffle questions + options, remap correct indices)
-2. ExamScreen: question panel + side palette, timer countdown via useEffect
-3. Submit: confirm modal → score computation → ResultsScreen with domain breakdown
-4. Certificate: canvas-based PNG generation for passing scores
-
-### URL Structure
-
-```
-/                                         → Landing page
-/training                                 → Redirects to /training/overview
-/training/overview                        → Program overview
-/training/competency-matrix               → Competency matrix
-/training/exam-blueprint                  → Exam blueprint
-/training/module/prerequisites            → Prerequisites
-/training/module/ai-fundamentals          → Module 1
-/training/module/guardrail-architecture   → Module 2
-/training/module/guardrail-implementation → Module 3
-/training/module/policy-compliance        → Module 4
-/training/module/testing-red-teaming      → Module 5
-/training/module/operations-observability → Module 6
-/exam                                     → Exam engine
-```
+Content pages are static HTML with no client JavaScript. React loads only on `/practice-exam`.
 
 ## Conventions
 
-- No inline `onclick` handlers — React event handlers in components
-- Content pages are static HTML with zero client JS
-- Exam options are shuffled per attempt; `correct` indices are remapped
-- Exam: 75 scored + 5 pilot questions, 120 min, 70% pass threshold
-- CSS custom properties use `--color-*` prefix (e.g., `--color-accent`, `--color-bg`)
-- SVG images referenced in markdown use absolute paths (`/svg/filename.svg`)
+- Follow `docs/style-guide.md` for all content: the safety / security / containment framework, the section skeleton, cited claims, no unsupported absolutes, no model names in timeless claims, and code that is correct and fails closed.
+- Every ```python block in content must parse, and every ```json block must be valid JSON. Use ```text for pseudocode.
+- Practice exam parameters come from `curriculum.json`. Do not hard-code question counts, time limits, or pass marks in components.
+- The practice exam is self-administered and must never be presented as a certification. It produces a score report, not a certificate.
+- Exam options are shuffled per attempt and `correct` indices are remapped.
+- CSS custom properties use the `--color-*` prefix.
+- SVGs in `public/svg/` are referenced with absolute paths (`/svg/name.svg`), and only where the image matches the text.
+- Old v1 URLs redirect via `astro.config.mjs`. Add a redirect when a published URL changes.

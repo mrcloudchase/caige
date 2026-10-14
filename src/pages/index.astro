@@ -1,16 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import curriculum from '../data/curriculum.json';
 import '../styles/landing.css';
+
+const maxWeight = Math.max(...curriculum.domains.map((d) => d.weight));
+const exam = curriculum.exam;
 ---
 
 <BaseLayout title="cAIge — Certified AI Guardrail Engineer">
   <section class="hero">
-    <div class="hero-badge">Free during launch</div>
+    <div class="hero-badge">Free and vendor-agnostic</div>
     <h1>Certified AI<br>Guardrail Engineer</h1>
-    <p>The vendor-agnostic certification for engineers who design, implement, and maintain AI safety systems. Prove your expertise across content safety, security, and operational guardrails.</p>
+    <p>Training and certification for the engineers who keep AI systems safe and secure in production. They design the controls, build them, prove they work, and can stop the system when it goes wrong.</p>
     <div class="btn-group">
       <a href="/training/overview" class="btn btn-primary">Start Training</a>
-      <a href="/exam" class="btn btn-secondary">Take Exam</a>
+      <a href="/labs" class="btn btn-secondary">Open the Labs</a>
     </div>
   </section>
 
@@ -21,23 +25,23 @@ import '../styles/landing.css';
     <div class="section-title">What is a Guardrail Engineer?</div>
     <div class="what-is-grid">
       <div>
-        <p>AI guardrails prevent AI systems from being used in ways they shouldn't. They enforce boundaries around what models can say, do, and access &mdash; spanning content safety, security, and operational reliability.</p>
-        <p style="margin-top: 16px;">A guardrail engineer works across all three of these pillars, designing and maintaining the systems that keep AI safe and trustworthy in production. It is a discipline that combines security engineering, ML operations, and policy expertise into a single, critical function.</p>
+        <p>A guardrail engineer makes AI systems hard to misuse and safe to run. They threat-model the system, decide which controls go where, implement them, measure whether they work, and operate them in production.</p>
+        <p style="margin-top: 16px;">The program is built around one design test: <strong style="color: var(--color-text);">if the model were fully compromised, what is the worst it could do?</strong> Classifiers make failures rarer. Architecture limits how bad they can get. A guardrail engineer uses both and knows the difference.</p>
       </div>
       <div class="highlight-box">
-        <h3>Three Pillars of AI Guardrails</h3>
+        <h3>Three Kinds of Risk</h3>
         <ul class="pillar-list">
           <li>
             <span class="pillar-marker"></span>
-            <span><strong style="color: var(--color-text);">Content Safety</strong> &mdash; Preventing harmful, biased, or policy-violating outputs from reaching users</span>
+            <span><strong style="color: var(--color-text);">Safety</strong> &mdash; the model says or does something undesirable with no attacker involved</span>
           </li>
           <li>
             <span class="pillar-marker"></span>
-            <span><strong style="color: var(--color-text);">Security</strong> &mdash; Defending against prompt injection, data exfiltration, and adversarial attacks</span>
+            <span><strong style="color: var(--color-text);">Security</strong> &mdash; an adversary manipulates the system to gain authority or data they should not have</span>
           </li>
           <li>
             <span class="pillar-marker"></span>
-            <span><strong style="color: var(--color-text);">Operational Safety</strong> &mdash; Ensuring reliability, observability, and graceful failure in production systems</span>
+            <span><strong style="color: var(--color-text);">Containment</strong> &mdash; whatever the cause, the model is limited, observed, and can always be stopped</span>
           </li>
         </ul>
       </div>
@@ -47,35 +51,17 @@ import '../styles/landing.css';
   <hr class="divider">
 
   <section>
-    <div class="section-label">Exam Domains</div>
-    <div class="section-title">Five Domains of Expertise</div>
-    <div class="section-subtitle">The cAIge certification validates competency across five domains that follow the guardrail engineering lifecycle &mdash; from understanding the technology to validating your defenses.</div>
+    <div class="section-label">Curriculum</div>
+    <div class="section-title">Seven Domains</div>
+    <div class="section-subtitle">From how models behave, through threat modeling, security, safety, and containment, to measuring and operating guardrails in production.</div>
     <div class="domains-grid">
-      <div class="domain-card">
-        <div class="domain-weight">15%</div>
-        <h3>AI Foundations</h3>
-        <div class="domain-bar"><div class="domain-bar-fill" style="width: 60%;"></div></div>
-      </div>
-      <div class="domain-card">
-        <div class="domain-weight">15%</div>
-        <h3>Understanding Failure Modes</h3>
-        <div class="domain-bar"><div class="domain-bar-fill" style="width: 60%;"></div></div>
-      </div>
-      <div class="domain-card">
-        <div class="domain-weight">25%</div>
-        <h3>Architecting Guardrails</h3>
-        <div class="domain-bar"><div class="domain-bar-fill" style="width: 100%;"></div></div>
-      </div>
-      <div class="domain-card">
-        <div class="domain-weight">25%</div>
-        <h3>Implementing Guardrails</h3>
-        <div class="domain-bar"><div class="domain-bar-fill" style="width: 100%;"></div></div>
-      </div>
-      <div class="domain-card">
-        <div class="domain-weight">20%</div>
-        <h3>Validating Guardrails</h3>
-        <div class="domain-bar"><div class="domain-bar-fill" style="width: 80%;"></div></div>
-      </div>
+      {curriculum.domains.map((d) => (
+        <a class="domain-card" href={`/training/module/${d.slug}`}>
+          <div class="domain-weight">{d.weight}%</div>
+          <h3>{d.domain}. {d.title}</h3>
+          <div class="domain-bar"><div class="domain-bar-fill" style={`width: ${Math.round((d.weight / maxWeight) * 100)}%;`}></div></div>
+        </a>
+      ))}
     </div>
   </section>
 
@@ -84,22 +70,22 @@ import '../styles/landing.css';
   <section>
     <div class="section-label">Process</div>
     <div class="section-title">How It Works</div>
-    <div class="section-subtitle">Three steps from start to certified. No prerequisites, no vendor lock-in.</div>
+    <div class="section-subtitle">Learn the concepts, practice on a real system, then prove it.</div>
     <div class="steps">
       <div class="step">
         <div class="step-number">1</div>
         <h3>Study</h3>
-        <p>Work through five modules of free, text-based training material covering every domain on the exam. Study at your own pace.</p>
+        <p>Seven domains and 43 sections of free training, each tied to real incidents and ending with self-check questions.</p>
       </div>
       <div class="step">
         <div class="step-number">2</div>
-        <h3>Exam</h3>
-        <p>75 scored questions in 120 minutes. Multiple choice, multiple select, and scenario-based questions. You need 70% to pass.</p>
+        <h3>Build</h3>
+        <p>Build a small practice AI system, then threat-model, harden, contain, measure, and operate it across seven labs.</p>
       </div>
       <div class="step">
         <div class="step-number">3</div>
         <h3>Certify</h3>
-        <p>Pass the exam and receive your Certified AI Guardrail Engineer certificate.</p>
+        <p>Associate: a knowledge exam. Professional: a hands-on exam scored against hidden attack and benign suites. Both are in development; the practice exam is available now.</p>
       </div>
     </div>
   </section>
@@ -107,29 +93,29 @@ import '../styles/landing.css';
   <hr class="divider">
 
   <section>
-    <div class="section-label">Specifications</div>
-    <div class="section-title">Exam Details</div>
-    <div class="section-subtitle">Everything you need to know about the cAIge certification exam at a glance.</div>
+    <div class="section-label">Practice Exam</div>
+    <div class="section-title">Test Your Knowledge</div>
+    <div class="section-subtitle">A free practice exam on the Associate blueprint, with answer review linked back to the training.</div>
     <div class="exam-grid">
       <div class="exam-item">
-        <div class="exam-item-value">75</div>
-        <div class="exam-item-label">Scored questions, plus 5 unscored pilot questions for future exam development</div>
+        <div class="exam-item-value">{exam.examSize}</div>
+        <div class="exam-item-label">Questions drawn from the full pool, weighted by domain</div>
       </div>
       <div class="exam-item">
-        <div class="exam-item-value">120 min</div>
-        <div class="exam-item-label">Total exam duration &mdash; approximately 90 seconds per question</div>
+        <div class="exam-item-value">{exam.timeLimitMinutes} min</div>
+        <div class="exam-item-label">Time limit</div>
       </div>
       <div class="exam-item">
-        <div class="exam-item-value">70%</div>
-        <div class="exam-item-label">Passing score required to earn your certification</div>
+        <div class="exam-item-value">{exam.passPercent}%</div>
+        <div class="exam-item-label">Passing standard</div>
       </div>
       <div class="exam-item">
         <div class="exam-item-value">3 types</div>
-        <div class="exam-item-label">Multiple choice, multiple select, and scenario-based question formats</div>
+        <div class="exam-item-label">Multiple choice, multiple select, and scenario-based</div>
       </div>
       <div class="exam-item">
-        <div class="exam-item-value">Vendor-agnostic</div>
-        <div class="exam-item-label">No specific tools, platforms, or cloud providers required</div>
+        <div class="exam-item-value">Review</div>
+        <div class="exam-item-label">Every missed question explained and linked to its section</div>
       </div>
     </div>
   </section>
@@ -138,11 +124,11 @@ import '../styles/landing.css';
 
   <section class="cta-section">
     <div class="cta-box">
-      <h2>Ready to get certified?</h2>
-      <p>Start with the free training material or jump straight to the exam.</p>
+      <h2>Ready to start?</h2>
+      <p>Begin with the training overview, or see where you stand with the practice exam.</p>
       <div class="btn-group">
         <a href="/training/overview" class="btn btn-primary">Start Training</a>
-        <a href="/exam" class="btn btn-secondary">Take Exam</a>
+        <a href="/practice-exam" class="btn btn-secondary">Take the Practice Exam</a>
       </div>
     </div>
   </section>

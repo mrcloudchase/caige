@@ -1,0 +1,18 @@
+---
+import { getCollection, render } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages
+    .filter((p) => p.data.slug.startsWith('certifications/'))
+    .map((entry) => ({ params: { slug: entry.data.slug.replace('certifications/', '') }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<TrainingLayout title={entry.data.title} currentPath={`/${entry.data.slug}`}>
+  <Content />
+</TrainingLayout>

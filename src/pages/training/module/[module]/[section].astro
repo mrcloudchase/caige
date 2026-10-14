@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import TrainingLayout from '../../../../layouts/TrainingLayout.astro';
+import SectionMeta from '../../../../components/training/SectionMeta.astro';
+import SourceList from '../../../../components/training/SourceList.astro';
 
 export async function getStaticPaths() {
   const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
@@ -60,5 +62,12 @@ const { Content } = await render(entry);
   prev={prev}
   next={next}
 >
+  <SectionMeta
+    id={entry.data.id}
+    category={entry.data.category}
+    controlLayers={entry.data.controlLayers}
+    lastReviewed={entry.data.lastReviewed}
+  />
   <Content />
+  <SourceList sources={entry.data.sources} />
 </TrainingLayout>

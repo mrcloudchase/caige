@@ -1,6 +1,8 @@
 ---
 import { getCollection, render } from 'astro:content';
 import TrainingLayout from '../../layouts/TrainingLayout.astro';
+import CompetencyMatrix from '../../components/training/CompetencyMatrix.astro';
+import BlueprintTables from '../../components/training/BlueprintTables.astro';
 
 export async function getStaticPaths() {
   const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
@@ -34,4 +36,6 @@ const { Content } = await render(entry);
   next={next}
 >
   <Content />
+  {entry.data.slug === 'competency-matrix' && <CompetencyMatrix />}
+  {entry.data.slug === 'exam-blueprint' && <BlueprintTables />}
 </TrainingLayout>

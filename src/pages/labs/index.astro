@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+const labs = (await getCollection('labs')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<TrainingLayout title="Labs" currentPath="/labs">
+  <h1>Hands-on Labs</h1>
+  <p>
+    Each domain has a lab with one task per training section. You work on your own <strong>practice system</strong>:
+    a small AI application with retrieval, tools, and two test tenants, built in a sandbox with fake data.
+    <a href="/labs/lab-1-map-the-system">Lab 1</a> walks you through building and mapping it. Later labs threat-model
+    it, harden it, contain it, measure it, and operate it.
+  </p>
+  <p>
+    A shared, deliberately vulnerable reference application with public scoring suites is planned but not yet
+    available. When it ships, these guides will be updated so everyone works against the same system.
+  </p>
+
+  <div class="section-tiles">
+    {labs.map((l) => (
+      <a href={`/labs/${l.data.slug}`} class="section-tile">
+        <span class="section-tile-number">Lab {l.data.order} · {l.data.estimatedTime}</span>
+        <span class="section-tile-title">{l.data.title}</span>
+        <span class="section-tile-desc">{l.data.description}</span>
+      </a>
+    ))}
+  </div>
+</TrainingLayout>

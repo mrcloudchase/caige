@@ -7,21 +7,18 @@ export async function loadQuestionBank(): Promise<QuestionBank> {
   if (cachedBank) return cachedBank;
   const resp = await fetch('/data/question-bank.json');
   if (!resp.ok) throw new Error('Failed to load question bank');
-  cachedBank = await resp.json();
-  return cachedBank!;
+  cachedBank = (await resp.json()) as QuestionBank;
+  return cachedBank;
 }
 
 export function selectQuestions(bank: QuestionBank): Question[] {
-  const dist = bank.domainDistribution;
   const selected: Question[] = [];
 
   for (const domainData of bank.domains) {
-    const needed = dist[domainData.domain] || 0;
-    const pool = [...domainData.questions];
-    const shuffled = shuffle(pool);
-    const picked = shuffled.slice(0, needed);
-    picked.forEach(q => { q.domainName = domainData.name; });
-    selected.push(...picked);
+    const needed = bank.domainDistribution[domainData.domain] || 0;
+    const picked = shuffle([...domainData.questions]).slice(0, needed);
+    // Copy so the cached bank is never mutated between attempts
+    selected.push(...picked.map(q => ({ ...q, domainName: domainData.name })));
   }
 
   return shuffle(selected);

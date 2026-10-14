@@ -1,13 +1,17 @@
+export type Category = 'safety' | 'security' | 'containment' | 'cross-cutting';
+
 export interface Question {
-  id: number;
+  id: string;
   domain: number;
   domainName: string;
+  objective: string;
+  category: Category;
   type: 'mc' | 'ms';
   question: string;
   options: string[];
   correct: number[];
   explanation: string;
-  originalId?: number;
+  originalId?: string;
   displayIndex?: number;
   optionMap?: number[];
 }
@@ -15,13 +19,16 @@ export interface Question {
 export interface QuestionBankDomain {
   domain: number;
   name: string;
+  slug: string;
   count: number;
   questions: Question[];
 }
 
 export interface QuestionBank {
-  version: number;
+  version: string;
   examSize: number;
+  timeLimitMinutes: number;
+  passPercent: number;
   domainDistribution: Record<string, number>;
   domains: QuestionBankDomain[];
 }

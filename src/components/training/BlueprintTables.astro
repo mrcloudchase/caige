@@ -1,0 +1,51 @@
+---
+// Exam distribution and objectives, rendered from the curriculum spine and
+// section frontmatter.
+import { getCollection } from 'astro:content';
+import curriculum from '../../data/curriculum.json';
+
+const sections = await getCollection('sections');
+const byId = Object.fromEntries(sections.map((s) => [s.data.id, s.data]));
+const exam = curriculum.exam;
+const passCount = Math.ceil((exam.examSize * exam.passPercent) / 100);
+---
+
+<h2 id="distribution">Question Distribution by Domain</h2>
+<table>
+  <thead>
+    <tr><th>Domain</th><th>Weight</th><th>Questions per exam</th></tr>
+  </thead>
+  <tbody>
+    {curriculum.domains.map((d) => (
+      <tr>
+        <td><a href={`/training/module/${d.slug}`}>{d.domain}. {d.title}</a></td>
+        <td>{d.weight}%</td>
+        <td>{d.examQuestions}</td>
+      </tr>
+    ))}
+    <tr>
+      <td><strong>Total</strong></td>
+      <td><strong>100%</strong></td>
+      <td><strong>{exam.examSize}</strong></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  Passing standard: {exam.passPercent}% ({passCount} of {exam.examSize}). Time limit: {exam.timeLimitMinutes} minutes.
+</p>
+
+<h2 id="objectives">Exam Objectives</h2>
+<p>Every question maps to exactly one objective. Each objective corresponds to one training section.</p>
+{curriculum.domains.map((d) => (
+  <section>
+    <h3>Domain {d.domain}: {d.title}</h3>
+    {d.sections.map((s) => (
+      <div class="objective">
+        <h4><a href={`/training/module/${d.slug}/${s.slug}`}>{s.id} {s.title}</a></h4>
+        <ul>
+          {(byId[s.id]?.skills ?? [s.scope]).map((k: string) => <li>{k}</li>)}
+        </ul>
+      </div>
+    ))}
+  </section>
+))}

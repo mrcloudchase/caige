@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
 import type { ExamState, ExamAction } from './types';
+import { TIME_LIMIT_SECONDS } from './config';
 
 const initialState: ExamState = {
   candidateName: '',
@@ -7,7 +8,7 @@ const initialState: ExamState = {
   answers: {},
   flags: new Set(),
   currentIndex: 0,
-  timeRemaining: 120 * 60,
+  timeRemaining: TIME_LIMIT_SECONDS,
   submitted: false,
 };
 
@@ -23,7 +24,7 @@ function examReducer(state: ExamState, action: ExamAction): ExamState {
         answers: {},
         flags: new Set(),
         currentIndex: 0,
-        timeRemaining: 120 * 60,
+        timeRemaining: TIME_LIMIT_SECONDS,
         submitted: false,
       };
 

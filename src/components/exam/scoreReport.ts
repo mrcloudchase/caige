@@ -1,6 +1,6 @@
 const FONT = '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif';
 
-export function downloadCertificate(
+export function downloadScoreReport(
   candidateName: string,
   correct: number,
   total: number,
@@ -51,7 +51,7 @@ export function downloadCertificate(
   ctx.fillStyle = '#8b90a0';
   ctx.font = `600 14px ${FONT}`;
   ctx.letterSpacing = '6px';
-  ctx.fillText('CERTIFICATE OF ACHIEVEMENT', canvas.width / 2, 110);
+  ctx.fillText('PRACTICE EXAM SCORE REPORT', canvas.width / 2, 110);
 
   // Accent line
   ctx.strokeStyle = '#6c9fff';
@@ -86,7 +86,7 @@ export function downloadCertificate(
   // Subtitle
   ctx.fillStyle = '#6c9fff';
   ctx.font = `400 20px ${FONT}`;
-  ctx.fillText('Certified AI Guardrail Engineer', canvas.width / 2, 250);
+  ctx.fillText('cAIge Associate Practice Exam', canvas.width / 2, 250);
 
   // Divider
   ctx.strokeStyle = '#2a2e3a';
@@ -99,7 +99,7 @@ export function downloadCertificate(
   // "This certifies that"
   ctx.fillStyle = '#8b90a0';
   ctx.font = `400 18px ${FONT}`;
-  ctx.fillText('This certifies that', canvas.width / 2, 340);
+  ctx.fillText('Score report for', canvas.width / 2, 340);
 
   // Candidate name
   ctx.fillStyle = '#e1e4eb';
@@ -118,9 +118,9 @@ export function downloadCertificate(
   // Description
   ctx.fillStyle = '#8b90a0';
   ctx.font = `400 17px ${FONT}`;
-  ctx.fillText('has successfully passed the Certified AI Guardrail Engineer (cAIge)', canvas.width / 2, 470);
-  ctx.fillText('examination, demonstrating proficiency in AI guardrail design,', canvas.width / 2, 498);
-  ctx.fillText('implementation, testing, and operations.', canvas.width / 2, 526);
+  ctx.fillText('met the passing standard on the cAIge Associate practice exam.', canvas.width / 2, 470);
+  ctx.fillText('This is a self-administered practice result. It is not proctored', canvas.width / 2, 498);
+  ctx.fillText('and is not a cAIge certification.', canvas.width / 2, 526);
 
   // Date and Score section
   const today = new Date();
@@ -144,7 +144,7 @@ export function downloadCertificate(
   ctx.stroke();
   ctx.fillStyle = '#8b90a0';
   ctx.font = `400 14px ${FONT}`;
-  ctx.fillText('Date of Certification', 450, 665);
+  ctx.fillText('Date', 450, 665);
 
   // Right: Score
   ctx.fillStyle = '#e1e4eb';
@@ -157,7 +157,7 @@ export function downloadCertificate(
   ctx.stroke();
   ctx.fillStyle = '#8b90a0';
   ctx.font = `400 14px ${FONT}`;
-  ctx.fillText('Examination Score', canvas.width - 450, 665);
+  ctx.fillText('Practice Score', canvas.width - 450, 665);
 
   // Bottom divider
   ctx.strokeStyle = '#6c9fff';
@@ -173,11 +173,11 @@ export function downloadCertificate(
   ctx.fillText('caige.org', canvas.width / 2, 770);
   ctx.fillStyle = '#8b90a0';
   ctx.font = `400 13px ${FONT}`;
-  ctx.fillText('Vendor-Agnostic AI Certification Programs', canvas.width / 2, 795);
+  ctx.fillText('Certified AI Guardrail Engineer program', canvas.width / 2, 795);
 
   // Download
   const link = document.createElement('a');
-  link.download = 'cAIge-Certificate-' + candidateName.replace(/\s+/g, '-') + '.png';
+  link.download = 'cAIge-Practice-Score-' + candidateName.replace(/\s+/g, '-') + '.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
 }

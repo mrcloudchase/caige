@@ -1,0 +1,44 @@
+---
+// Rendered from section frontmatter so the matrix, the sections, and the exam
+// objectives always share one source of truth.
+import { getCollection } from 'astro:content';
+import curriculum from '../../data/curriculum.json';
+
+const sections = await getCollection('sections');
+const byId = Object.fromEntries(sections.map((s) => [s.data.id, s.data]));
+---
+
+<div class="matrix">
+  {curriculum.domains.map((d) => (
+    <section class="matrix-domain">
+      <h2 id={`domain-${d.domain}`}>Domain {d.domain}: {d.title} ({d.weight}%)</h2>
+      <p class="matrix-domain-links">
+        <a href={`/training/module/${d.slug}`}>Study the module</a> · <a href={`/labs/${d.lab}`}>Lab {d.domain}</a>
+      </p>
+      {d.sections.map((s) => {
+        const data = byId[s.id];
+        return (
+          <div class="matrix-section">
+            <h3>
+              <a href={`/training/module/${d.slug}/${s.slug}`}>{s.id} {s.title}</a>
+            </h3>
+            {data ? (
+              <div class="matrix-columns">
+                <div>
+                  <h4>Knowledge</h4>
+                  <ul>{data.knowledge.map((k: string) => <li>{k}</li>)}</ul>
+                </div>
+                <div>
+                  <h4>Skills: the candidate can</h4>
+                  <ul>{data.skills.map((k: string) => <li>{k}</li>)}</ul>
+                </div>
+              </div>
+            ) : (
+              <p>{s.scope}</p>
+            )}
+          </div>
+        );
+      })}
+    </section>
+  ))}
+</div>
