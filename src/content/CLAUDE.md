@@ -1,74 +1,58 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with content in this directory.
+Guidance for working with content in this directory. Also read the root [AGENTS.md](../../AGENTS.md) and [docs/style-guide.md](../../docs/style-guide.md).
 
-Also refer to the root [AGENTS.md](../../AGENTS.md) for project-wide context.
+## Structure
 
-## Content Structure
+- `programs/`: overview, competency-matrix (intro only; the matrix is generated), exam-blueprint (narrative only; distribution and objectives are generated), glossary.
+- `modules/d<N>-<slug>.md`: seven domain landing pages.
+- `sections/<domain-slug>/<section-slug>.md`: 43 sections, one per curriculum entry in `src/data/curriculum.json`.
+- `incidents/<slug>.md`: incident case studies.
+- `pages/`: the deployment standard and the certification pages.
 
-- `programs/overview.md` — Training program overview
-- `programs/competency-matrix.md` — Exhaustive knowledge areas and skills per domain
-- `programs/exam-blueprint.md` — Exam structure, question types, detailed objectives, scoring methodology
-- `modules/prerequisites.md` — Required AI Foundations prerequisite knowledge (not directly tested on exam)
-- `modules/module-{1-6}-*.md` — Six training modules, one per exam domain
-- `sections/{module-slug}/*.md` — Section content files organized by parent module
-
-All content is version 1.0. All files have YAML frontmatter validated by Zod schemas in `src/content.config.ts`.
+Lab guides live in `lab/labs/` and are loaded into the site as the `labs` collection.
 
 ## Frontmatter
 
-### Modules
-```yaml
-title: string       # Display title
-slug: string        # URL slug (used in /training/module/[slug])
-order: number       # Sort order (0=prerequisites, 1-6=modules)
-description: string # Short description
-domain?: number     # Exam domain number (1-6, absent for prerequisites)
-weight?: string     # Domain weight (e.g. "15%", absent for prerequisites)
-studyTime?: string  # Estimated study time (e.g. "3-4 hours")
-```
+Schemas are in `src/content.config.ts`. `npm run validate` checks that content agrees with `curriculum.json`.
 
 ### Sections
+
 ```yaml
-title: string       # Display title
-slug: string        # URL slug (used in /training/module/[module]/[slug])
-module: string      # Parent module slug (must match a module's slug field)
-sectionOrder: number # Sort order within the module (0=learning-objectives, etc.)
-description: string # Short description
+id: "3.4"                        # must match curriculum.json
+title: "..."                     # must match curriculum.json
+slug: output-handling-and-egress # must match curriculum.json
+module: security-engineering     # domain slug
+sectionOrder: 4                  # digit after the dot
+description: "..."
+category: security               # safety | security | containment | cross-cutting
+controlLayers: [deterministic]   # model | prompt | runtime-ml | deterministic | human
+knowledge: ["..."]               # rendered into the competency matrix
+skills: ["..."]                  # rendered into the matrix and exam objectives
+sources: [{ title: "...", url: "https://..." }]
+lastReviewed: "2026-10-14"       # flagged by validate after 12 months
 ```
 
-Module ordering is resolved at build time from the parent module's `order` field — sections do NOT store module order.
+Section bodies follow the skeleton in the style guide. They must include `## Where it breaks`, `## Lab exercise` (linking `/labs/<lab-slug>`), and `## Check your understanding`.
 
-### Programs
-```yaml
-title: string       # Display title
-slug: string        # URL slug (used in /training/[slug])
-order: number       # Sort order (0=overview, 1=competency-matrix, 2=exam-blueprint)
-description: string # Short description
-```
+### Modules
 
-## How Content Is Consumed
+`title`, `slug`, `order`, `domain`, `weight` ("15%"), `description`, `studyTime`, `lab`.
 
-Markdown files are rendered at build time by Astro's built-in markdown pipeline (remark/rehype). Standard markdown features are fully supported including HTML in markdown. SVG diagrams are referenced as images using absolute paths: `![alt text](/svg/filename.svg)`.
+### Incidents
 
-## Question Bank Format
+`title`, `slug` (same as the file name), `date` (YYYY-MM or YYYY-MM-DD), `category` (list), `sections` (section ids), `summary`, `sources` (at least one).
 
-Located at `public/data/question-bank.json` (served as a static file, fetched at runtime by the exam engine).
+## Question pools
 
-Structure:
-- `version` — integer version number
-- `examSize` — total scored questions per exam (75)
-- `domainDistribution` — object mapping domain number to question count (must sum to `examSize`)
-- `domains[]` — array of domain objects with `domain`, `name`, `count`, and `questions[]`
+Pools are in `exam/questions/d<N>.json`, and `scripts/build-question-bank.mjs` merges them into `public/data/question-bank.json`. Each question has these fields:
 
-Each question: `id`, `domain`, `type` ("mc"/"ms"), `question`, `correct` (array of indices), `options`, `explanation`.
+- `id`, `objective` (section id), `category`;
+- `type`: `mc` (4 options, 1 correct) or `ms` (5 options, 2-3 correct, with "(Choose N)" in the question text);
+- `question`, `options`, `correct` (indices);
+- `explanation`.
 
-## Cross-Reference Integrity
-
-These values must stay consistent across all documents:
-- Domain names, numbers, and weights
-- Exam parameters (75 scored + 5 pilot, 120 min, 70% pass)
-- Competency matrix sub-section numbering maps 1:1 to module sections and exam blueprint objectives
+Each section needs at least 3 questions, and each pool needs at least twice its domain's exam draw.
 
 ## Git
 

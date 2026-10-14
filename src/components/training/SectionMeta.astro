@@ -1,0 +1,32 @@
+---
+interface Props {
+  id: string;
+  category: string;
+  controlLayers: string[];
+  lastReviewed: string;
+}
+
+const { id, category, controlLayers, lastReviewed } = Astro.props;
+
+const CATEGORY_LABEL: Record<string, string> = {
+  safety: 'Safety',
+  security: 'Security',
+  containment: 'Containment',
+  'cross-cutting': 'Cross-cutting',
+};
+
+const LAYER_LABEL: Record<string, string> = {
+  model: 'Model',
+  prompt: 'Prompt',
+  'runtime-ml': 'Runtime ML',
+  deterministic: 'Deterministic',
+  human: 'Human',
+};
+---
+
+<div class="section-meta" aria-label="Section metadata">
+  <span class="meta-chip meta-id">Section {id}</span>
+  <span class:list={['meta-chip', 'meta-category', `cat-${category}`]}>{CATEGORY_LABEL[category] ?? category}</span>
+  {controlLayers.map((l) => <span class="meta-chip meta-layer">{LAYER_LABEL[l] ?? l} layer</span>)}
+  <span class="meta-reviewed">Last reviewed {lastReviewed}</span>
+</div>

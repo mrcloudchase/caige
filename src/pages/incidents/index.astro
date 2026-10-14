@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+const incidents = (await getCollection('incidents')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+
+<TrainingLayout title="Incident Library" currentPath="/incidents">
+  <h1>Incident Library</h1>
+  <p>
+    Real, documented AI failures, each analyzed with the program's framework: was it a safety, security, or
+    containment failure, which mechanism caused it, and which controls would have changed the outcome. Every case
+    cites its sources and links to the training sections it illustrates.
+  </p>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Incident</th><th>Category</th><th>Sections</th></tr>
+    </thead>
+    <tbody>
+      {incidents.map((i) => (
+        <tr>
+          <td>{i.data.date}</td>
+          <td><a href={`/incidents/${i.data.slug}`}>{i.data.title}</a><br /><span class="muted">{i.data.summary}</span></td>
+          <td>{i.data.category.join(', ')}</td>
+          <td>{i.data.sections.join(', ')}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</TrainingLayout>

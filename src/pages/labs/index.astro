@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+const labs = (await getCollection('labs')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<TrainingLayout title="Labs" currentPath="/labs">
+  <h1>Hands-on Labs</h1>
+  <p>
+    The labs use <strong>Acme Support</strong>, a deliberately vulnerable customer-support agent with retrieval,
+    tools, memory, and multiple tenants. You harden it step by step, one lab per domain, and measure your progress
+    with the lab's scoring tool: attack success rate, harmful-output rate, false-refusal rate, latency, and cost.
+  </p>
+  <p>
+    The lab is pure Python 3.11+ with no dependencies and runs on a deterministic model simulator, so no API keys
+    are needed. Get it from the <a href="https://github.com/mrcloudchase/caige/tree/main/lab">lab directory of the
+    cAIge repository</a> and start with its README.
+  </p>
+  <pre><code>git clone https://github.com/mrcloudchase/caige.git
+cd caige/lab
+python3 -m caige_lab.score --suite attacks/public --suite evals/public</code></pre>
+
+  <div class="section-tiles">
+    {labs.map((l) => (
+      <a href={`/labs/${l.data.slug}`} class="section-tile">
+        <span class="section-tile-number">Lab {l.data.order} · {l.data.estimatedTime}</span>
+        <span class="section-tile-title">{l.data.title}</span>
+        <span class="section-tile-desc">{l.data.description}</span>
+      </a>
+    ))}
+  </div>
+</TrainingLayout>

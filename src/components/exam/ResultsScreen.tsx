@@ -1,6 +1,7 @@
-import React from 'react';
-import type { ExamState } from './types';
-import { downloadCertificate } from './certificate';
+import React, { useState } from 'react';
+import type { ExamState, Question } from './types';
+import { downloadScoreReport } from './scoreReport';
+import { DOMAINS, EXAM, SECTIONS } from './config';
 
 interface ResultsScreenProps {
   state: ExamState;
@@ -14,74 +15,73 @@ interface DomainResult {
   pct: number;
 }
 
+interface Missed {
+  index: number;
+  question: Question;
+  selected: number[];
+}
+
+function isCorrect(q: Question, selected: number[]): boolean {
+  const a = [...selected].sort();
+  const b = [...q.correct].sort();
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
 function computeResults(state: ExamState) {
-  let totalCorrect = 0;
   const domainScores: Record<number, number> = {};
   const domainTotals: Record<number, number> = {};
-  const domainNames: Record<number, string> = {};
+  const missed: Missed[] = [];
+  let totalCorrect = 0;
 
   state.questions.forEach((q, idx) => {
-    if (!domainScores[q.domain]) {
-      domainScores[q.domain] = 0;
-      domainTotals[q.domain] = 0;
-      domainNames[q.domain] = q.domainName;
-    }
-    domainTotals[q.domain]++;
-
-    const selected = [...(state.answers[idx] || [])].sort();
-    const correct = [...q.correct].sort();
-
-    if (selected.length === correct.length && selected.every((v, i) => v === correct[i])) {
+    domainTotals[q.domain] = (domainTotals[q.domain] ?? 0) + 1;
+    const selected = state.answers[idx] || [];
+    if (isCorrect(q, selected)) {
       totalCorrect++;
-      domainScores[q.domain]++;
+      domainScores[q.domain] = (domainScores[q.domain] ?? 0) + 1;
+    } else {
+      missed.push({ index: idx, question: q, selected });
     }
   });
 
   const total = state.questions.length;
-  const pct = Math.round((totalCorrect / total) * 100);
-  const passed = pct >= 70;
+  const exactPct = total > 0 ? (totalCorrect / total) * 100 : 0;
+  const passed = exactPct >= EXAM.passPercent;
 
-  const domains: DomainResult[] = [];
-  for (let d = 1; d <= 6; d++) {
-    if (!domainTotals[d]) continue;
-    const dScore = domainScores[d];
-    const dTotal = domainTotals[d];
-    const dPct = Math.round((dScore / dTotal) * 100);
-    domains.push({ domain: d, name: domainNames[d], correct: dScore, total: dTotal, pct: dPct });
-  }
+  const domains: DomainResult[] = DOMAINS.filter(d => domainTotals[d.domain]).map(d => {
+    const correct = domainScores[d.domain] ?? 0;
+    const dTotal = domainTotals[d.domain];
+    return { domain: d.domain, name: d.title, correct, total: dTotal, pct: Math.round((correct / dTotal) * 100) };
+  });
 
-  return { totalCorrect, total, pct, passed, domains };
+  // Sections to review, ordered by number of misses
+  const missCounts: Record<string, number> = {};
+  missed.forEach(m => { missCounts[m.question.objective] = (missCounts[m.question.objective] ?? 0) + 1; });
+  const reviewSections = Object.entries(missCounts)
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([id, count]) => ({ ...SECTIONS[id], count }))
+    .filter(s => s.href);
+
+  return { totalCorrect, total, pct: Math.round(exactPct), passed, domains, missed, reviewSections };
 }
 
 export default function ResultsScreen({ state }: ResultsScreenProps) {
-  const { totalCorrect, total, pct, passed, domains } = computeResults(state);
-
-  const handleDownload = () => {
-    downloadCertificate(state.candidateName, totalCorrect, total, pct);
-  };
-
-  const handleHome = () => {
-    window.location.href = '/';
-  };
+  const { totalCorrect, total, pct, passed, domains, missed, reviewSections } = computeResults(state);
+  const [showReview, setShowReview] = useState(false);
 
   return (
     <div id="results-screen" style={{ display: 'block' }}>
       <div className="container">
         <div className={`result-banner ${passed ? 'pass' : 'fail'}`}>
-          <div className="result-status">{passed ? 'PASSED' : 'DID NOT PASS'}</div>
+          <div className="result-status">{passed ? 'MET THE PASSING STANDARD' : 'BELOW THE PASSING STANDARD'}</div>
           <div className="result-score">Score: {totalCorrect} / {total}</div>
           <div className="result-percent">
-            {pct}%{!passed && ' (70% required to pass)'}
+            {pct}% ({EXAM.passPercent}% passing standard)
           </div>
+          <p className="practice-notice">Practice result only. This is not a cAIge certification.</p>
         </div>
 
-        <div style={{
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          marginBottom: '32px',
-        }}>
+        <div className="results-card">
           <table className="domain-table">
             <thead>
               <tr>
@@ -94,7 +94,7 @@ export default function ResultsScreen({ state }: ResultsScreenProps) {
               {domains.map((d) => {
                 let colorClass = 'pass-color';
                 if (d.pct < 50) colorClass = 'fail-color';
-                else if (d.pct < 70) colorClass = 'warn-color';
+                else if (d.pct < EXAM.passPercent) colorClass = 'warn-color';
 
                 return (
                   <tr key={d.domain}>
@@ -103,10 +103,7 @@ export default function ResultsScreen({ state }: ResultsScreenProps) {
                     <td>
                       <div className="score-bar-cell">
                         <div className="score-bar-track">
-                          <div
-                            className={`score-bar-fill ${colorClass}`}
-                            style={{ width: `${d.pct}%` }}
-                          />
+                          <div className={`score-bar-fill ${colorClass}`} style={{ width: `${d.pct}%` }} />
                         </div>
                         <span className="score-label">{d.pct}%</span>
                       </div>
@@ -118,16 +115,68 @@ export default function ResultsScreen({ state }: ResultsScreenProps) {
           </table>
         </div>
 
+        {reviewSections.length > 0 && (
+          <div className="results-card review-sections">
+            <h3>Sections to review</h3>
+            <ul>
+              {reviewSections.map(s => (
+                <li key={s.id}>
+                  <a href={s.href}>{s.id} {s.title}</a>
+                  <span className="miss-count">{s.count} missed</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="result-actions">
-          {passed && (
-            <button className="btn btn-success" onClick={handleDownload}>
-              Download Certificate
+          {missed.length > 0 && (
+            <button className="btn btn-primary" onClick={() => setShowReview(v => !v)}>
+              {showReview ? 'Hide' : 'Review'} missed questions ({missed.length})
             </button>
           )}
-          <button className="btn btn-secondary" onClick={handleHome}>
-            Return Home
-          </button>
+          {passed && (
+            <button
+              className="btn btn-success"
+              onClick={() => downloadScoreReport(state.candidateName, totalCorrect, total, pct)}
+            >
+              Download Score Report
+            </button>
+          )}
+          <a className="btn btn-secondary" href="/">Return Home</a>
         </div>
+
+        {showReview && (
+          <div className="review-list">
+            {missed.map(({ index, question, selected }) => {
+              const section = SECTIONS[question.objective];
+              return (
+                <div className="review-item" key={question.id}>
+                  <div className="review-meta">
+                    Question {index + 1} · Domain {question.domain} ·{' '}
+                    {section ? <a href={section.href}>{section.id} {section.title}</a> : question.objective}
+                  </div>
+                  <p className="review-question">{question.question}</p>
+                  <ul className="review-options">
+                    {question.options.map((opt, i) => {
+                      const isAnswer = question.correct.includes(i);
+                      const wasSelected = selected.includes(i);
+                      const cls = isAnswer ? 'correct' : wasSelected ? 'incorrect' : '';
+                      return (
+                        <li key={i} className={cls}>
+                          {opt}
+                          {isAnswer && <span className="tag">correct</span>}
+                          {wasSelected && !isAnswer && <span className="tag">your answer</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <p className="review-explanation">{question.explanation}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,32 @@
+---
+import { getCollection, render } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+
+export async function getStaticPaths() {
+  const labs = (await getCollection('labs')).sort((a, b) => a.data.order - b.data.order);
+  const modules = await getCollection('modules');
+
+  return labs.map((entry, i) => {
+    const module = modules.find((m) => m.data.lab === entry.data.slug);
+    const prev = module
+      ? { title: module.data.title, href: `/training/module/${module.data.slug}` }
+      : null;
+    const next = i < labs.length - 1
+      ? { title: labs[i + 1].data.title, href: `/labs/${labs[i + 1].data.slug}` }
+      : null;
+    return { params: { slug: entry.data.slug }, props: { entry, prev, next } };
+  });
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<TrainingLayout title={entry.data.title} currentPath={`/labs/${entry.data.slug}`} prev={prev} next={next}>
+  <div class="section-meta">
+    <span class="meta-chip meta-id">Lab {entry.data.order}</span>
+    <span class="meta-chip">Domain {entry.data.domain}</span>
+    <span class="meta-reviewed">Estimated time {entry.data.estimatedTime}</span>
+  </div>
+  <Content />
+</TrainingLayout>

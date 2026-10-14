@@ -25,6 +25,18 @@ function isInModule(moduleSlug: string) {
 
 const inProgram = programs.some(p => isActive(`/training/${p.data.slug}`));
 const inModules = currentPath.startsWith('/training/module/');
+
+const practiceLinks = [
+  { title: 'Hands-on Labs', href: '/labs' },
+  { title: 'Incident Library', href: '/incidents' },
+  { title: 'AI Deployment Standard', href: '/standard' },
+  { title: 'cAIge Associate', href: '/certifications/associate' },
+  { title: 'cAIge Professional', href: '/certifications/professional' },
+  { title: 'Practice Exam', href: '/practice-exam' },
+];
+const inPractice = ['/labs', '/incidents', '/standard', '/certifications'].some(
+  p => currentPath === p || currentPath.startsWith(`${p}/`)
+);
 ---
 
 <nav class="sidebar" id="sidebar" aria-label="Training navigation">
@@ -112,6 +124,31 @@ const inModules = currentPath.startsWith('/training/module/');
     );
   })}
   </div>
+  </div>
+
+  <button
+    class:list={['nav-section', 'nav-section-toggle', { collapsed: !inPractice }]}
+    id="practice-toggle"
+    aria-expanded={inPractice ? 'true' : 'false'}
+    aria-controls="practice-items"
+  >
+    <span>Practice and Certification</span>
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class:list={['nav-section-items', { collapsed: !inPractice }]} id="practice-items" role="region" aria-labelledby="practice-toggle">
+    <div class="nav-section-inner">
+      {practiceLinks.map((l) => (
+        <a
+          class:list={['nav-item', { active: isActive(l.href) || currentPath.startsWith(`${l.href}/`) }]}
+          href={l.href}
+          aria-current={isActive(l.href) ? 'page' : undefined}
+        >
+          {l.title}
+        </a>
+      ))}
+    </div>
   </div>
 </nav>
 

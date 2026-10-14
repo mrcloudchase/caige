@@ -143,6 +143,9 @@ section {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+a.domain-card { display: block; color: inherit; text-decoration: none; }
+a.domain-card:hover { opacity: 1; }
+
 .domain-card:hover {
   border-color: rgba(108, 159, 255, 0.3);
   box-shadow: 0 0 24px rgba(108, 159, 255, 0.06);

@@ -6,6 +6,7 @@ export async function getStaticPaths() {
   const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
   const programs = (await getCollection('programs')).sort((a, b) => a.data.order - b.data.order);
   const allSections = await getCollection('sections');
+  const labs = await getCollection('labs');
 
   return modules.map((entry, i) => {
     // Prev: last section of previous module, or last program page
@@ -38,15 +39,14 @@ export async function getStaticPaths() {
 
     return {
       params: { slug: entry.data.slug },
-      props: { entry, prev, next, sections },
+      props: { entry, prev, next, sections, lab: labs.find(l => l.data.slug === entry.data.lab) },
     };
   });
 }
 
-const { entry, prev, next, sections } = Astro.props;
+const { entry, prev, next, sections, lab } = Astro.props;
 const { Content } = await render(entry);
 const moduleSlug = entry.data.slug;
-const moduleOrder = entry.data.order;
 ---
 
 <TrainingLayout
@@ -61,52 +61,17 @@ const moduleOrder = entry.data.order;
     {sections.map((s, i) => (
       <a href={`/training/module/${moduleSlug}/${s.data.slug}`} class="section-tile">
         <span class="section-tile-number">
-          {`Section ${s.data.sectionOrder}`}
+          {`Section ${s.data.id}`}
         </span>
         <span class="section-tile-title">{s.data.title}</span>
       </a>
     ))}
+    {lab && (
+      <a href={`/labs/${lab.data.slug}`} class="section-tile lab-tile">
+        <span class="section-tile-number">Hands-on lab</span>
+        <span class="section-tile-title">{lab.data.title}</span>
+      </a>
+    )}
   </div>
 </TrainingLayout>
 
-<style>
-  .section-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 12px;
-    margin-top: 32px;
-  }
-
-  .section-tile {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 20px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    text-decoration: none;
-    color: var(--color-text);
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .section-tile:hover {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 20px rgba(108, 159, 255, 0.08);
-    opacity: 1;
-  }
-
-  .section-tile-number {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-accent);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .section-tile-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-</style>

@@ -1,12 +1,16 @@
 {
-  "name": "ai-certification",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "caige",
+  "version": "2.0.0",
+  "description": "cAIge: Certified AI Guardrail Engineer program site, practice exam, and lab",
   "scripts": {
+    "predev": "node scripts/build-question-bank.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/build-question-bank.mjs",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "validate": "node scripts/validate.mjs && python3 -I scripts/check-code-blocks.py",
+    "test:lab": "cd lab && python3 -m unittest",
+    "check": "npm run validate && npm run test:lab && npm run build"
   },
   "repository": {
     "type": "git",
@@ -30,7 +34,9 @@
     "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "js-yaml": "^4.1.1",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
-  }
+  },
+  "private": true
 }

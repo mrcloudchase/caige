@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import TrainingLayout from '../../layouts/TrainingLayout.astro';
+import SourceList from '../../components/training/SourceList.astro';
+import curriculum from '../../data/curriculum.json';
+
+export async function getStaticPaths() {
+  const incidents = await getCollection('incidents');
+  return incidents.map((entry) => ({ params: { slug: entry.data.slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const sectionLinks = curriculum.domains.flatMap((d) =>
+  d.sections
+    .filter((s) => entry.data.sections.includes(s.id))
+    .map((s) => ({ id: s.id, title: s.title, href: `/training/module/${d.slug}/${s.slug}` }))
+);
+---
+
+<TrainingLayout
+  title={entry.data.title}
+  currentPath={`/incidents/${entry.data.slug}`}
+  prev={{ title: 'Incident Library', href: '/incidents' }}
+>
+  <div class="section-meta">
+    <span class="meta-chip meta-id">{entry.data.date}</span>
+    {entry.data.category.map((c) => <span class:list={['meta-chip', 'meta-category', `cat-${c}`]}>{c}</span>)}
+  </div>
+  <h1>{entry.data.title}</h1>
+  <p class="lead">{entry.data.summary}</p>
+  <Content />
+  <section>
+    <h2>Related sections</h2>
+    <ul>
+      {sectionLinks.map((s) => <li><a href={s.href}>{s.id} {s.title}</a></li>)}
+    </ul>
+  </section>
+  <SourceList sources={entry.data.sources} />
+</TrainingLayout>

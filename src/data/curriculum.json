@@ -1,0 +1,138 @@
+{
+  "version": "2.0",
+  "exam": {
+    "name": "cAIge Associate (practice)",
+    "examSize": 75,
+    "timeLimitMinutes": 120,
+    "passPercent": 70
+  },
+  "domains": [
+    {
+      "domain": 1,
+      "slug": "how-ai-systems-behave",
+      "title": "How AI Systems Behave",
+      "weight": 10,
+      "examQuestions": 8,
+      "poolTarget": 24,
+      "lab": "lab-1-map-the-system",
+      "studyTime": "3-4 hours",
+      "sections": [
+        { "id": "1.1", "slug": "tokens-context-sampling", "title": "Tokens, Context, and Sampling", "scope": "Tokenization and why filters and tokenizers disagree; context windows and long-context dilution; logits, temperature, top-p/top-k; why outputs are non-deterministic even at temperature 0 on hosted APIs." },
+        { "id": "1.2", "slug": "how-models-learn-behavior", "title": "How Models Learn Behavior", "scope": "Pre-training, instruction tuning, preference training (RLHF, DPO, RLAIF/Constitutional AI), reasoning-model RL; safety behavior as a learned statistical preference; fine-tuning can remove safety; what providers vs. application builders control." },
+        { "id": "1.3", "slug": "instruction-hierarchy-single-channel", "title": "The Instruction Hierarchy and the Single-Channel Problem", "scope": "Roles (system/developer, user, tool, retrieved content); the hierarchy is trained, not enforced; instructions and data share one token stream with no privileged channel; the root cause of prompt injection." },
+        { "id": "1.4", "slug": "tools-agents-memory-retrieval", "title": "Tools, Agents, Memory, and Retrieval", "scope": "How tool/function calling actually works (model emits a request, the application executes it); agent loops; memory (short-term context, summaries, long-term stores); RAG and embeddings mechanics; MCP at a mechanical level." },
+        { "id": "1.5", "slug": "anatomy-of-production-ai-systems", "title": "Anatomy of a Production AI System", "scope": "Gateway, orchestrator/harness, model, retrieval, tools, memory, control plane, logging; common patterns (chat, RAG, agent, multi-model); provider-side vs. application-side controls; where guardrails can attach." }
+      ]
+    },
+    {
+      "domain": 2,
+      "slug": "risk-and-threat-modeling",
+      "title": "Risk and Threat Modeling",
+      "weight": 15,
+      "examQuestions": 11,
+      "poolTarget": 33,
+      "lab": "lab-2-threat-model",
+      "studyTime": "4-5 hours",
+      "sections": [
+        { "id": "2.1", "slug": "safety-security-containment", "title": "Safety, Security, and Containment", "scope": "The organizing framework of the program: safety (the model misbehaves without an adversary), security (an adversary gains or abuses authority), containment (cause-agnostic: limit, observe, stop). Reliability as a sub-class of safety. Mechanism vs. impact classification (a jailbreak is a security mechanism with a safety impact). The control-strength ladder: model < prompt < runtime ML < deterministic architecture < human/operational." },
+        { "id": "2.2", "slug": "principals-authority-trust-boundaries", "title": "Principals, Authority, and Trust Boundaries", "scope": "Enumerating principals (operator, developer, end user, tenant, tool, retrieved content, other agents, the model itself); assigning authority; drawing trust boundaries across the data flow, including tool results flowing back into context and model output flowing to downstream systems." },
+        { "id": "2.3", "slug": "failure-mode-catalog", "title": "The Failure Mode Catalog", "scope": "Catalog of failure modes classified as safety / security / containment with mechanism, example, and real incident: hallucination, harmful content, over-refusal, sycophancy, off-scope behavior, direct and indirect prompt injection, jailbreaking, data leakage, improper output handling, excessive agency, unbounded consumption, supply-chain compromise, memory poisoning, cascading agent failures." },
+        { "id": "2.4", "slug": "frameworks-and-standards", "title": "Threat Frameworks and Standards", "scope": "OWASP Top 10 for LLM Applications (2025) and OWASP agentic security guidance, MITRE ATLAS, NIST AI RMF and NIST AI 600-1, STRIDE applied to LLM systems; mapping the catalog to them; date-stamp every version." },
+        { "id": "2.5", "slug": "assume-compromise-blast-radius", "title": "Assume Compromise: Blast-Radius Analysis", "scope": "The central design test: if the model were fully compromised or misaligned, what is the worst it could do? The insider-risk model (treat the model like a privileged insider). The lethal trifecta (private data + untrusted content + exfiltration channel). Reducing blast radius vs. reducing likelihood." },
+        { "id": "2.6", "slug": "risk-scoring-and-threat-model-documents", "title": "Risk Scoring and Threat Model Documents", "scope": "Likelihood x impact scoring that depends on the use case; prioritization; documenting a threat model (template); risk acceptance and who signs it; keeping threat models alive as the system changes." }
+      ]
+    },
+    {
+      "domain": 3,
+      "slug": "security-engineering",
+      "title": "Security Engineering",
+      "weight": 20,
+      "examQuestions": 15,
+      "poolTarget": 45,
+      "lab": "lab-3-security-hardening",
+      "studyTime": "7-9 hours",
+      "sections": [
+        { "id": "3.1", "slug": "prompt-injection", "title": "Prompt Injection", "scope": "Direct, indirect, and multimodal injection; why it is unsolved (no parameterized-query equivalent); why detection is a mitigation not a fix; adaptive attacks against detectors; injection vs. jailbreak." },
+        { "id": "3.2", "slug": "architectural-injection-defenses", "title": "Architectural Defenses Against Injection", "scope": "Designs that bound what injected content can do: privilege separation, dual-LLM (privileged/quarantined), plan-then-execute, CaMeL-style capability/data-flow control, taint tracking, breaking the lethal trifecta, spotlighting/data marking." },
+        { "id": "3.3", "slug": "input-handling", "title": "Input Handling", "scope": "Normalization (Unicode NFKC, zero-width and homoglyph handling, decoding layers); size and rate limits keyed correctly (pre-auth vs. post-auth); delimiters with escaping or randomized boundaries; injection detection as one layer; defensive system prompts and their limits; never put secrets in prompts." },
+        { "id": "3.4", "slug": "output-handling-and-egress", "title": "Output Handling and Egress Control", "scope": "Treat model output as untrusted input to downstream systems: XSS, SQL/command injection, SSRF via model-chosen URLs; data exfiltration via markdown images and links; URL allowlists and egress proxies; content security policy." },
+        { "id": "3.5", "slug": "data-protection-and-isolation", "title": "Data Protection and Isolation", "scope": "Retrieval-time authorization (filter at query time by the caller's identity); multi-tenant and session isolation; PII detection (regex with validation, NER, purpose-built detectors) and redaction/masking/tokenization; keyed hashing (HMAC) for pseudonymization; data minimization; privacy-preserving logging; memory stores." },
+        { "id": "3.6", "slug": "identity-and-delegation", "title": "Identity and Delegation", "scope": "Agents acting on behalf of users; OAuth scopes and short-lived, audience-bound tokens; no token passthrough; the confused-deputy problem; per-user vs. service credentials; authorization enforced by the tool backend, never by the model." },
+        { "id": "3.7", "slug": "ai-supply-chain", "title": "AI Supply Chain Security", "scope": "Third-party models and weights (provenance, serialization risks), poisoned datasets and RAG corpora, MCP servers and tool-description poisoning, rug-pull tool updates, extensions and plugins; pinning, review, and allowlisting." }
+      ]
+    },
+    {
+      "domain": 4,
+      "slug": "safety-engineering",
+      "title": "Safety Engineering",
+      "weight": 20,
+      "examQuestions": 15,
+      "poolTarget": 45,
+      "lab": "lab-4-safety-controls",
+      "studyTime": "7-9 hours",
+      "sections": [
+        { "id": "4.1", "slug": "content-policy-as-specification", "title": "Content Policy as a Specification", "scope": "Writing policy that engineers can implement and test: harm taxonomy, allowed/disallowed/needs-care tiers, worked examples and edge cases, context-dependence (same text, different deployments); policy versioning." },
+        { "id": "4.2", "slug": "detection-and-classification", "title": "Detection and Classification", "scope": "Rules, ML classifiers, embedding similarity, LLM-as-judge; calibration and threshold choice; layered pipelines that route only ambiguous cases to expensive checks; judges are themselves injectable; integration points (SDK, proxy, gateway) and build vs. buy by tool category." },
+        { "id": "4.3", "slug": "groundedness-and-hallucination", "title": "Groundedness and Hallucination", "scope": "Why hallucination is structural; grounding in retrieved sources; claim extraction and NLI/judge-based support checks and their limits (chunking, input limits); citation verification; abstention and 'I don't know' design; high-stakes domains." },
+        { "id": "4.4", "slug": "over-refusal-and-refusal-design", "title": "Over-Refusal and Refusal Design", "scope": "Over-refusal as a measured failure mode; false-positive cost; designing helpful refusals that do not leak internals; safe completion and redirection; escalation to humans." },
+        { "id": "4.5", "slug": "sycophancy-and-vulnerable-users", "title": "Sycophancy, Manipulation, and Vulnerable Users", "scope": "Sycophancy and agreement bias; emotional reliance and companion-style risk; detecting crisis signals and routing to resources; minors; high-stakes advice (medical, legal, financial); persuasion and manipulation risks." },
+        { "id": "4.6", "slug": "structured-output-enforcement", "title": "Structured Output Enforcement", "scope": "Schemas (JSON Schema, strict models that forbid extra fields and fail closed on required fields); constrained decoding vs. post-hoc validation and the failure cases of each (truncation, refusals); bounded retries; template-based generation with output encoding." },
+        { "id": "4.7", "slug": "streaming-latency-and-failure-behavior", "title": "Streaming, Latency, and Failure Behavior", "scope": "Guardrails on streamed output (buffering windows, retraction); running checks in parallel with generation; latency and cost budgets; timeouts; fail-open vs. fail-closed decisions by risk; graceful degradation and circuit breakers." }
+      ]
+    },
+    {
+      "domain": 5,
+      "slug": "agent-containment-and-control",
+      "title": "Agent Containment and Control",
+      "weight": 15,
+      "examQuestions": 11,
+      "poolTarget": 33,
+      "lab": "lab-5-containment-and-brake",
+      "studyTime": "5-7 hours",
+      "sections": [
+        { "id": "5.1", "slug": "least-privilege-for-agents", "title": "Least Privilege for Agents", "scope": "The insider-risk model applied: minimal tool sets per task, read vs. write separation, enforcing parameter constraints in the tool backend (e.g. read-only database roles, exact-match recipient allowlists), dynamic scoping per session." },
+        { "id": "5.2", "slug": "sandboxing-and-egress-isolation", "title": "Sandboxing and Egress Isolation", "scope": "Isolation strength: process, container, gVisor-style kernels, microVMs (Firecracker); filesystem and network isolation; default-deny egress; secrets never mounted into sandboxes; sandbox escape as a realistic threat." },
+        { "id": "5.3", "slug": "action-gating-and-approvals", "title": "Action Gating and Human Approval", "scope": "Risk tiers for actions; reversibility as a design criterion; approval workflows that show the actual action and data (not the model's self-description); approval fatigue; dry-run and staged execution; compensating actions." },
+        { "id": "5.4", "slug": "budgets-and-resource-limits", "title": "Budgets and Resource Limits", "scope": "Step, token, cost, time, and rate budgets; loop detection; unbounded consumption and denial-of-wallet; per-tenant quotas; enforcing limits outside the model." },
+        { "id": "5.5", "slug": "the-emergency-brake", "title": "The Emergency Brake", "scope": "Human-operated pause, stop, and kill for running agents: who is authorized; what pause means mid-task (checkpointing, in-flight actions); safe-state and rollback; credential revocation as a kill; the brake must sit outside the model's reach and be tamper-resistant; drills. Reference Satya Nadella's 2026 'Models as Insider Risks' essay as context." },
+        { "id": "5.6", "slug": "external-control-plane-and-audit", "title": "External Control Plane and Tamper-Proof Audit", "scope": "Separating the model from the harness and action space; reference-monitor principle (the program must not bypass the mechanism enforcing its permissions); tamper-evident, append-only audit logs the model cannot write to; reproducing outcomes without relying on the model's self-report; no model verifies its own work." },
+        { "id": "5.7", "slug": "multi-agent-memory-and-monitoring", "title": "Multi-Agent Systems, Memory, and Monitoring", "scope": "Trust between agents; memory poisoning and what never to store; long-running autonomy; chain-of-thought monitoring and its unfaithfulness; behavioral anomaly detection; containment as model capability grows." }
+      ]
+    },
+    {
+      "domain": 6,
+      "slug": "evaluation-and-red-teaming",
+      "title": "Evaluation and Red Teaming",
+      "weight": 12,
+      "examQuestions": 9,
+      "poolTarget": 27,
+      "lab": "lab-6-red-team-and-measure",
+      "studyTime": "5-6 hours",
+      "sections": [
+        { "id": "6.1", "slug": "designing-evaluations", "title": "Designing Evaluations", "scope": "Benign and adversarial evaluation sets; labeling guidelines and inter-annotator agreement; representative traffic; contamination; tagging synthetic probes so they do not pollute production metrics." },
+        { "id": "6.2", "slug": "metrics-and-statistics", "title": "Metrics and Statistics", "scope": "Confusion matrix, precision, recall, F1, FPR, FNR, attack success rate (ASR) with multiple trials; base rates and why precision collapses for rare events; confidence intervals and sample sizes; ROC/PR curves and threshold selection; latency percentiles; cost per evaluation." },
+        { "id": "6.3", "slug": "validating-judges-and-classifiers", "title": "Validating Judges and Classifiers", "scope": "Measuring LLM-judge agreement with human labels; judge bias (position, verbosity, self-preference); adversarial robustness of judges; drift; never letting a model grade its own outputs." },
+        { "id": "6.4", "slug": "red-team-engagements", "title": "Red Team Engagements", "scope": "Planning, scope and rules of engagement; manual and automated attacks (GCG-style suffixes, PAIR/TAP, many-shot, Crescendo, encoding, low-resource languages); tools by category with examples (garak, PyRIT, promptfoo); judging success; exploitability and severity rating; reporting; coordinated disclosure to vendors." },
+        { "id": "6.5", "slug": "agentic-and-multimodal-red-teaming", "title": "Red Teaming Agents and Multimodal Systems", "scope": "Testing tool-using agents (AgentDojo-style environments), indirect injection via documents, web pages, images, and audio; measuring harmful actions rather than harmful text; testing the brake and approval flows." },
+        { "id": "6.6", "slug": "regression-and-ci", "title": "Regression Testing and CI", "scope": "Unit tests for guardrail components that can actually fail; integration tests for pipelines (mock stages to verify ordering); regression suites from incidents; tiered CI (fast on every commit, full suites nightly); performance testing with warm-up and proper percentile computation." }
+      ]
+    },
+    {
+      "domain": 7,
+      "slug": "operations-and-governance",
+      "title": "Operations and Governance",
+      "weight": 8,
+      "examQuestions": 6,
+      "poolTarget": 18,
+      "lab": "lab-7-operate-and-respond",
+      "studyTime": "3-4 hours",
+      "sections": [
+        { "id": "7.1", "slug": "monitoring-and-alerting", "title": "Monitoring and Alerting", "scope": "Operational metrics (block rate, bypass signals, refusal rate, latency, errors, cost); relative-change alerting and alert fatigue; governed, access-controlled sample stores for review; dashboards for different audiences." },
+        { "id": "7.2", "slug": "incident-response-and-disclosure", "title": "Incident Response and Disclosure", "scope": "AI incident severity; containment options for an active bypass (emergency rules, stricter thresholds, disabling a tool or feature, routing to humans, the brake); forensics from audit logs; post-incident regression tests; disclosure to affected parties and coordinated industry sharing." },
+        { "id": "7.3", "slug": "change-management", "title": "Change Management", "scope": "Guardrail configuration as code; re-validating on every model, prompt, or policy change; canary and shadow releases with relative thresholds and detection probes; versioning and rollback; guardrail debt." },
+        { "id": "7.4", "slug": "release-gates-and-documentation", "title": "Release Gates and Documentation", "scope": "Go/no-go criteria for AI releases; system cards; risk acceptance records and ownership; who holds the authority to stop a launch or a running system." },
+        { "id": "7.5", "slug": "regulation-and-standards", "title": "Regulation and Standards", "scope": "Mapping engineering controls to the EU AI Act, NIST AI RMF, ISO/IEC 42001, and sector rules; what evidence auditors ask for; privacy law basics relevant to guardrails (GDPR lawful bases, CCPA/CPRA); date-stamp all regulatory references." }
+      ]
+    }
+  ]
+}

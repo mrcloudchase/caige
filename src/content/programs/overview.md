@@ -1,88 +1,89 @@
 ---
-title: "Training Program Overview"
+title: "Program Overview"
 slug: overview
 order: 0
-description: "Overview of the cAIge Certified AI Guardrail Engineer training program."
+description: "What the cAIge program trains, how it is organized, and how to use it."
 ---
 
-# cAIge Training Program
+# cAIge Program Overview
 
-## Certified AI Guardrail Engineer (cAIge)
+**Certified AI Guardrail Engineer, version 2.0**
 
-**Version:** 1.0
-**Maintained by:** caige.org
+A guardrail engineer makes AI systems hard to misuse and safe to run. In practice that means designing, building, testing, and operating the controls that stop an AI application from producing harmful output, being turned against its users or its operator, leaking data, or taking actions nobody authorized. When those controls fail, the guardrail engineer is also the person who can stop the system.
 
----
-
-## Program Overview
-
-AI guardrails are the technical controls that prevent AI systems from producing harmful content, being exploited by adversarial users, leaking sensitive data, or taking unauthorized actions. A guardrail engineer designs, builds, and validates these controls — specifically for applications powered by large language models (LLMs).
-
-This training program prepares candidates for the Certified AI Guardrail Engineer (cAIge) examination. It covers all five domains of the cAIge competency matrix with text-based instruction, real-world examples, code samples, and architectural diagrams aligned to the exam blueprint.
-
-The program is vendor-agnostic. It teaches concepts, patterns, and engineering thinking — not product-specific configuration. You will learn to design, implement, test, and maintain AI guardrails across any technology stack.
+This program trains engineers for that job and certifies that they can do it. It is free, vendor-agnostic, and built around hands-on work on a deliberately vulnerable AI application.
 
 ---
 
-## Prerequisites
+## The framework behind the program
 
-Before starting the training modules, you should have:
+AI risk comes from different sources, and each source needs a different kind of control. The program uses three categories throughout:
 
-- 1-2 years working with AI/ML systems in any capacity
-- Basic understanding of software architecture and API design
-- Familiarity with at least one programming language (Python examples are used throughout)
-- Exposure to security concepts (you don't need to be a security specialist)
+| Category | The problem | Typical controls |
+|---|---|---|
+| **Safety** | The model misbehaves without an adversary: harmful or wrong output, sycophancy, over-refusal, overreach. | Content policy, classifiers and judges, grounding checks, refusal design, human review |
+| **Security** | An adversary gains or abuses authority, most often by injecting instructions that try to borrow authority they do not hold. | Trust boundaries, privilege separation, retrieval authorization, output handling, egress control |
+| **Containment** | Any cause, including ones you cannot diagnose. Treat the model like a powerful insider: limit it, observe it, and keep the ability to stop it. | Least privilege, sandboxing, budgets, action gating, the emergency brake, tamper-proof audit |
 
-Module 1 (AI Foundations) covers the foundational AI knowledge required for the certification — including neural networks, the transformer architecture, LLM inference, training pipelines, and production AI system architecture. If you are already comfortable with these concepts, you can move quickly through Module 1 and focus your time on Modules 2-5.
-
----
-
-## Training Modules
-
-| Module | Domain | Weight | Estimated Time |
-|--------|--------|--------|----------------|
-| [Module 1: AI Foundations](/training/module/ai-foundations) | Domain 1 | 15% | 5-6 hours |
-| [Module 2: Understanding Failure Modes](/training/module/understanding-failure-modes) | Domain 2 | 15% | 3-4 hours |
-| [Module 3: Architecting Guardrails](/training/module/architecting-guardrails) | Domain 3 | 25% | 6-8 hours |
-| [Module 4: Implementing Guardrails](/training/module/implementing-guardrails) | Domain 4 | 25% | 6-8 hours |
-| [Module 5: Validating Guardrails](/training/module/validating-guardrails) | Domain 5 | 20% | 5-6 hours |
-
-**Total estimated study time:** 25-32 hours
+Controls are also ranked by where they are enforced, from weakest to strongest: the model itself, the prompt, runtime ML checks, deterministic architecture, and human or operational controls. One question tests every design in the program: **if the model were fully compromised, what is the worst it could do?** Classifiers make failures less frequent. Architecture limits how bad they can get. The full treatment is in [2.1 Safety, Security, and Containment](/training/module/risk-and-threat-modeling/safety-security-containment).
 
 ---
 
-## How to Use This Training
+## Who it is for
 
-1. **Study in order.** The five modules follow the guardrail engineering lifecycle: understand the technology → understand the failures → design defenses → build them → validate them. Each module builds on the previous ones.
-2. **Read actively.** Don't skim. The exam tests applied understanding, not memorization. When you encounter a concept, think about how you'd apply it in your own work.
-3. **Run the code examples.** Modules 3-5 include Python code patterns for detection pipelines, testing frameworks, and monitoring systems. Running these examples will deepen your understanding.
-4. **Build something.** The best preparation combines this training with hands-on experience. Set up a test environment and implement the guardrails discussed in each module.
-5. **Review the competency matrix.** After completing all modules, review the [competency matrix](/training/competency-matrix) and honestly assess whether you can demonstrate each listed skill. Focus additional study on gaps.
+The program targets engineers with roughly one to two years of experience building with AI or ML, including software engineers, ML engineers, security engineers, and platform engineers who are now responsible for AI systems in production. You should be comfortable reading Python, have a working understanding of APIs and web application architecture, and know basic security concepts. You do not need to be a security specialist or an ML researcher.
 
 ---
 
-## Supporting Materials
+## Domains
 
-- [Competency Matrix](/training/competency-matrix) — Complete breakdown of knowledge areas and skills per domain
-- [Exam Blueprint](/training/exam-blueprint) — Exam structure, question types, and detailed objectives
+| Domain | Weight | Study time |
+|---|---|---|
+| [1. How AI Systems Behave](/training/module/how-ai-systems-behave) | 10% | 3-4 hours |
+| [2. Risk and Threat Modeling](/training/module/risk-and-threat-modeling) | 15% | 4-5 hours |
+| [3. Security Engineering](/training/module/security-engineering) | 20% | 7-9 hours |
+| [4. Safety Engineering](/training/module/safety-engineering) | 20% | 7-9 hours |
+| [5. Agent Containment and Control](/training/module/agent-containment-and-control) | 15% | 5-7 hours |
+| [6. Evaluation and Red Teaming](/training/module/evaluation-and-red-teaming) | 12% | 5-6 hours |
+| [7. Operations and Governance](/training/module/operations-and-governance) | 8% | 3-4 hours |
 
----
-
-## Exam Information
-
-| Parameter | Detail |
-|-----------|--------|
-| Format | Multiple choice, multiple select, and scenario-based |
-| Questions | 75 scored + 5 unscored pilot questions |
-| Time | 120 minutes |
-| Passing score | 70% (53 of 75) |
-| Prerequisites | None required to sit for the exam; training program completion strongly recommended |
-| Delivery | Online proctored |
+Reading time is about 37-48 hours. The labs add roughly 20-30 hours.
 
 ---
 
-## Version History
+## How to use the program
+
+1. **Read the [competency matrix](/training/competency-matrix).** It lists everything a cAIge holder knows and can do, section by section. It is generated from the training content, so it always matches.
+2. **Study the domains in order.** Domains 1 and 2 give you the model and the vocabulary. Domains 3 to 5 build the controls. Domains 6 and 7 measure and operate them.
+3. **Do the lab for each domain.** The [labs](/labs) use one realistic, vulnerable application that you harden across all seven domains. The scoring tool reports your attack success rate and false-refusal rate as you go.
+4. **Read the [incident library](/incidents).** Each case is a real failure analyzed with the program's framework.
+5. **Take the [practice exam](/practice-exam).** It follows the Associate blueprint and links every missed question back to its section.
+
+---
+
+## Credentials
+
+| Credential | What it shows | Format |
+|---|---|---|
+| [cAIge Associate](/certifications/associate) | Understands AI guardrail engineering | Proctored knowledge exam, 75 questions |
+| [cAIge Professional](/certifications/professional) | Can do the job | Hands-on exam: harden a live system against hidden attack and benign suites |
+
+The [practice exam](/practice-exam) on this site is free and self-administered. It does not award a credential.
+
+---
+
+## Supporting material
+
+- [Competency Matrix](/training/competency-matrix): knowledge and skills for every section
+- [Exam Blueprint](/training/exam-blueprint): exam structure, distribution, and objectives
+- [Glossary](/training/glossary): terms used across the program
+- [cAIge AI Deployment Standard](/standard): a short, public control set for production AI systems
+
+---
+
+## Version history
 
 | Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2026-03-07 | Initial release |
+|---|---|---|
+| 2.0 | 2026-10-14 | Rebuilt around safety, security, and containment. Seven domains, new Agent Containment and Control domain, hands-on lab, incident library, deployment standard, regenerated question bank, practice exam with answer review. |
+| 1.0 | 2026-03-07 | Initial release. Archived as the `v1.0` tag in the repository. |
