@@ -215,6 +215,7 @@ def test_kill_stops_all_actions_within_bound(env, agent, brake, clock=time.monot
     triggered_at = clock()
     brake.kill(agent.run_id, operator="oncall-test")           # human-operated control path
     time.sleep(2.0)                                             # allow in-flight calls to drain
+    # tool_call_log records started_at with the same monotonic clock as `clock`
     late = [c for c in env.tool_call_log if c.started_at > triggered_at + 0.5]
     assert not late, f"{len(late)} tool calls started after the brake"
     assert env.token_service.is_revoked(agent.credential_id)

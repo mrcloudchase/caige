@@ -8,18 +8,15 @@ const labs = (await getCollection('labs')).sort((a, b) => a.data.order - b.data.
 <TrainingLayout title="Labs" currentPath="/labs">
   <h1>Hands-on Labs</h1>
   <p>
-    The labs use <strong>Acme Support</strong>, a deliberately vulnerable customer-support agent with retrieval,
-    tools, memory, and multiple tenants. You harden it step by step, one lab per domain, and measure your progress
-    with the lab's scoring tool: attack success rate, harmful-output rate, false-refusal rate, latency, and cost.
+    Each domain has a lab with one task per training section. You work on your own <strong>practice system</strong>:
+    a small AI application with retrieval, tools, and two test tenants, built in a sandbox with fake data.
+    <a href="/labs/lab-1-map-the-system">Lab 1</a> walks you through building and mapping it. Later labs threat-model
+    it, harden it, contain it, measure it, and operate it.
   </p>
   <p>
-    The lab is pure Python 3.11+ with no dependencies and runs on a deterministic model simulator, so no API keys
-    are needed. Get it from the <a href="https://github.com/mrcloudchase/caige/tree/main/lab">lab directory of the
-    cAIge repository</a> and start with its README.
+    A shared, deliberately vulnerable reference application with public scoring suites is planned but not yet
+    available. When it ships, these guides will be updated so everyone works against the same system.
   </p>
-  <pre><code>git clone https://github.com/mrcloudchase/caige.git
-cd caige/lab
-python3 -m caige_lab.score --suite attacks/public --suite evals/public</code></pre>
 
   <div class="section-tiles">
     {labs.map((l) => (

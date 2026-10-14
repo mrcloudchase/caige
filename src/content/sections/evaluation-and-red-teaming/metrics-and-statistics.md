@@ -173,13 +173,13 @@ The judge belongs on ambiguous or low-confidence inputs (scores near the thresho
 
 ## Control patterns
 
-Metrics are not controls, but the way you compute and report them is a control on decision quality. In order of importance:
+Metrics are not controls, but how you compute and report them controls decision quality:
 
-1. **Fix definitions before measuring.** Write down what counts as a positive, a success, an attempt, and an over-refusal, and which judge applies the rubric.
-2. **Report rates with intervals and counts.** "ASR 6% (12/200, 95% CI 3.5% to 10.2%)" is actionable; "ASR 6%" is not.
-3. **Report at production base rate.** Pair any precision or F1 figure with the prevalence it assumes.
-4. **Separate safety and security numbers.** Over-refusal, harmful-output, and grounding rates on representative traffic; ASR per goal against named attacks. Do not average them into one score.
-5. **Choose thresholds on one split, report on another.**
+1. **Fix definitions before measuring:** what counts as a positive, a success, an attempt, and an over-refusal, and which judge applies the rubric.
+2. **Report rates with counts and intervals:** "ASR 6% (12/200, 95% CI 3.5% to 10.2%)", not "ASR 6%".
+3. **Report precision and F1 at production base rate**, with the prevalence stated.
+4. **Keep safety and security numbers separate.** Do not average over-refusal and ASR into one score.
+5. **Choose thresholds on one split and report on another.**
 
 ## Implementation
 
@@ -299,7 +299,6 @@ Run this on a calibration split, then report FPR and recall at the chosen thresh
 - **ASR depends on the attack set and the judge.** A low ASR against weak or stale attacks, or an ASR scored by a judge that misses partial compliance, overstates security. Name the attacks, the number of trials, and the judge in every report.
 - **Wilson intervals assume independent trials.** Repeated trials on the same goal are correlated; bootstrap by goal or use clustered errors.
 - **Thresholds drift.** A provider model update or a new traffic mix moves score distributions; a threshold chosen last quarter may now sit at a different FPR. Re-run calibration on every change ([7.3](/training/module/operations-and-governance/change-management)).
-- **Aggregate numbers hide slices.** An overall 0.5% FPR can conceal a 6% FPR for one language. Report per stratum.
 - **Cost models omit retries and long inputs.** Judge cost scales with tokens, and retries on timeouts can double calls in a bad hour. Budget for the tail, and enforce the budget outside the model ([5.4](/training/module/agent-containment-and-control/budgets-and-resource-limits)).
 
 ## Lab exercise

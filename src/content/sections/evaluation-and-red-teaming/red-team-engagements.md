@@ -150,7 +150,7 @@ Tools change quickly; pick by category and check current capabilities in the doc
 | Evaluation harnesses with red-team plugins | Generate adversarial test cases for an application, run them, and grade results, often in CI | promptfoo |
 | Benchmarks | Fixed goal sets and scoring protocols for comparable ASR | HarmBench, JailbreakBench (jailbreak ASR); XSTest (over-refusal); AgentDojo (agent prompt injection, see [6.5](/training/module/evaluation-and-red-teaming/agentic-and-multimodal-red-teaming)) |
 
-Public benchmarks are useful for comparability and as a regression floor. They are likely to be in training data (contamination), and they measure a fixed attacker. They do not replace product-specific goals.
+Public benchmarks give comparability and a regression floor, but they are likely in training data and measure a fixed attacker; they do not replace product-specific goals.
 
 ### 4. Judge success on the response or action
 
@@ -274,9 +274,9 @@ Group the attempts by (goal, technique) and compute ASR with a Wilson interval u
 - **Coverage is bounded by imagination and budget.** A clean engagement means the attacks tried did not work. It is not evidence that none will. Repeat engagements on model, prompt, and tool changes ([7.3](/training/module/operations-and-governance/change-management)).
 - **Stale attack libraries.** Public jailbreaks are likely in model and classifier training data. A system that resists them can still fall to a fresh variant of the same mechanism.
 - **Judging errors.** An unvalidated judge misses partial compliance or is fooled by injected text, understating ASR ([6.3](/training/module/evaluation-and-red-teaming/validating-judges-and-classifiers)).
-- **Testing the model instead of the system.** Results against a bare model API say little about your deployed system, and the reverse: a guardrail that stops an attack in staging may be configured differently in production.
+- **Testing the model instead of the system.** Results against a bare model API say little about your deployed system, and staging guardrails may be configured differently from production.
 - **Scope gaps.** Excluding ingestion channels (email, uploaded files, retrieved web pages) excludes the indirect injection paths attackers prefer.
-- **Severity inflation and deflation.** Rating every jailbreak "critical" leads to fatigue; rating them "low" because "it is just text" ignores what downstream systems do with that text. Rate impact from the blast radius.
+- **Severity drift.** Rating every jailbreak "critical" breeds fatigue; rating them "low" because "it is just text" ignores what downstream systems do with it. Rate impact from the blast radius.
 - **Disclosure stalls.** Vendors may not respond, may decline to treat a jailbreak as a vulnerability, or may fix it silently. Your mitigation should not depend on their timeline.
 
 ## Lab exercise

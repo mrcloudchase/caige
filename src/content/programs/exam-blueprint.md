@@ -17,7 +17,7 @@ The program has two exams. The **Associate** exam tests knowledge and judgment w
 |---|---|
 | Associate practice exam | **Available now** on this site: free, self-administered, not proctored, no credential awarded |
 | Associate (proctored) | In development: question pool expansion, beta pilot, cut-score study |
-| Professional | In development: hidden suites and scoring harness built on the public [lab](/labs) |
+| Professional | In development: reference application, hidden suites, and scoring harness |
 
 This blueprint describes the intended design. Where something is not built yet, the status table above says so.
 

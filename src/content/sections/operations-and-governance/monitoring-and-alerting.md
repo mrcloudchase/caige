@@ -237,7 +237,7 @@ def should_sample(decision: str, allowed_sample_rate: float, rng: random.Random)
     return rng.random() < allowed_sample_rate
 ```
 
-Pass a `random.Random` seeded from the system's secure source in production. The record that `should_sample` admits is then passed through the PII redaction step from 3.5 before it is written.
+Passing the `random.Random` instance in lets tests seed it. The record that `should_sample` admits is then passed through the PII redaction step from 3.5 before it is written.
 
 ### Dashboards for three audiences
 
@@ -253,7 +253,7 @@ Keep the on-call dashboard to one screen. If something needs scrolling to find d
 
 - **Probes test only what you already know.** A 100% probe pass rate says nothing about a new jailbreak. Probes also go stale if attackers learn them; keep the probe set private and rotate in new cases from red-team findings ([6.4](/training/module/evaluation-and-red-teaming/red-team-engagements)).
 - **Probes can take a different path.** If probe traffic is routed, cached, or authenticated differently from real traffic, a passing probe can hide a broken production path. Send probes through each real entry point.
-- **Seasonal baselines adapt to slow drift.** A block rate that falls 5% a week never trips a ratio against last week. Also compare against a fixed reference period, such as the baseline recorded at the last release gate, and track the reviewed-sample FNR, which does not drift with traffic.
+- **Seasonal baselines adapt to slow drift.** A block rate that falls 5% a week never trips a ratio against last week. Also compare against a fixed reference period, such as the baseline recorded at the last release gate, and track the reviewed-sample FNR, which is measured against labels rather than against recent traffic.
 - **Ratios mislead at low volume and low base rates.** Hence the minimum-volume floor. For rare categories, aggregate over longer windows rather than lowering the floor.
 - **Block rate falls for good reasons too.** An attack campaign ending, or a product change that reduces abusive traffic, also lowers it. The page is still right: the on-call engineer checks probes and coverage and closes the alert in minutes if both are healthy.
 - **Judges drift and can be attacked.** An LLM judge labeling the allowed sample has its own error rate and can be targeted by content written to fool it. Re-validate it against human labels on a schedule.

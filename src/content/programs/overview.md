@@ -55,7 +55,7 @@ Reading time is about 37-48 hours. The labs add roughly 20-30 hours.
 
 1. **Read the [competency matrix](/training/competency-matrix).** It lists everything a cAIge holder knows and can do, section by section. It is generated from the training content, so it always matches.
 2. **Study the domains in order.** Domains 1 and 2 give you the model and the vocabulary. Domains 3 to 5 build the controls. Domains 6 and 7 measure and operate them.
-3. **Do the lab for each domain.** The [labs](/labs) use one realistic, vulnerable application that you harden across all seven domains. The scoring tool reports your attack success rate and false-refusal rate as you go.
+3. **Do the lab for each domain.** In the [labs](/labs) you build a small practice AI system and carry it through all seven domains: map it, threat-model it, harden it, contain it, measure it, and operate it.
 4. **Read the [incident library](/incidents).** Each case is a real failure analyzed with the program's framework.
 5. **Take the [practice exam](/practice-exam).** It follows the Associate blueprint and links every missed question back to its section.
 

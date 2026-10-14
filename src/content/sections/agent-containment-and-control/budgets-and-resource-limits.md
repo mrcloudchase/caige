@@ -77,7 +77,9 @@ Ordered from strongest to weakest. All are `deterministic` unless noted.
 
 **5. Fail closed, with a useful end state.** When a budget is exhausted, the harness stops the run, checkpoints, and returns a structured status: what was done, what remains, and which limit triggered. It does not ask the model whether to continue. Raising a limit for a run is a human action, logged like any other approval.
 
-**6. Alert on consumption anomalies (runtime monitoring).** Cost per run, steps per run, and per-tenant spend have stable distributions. Alert on outliers well before the hard cap. This is detection, not prevention, and complements the caps.
+**6. Caps on effects, not only on calls.** Some of the most useful limits count consequences rather than calls: total refund value per agent per day, number of distinct external recipients per run, number of records modified per run, number of production deploys per hour. These caps are enforced in the tool backend or gateway, aggregated across runs, and keyed on the authenticated principal. They are the counter to decomposition, where an agent blocked on one large action achieves the same effect through many small ones that each fall under the approval threshold ([5.3](/training/module/agent-containment-and-control/action-gating-and-approvals)). Set the aggregate below the level at which a single approval would have been required, so splitting an action never avoids review.
+
+**7. Alert on consumption anomalies (runtime monitoring).** Cost per run, steps per run, and per-tenant spend have stable distributions. Alert on outliers well before the hard cap. This is detection, not prevention, and complements the caps.
 
 ## Implementation
 
@@ -157,6 +159,10 @@ def worst_case_cost(prompt_tokens: int, max_output_tokens: int, price) -> float:
 The harness calls `budget.reserve(...)` before each model call with `max_output_tokens` set explicitly on the request (so the worst case is actually bounded), then `settle` with the provider-reported usage, in a `finally` block so failed calls are still accounted for. It calls `loop.check(...)` before each tool call and `loop.observe(...)` after. A `BudgetExceeded` exception ends the run through the same stop path as the emergency brake: checkpoint, release credentials, report.
 
 Per-tenant and global ledgers use the same reserve/settle logic, keyed on the authenticated tenant ID. A run must reserve successfully at every level (run, user, tenant, global) or it does not proceed.
+
+### What happens at the limit
+
+When any limit trips, the harness does the same four things it does when a human pulls the brake: stop scheduling steps, checkpoint, stop renewing the run's credential lease, and write an audit event naming the limit and the values at the time. The user receives a structured status built by the harness ("Stopped: step limit 40 reached. Completed: 3 of 5 sub-tasks. Pending: none in flight."), not a model-written apology that may misstate what was done. A human can extend the budget for that run; the extension is logged with who approved it and why, and it does not change the default for other runs.
 
 ### Choosing limits
 
