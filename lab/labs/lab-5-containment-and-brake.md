@@ -15,7 +15,7 @@ Make your system safe even when every detection control fails. Assume the model 
 
 ## Setup
 
-Your system from [Lab 4](/labs/lab-4-safety-controls). If your agent takes multi-step actions, give it at least one long-running task, for example processing a queue of fake support tickets.
+The Acme Support app from [Lab 4](/labs/lab-4-safety-controls). Its control plane already supports `pause`, `stop`, and `kill` with leased tool credentials, and the harness enforces budgets. Your job is to configure these controls, prove they work under load and under attack, and close the gaps you find. If you use your own practice system instead, build those controls first.
 
 ## Task 5.1: Least Privilege for Agents
 
@@ -43,7 +43,7 @@ Enforce step, token, cost, and time budgets in the orchestrator.
 
 ## Task 5.5: The Emergency Brake
 
-Build a brake in the control plane with pause, stop, and kill:
+Use the control plane's pause, stop, and kill (`python3 -m caige_lab brake ...`), or build your own:
 
 - **pause** checkpoints at the next step boundary;
 - **stop** cancels pending tool calls;
@@ -55,7 +55,7 @@ The agent must have no way to disable, delay, or route around the brake. Name wh
 
 ## Task 5.6: External Control Plane and Tamper-Proof Audit
 
-Write every meaningful action to an append-only log the agent cannot modify. Reconstruct one task from the log alone.
+Use the hash-chained audit log (`runs/<run_id>/audit.jsonl`), and verify it with `python3 -m caige_lab audit --run <run_id>`. Reconstruct one task from the log alone. Then tamper with a copy, and show that verification catches both an edit and a truncation.
 
 **Outcome:** a reconstruction that matches what actually happened, without using the model's own account.
 

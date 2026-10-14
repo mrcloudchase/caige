@@ -15,7 +15,7 @@ Produce a threat model for your Lab 1 system that a reviewer could use to decide
 
 ## Setup
 
-You need the architecture diagram and context map from [Lab 1](/labs/lab-1-map-the-system).
+You need the architecture diagram and context map from [Lab 1](/labs/lab-1-map-the-system), and the Acme Support app (or your own practice system) with its default, naive `lab.toml`.
 
 ## Task 2.1: Safety, Security, and Containment
 

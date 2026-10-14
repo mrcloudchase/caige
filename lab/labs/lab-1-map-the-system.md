@@ -1,28 +1,33 @@
 ---
-title: "Lab 1: Build and Map Your Practice System"
+title: "Lab 1: Set Up and Map the Lab System"
 slug: lab-1-map-the-system
 domain: 1
 order: 1
-description: "Build a small AI application with retrieval, tools, and two tenants, then map every component, input, and authority it has."
+description: "Set up the Acme Support reference app (or your own practice system), then map every component, input, and authority it has."
 estimatedTime: "3-4 hours"
 ---
 
-# Lab 1: Build and Map Your Practice System
+# Lab 1: Set Up and Map the Lab System
 
 ## Goal
 
-Build the practice system you will harden in every later lab, and produce an accurate map of how it works. You cannot guard a system you cannot describe.
+Set up the system you will harden in every later lab, and produce an accurate map of how it works. You cannot guard a system you cannot describe.
 
 ## Setup
 
-Build a minimal assistant in a sandbox environment. Use any model provider, or a local model. The minimum system:
+Use the **Acme Support** reference application in the [`lab/` directory of the cAIge repository](https://github.com/mrcloudchase/caige/tree/main/lab). It is a multi-tenant support assistant with retrieval, five tools, an emergency brake, budgets, and a hash-chained audit log. It needs Python 3.11+ and nothing else:
 
-- a chat endpoint with authenticated users belonging to **two tenants**;
-- **retrieval** over a small document store (10-20 short, fake documents per tenant);
-- **two or three tools**, for example `search_docs`, `send_email` that writes to a local outbox file instead of sending, and `lookup_order` against a local SQLite database of fake orders;
-- **structured logging** of every model request, retrieval, tool call, and response.
+```text
+git clone https://github.com/mrcloudchase/caige.git
+cd caige/lab
+python3 -m unittest
+python3 -m caige_lab eval --suite suites/benign.jsonl
+python3 -m caige_lab chat --user alice
+```
 
-Use only fake data. Never connect the practice system to real email, payment, or production systems.
+It runs out of the box with a deterministic offline stand-in. For realistic behavior and for every security measurement in later labs, point it at a real model through any OpenAI-compatible endpoint. The [lab README](https://github.com/mrcloudchase/caige/tree/main/lab#quickstart) explains how.
+
+If you prefer, you can build your own practice system instead. Give it at least two tenants, retrieval, two or three tools whose side effects are simulated (an outbox file, not real email), and structured logging. Use only fake data, and never connect a practice system to real email, payment, or production systems.
 
 ## Task 1.1: Tokens, Context, and Sampling
 
@@ -56,7 +61,7 @@ Draw the architecture: gateway, orchestrator, model, retrieval, tools, data stor
 
 ## Deliverables
 
-- The working practice system and setup notes
+- The running lab system and setup notes
 - The context-usage note and non-determinism evidence (1.1)
 - The provider-vs-application control table (1.2)
 - The annotated context (1.3)

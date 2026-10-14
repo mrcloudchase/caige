@@ -180,7 +180,7 @@ Note what the function does not do: it does not decide what happens on a high sc
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.1 has you run a prompt-injection test set against your practice system, classify each success as direct or indirect, and record the component each instruction entered through, giving a baseline attack success rate by entry point.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.1 has you run a prompt-injection test set against the lab system, classify each success as direct or indirect, and record the component each instruction entered through, giving a baseline attack success rate by entry point.
 
 ## Check your understanding
 

@@ -35,4 +35,4 @@ After this domain you should be able to:
 6. Design delegated access with scoped, short-lived, audience-bound tokens and no token passthrough.
 7. Vet and pin third-party models, datasets, MCP servers, and extensions.
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening) you fix the security risks from your Lab 2 threat model in your practice system, starting with the controls that bound damage.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening) you fix the security risks from your Lab 2 threat model in the lab system, starting with the controls that bound damage.

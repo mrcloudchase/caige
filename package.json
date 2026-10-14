@@ -1,15 +1,16 @@
 {
   "name": "caige",
   "version": "2.0.0",
-  "description": "cAIge: Certified AI Guardrail Engineer program site and practice exam",
+  "description": "cAIge: Certified AI Guardrail Engineer program site, practice exam, and lab",
   "scripts": {
     "predev": "node scripts/build-question-bank.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/build-question-bank.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "validate": "node scripts/validate.mjs && python3 -I scripts/check-code-blocks.py",
-    "check": "npm run validate && npm run build"
+    "validate": "node scripts/validate.mjs && node scripts/test-credentials.mjs && python3 -I scripts/check-code-blocks.py",
+    "check": "npm run validate && npm run test:lab && npm run build",
+    "test:lab": "cd lab && python3 -m unittest"
   },
   "repository": {
     "type": "git",

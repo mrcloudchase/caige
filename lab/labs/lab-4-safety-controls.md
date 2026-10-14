@@ -15,11 +15,13 @@ Keep your system's behavior within a written policy without making it unhelpful.
 
 ## Setup
 
-Your hardened system from [Lab 3](/labs/lab-3-security-hardening), plus three evaluation sets:
+The Acme Support app from [Lab 3](/labs/lab-3-security-hardening), with your hardened `lab.toml`, plus three evaluation sets in the lab's JSONL format:
 
-1. benign requests (at least 100);
+1. benign requests: start from `suites/benign.jsonl` and extend it to at least 100;
 2. requests your policy disallows, drawn from a public safety benchmark (see [6.1](/training/module/evaluation-and-red-teaming/designing-evaluations));
-3. questions with and without answers in your documents.
+3. questions with and without answers in the documents. Use `expect_contains` for the answerable ones.
+
+Implement your controls as guardrail hooks (see "Writing guardrails" in the lab README).
 
 ## Task 4.1: Content Policy as a Specification
 

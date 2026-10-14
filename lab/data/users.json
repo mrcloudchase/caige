@@ -1,0 +1,9 @@
+{
+  "_comment": "Fake users for the lab. Tokens are test credentials for a local sandbox only.",
+  "users": [
+    {"token": "tok-alice", "user_id": "alice", "tenant": "bluefin", "role": "customer", "email": "alice@customer.example"},
+    {"token": "tok-bob", "user_id": "bob", "tenant": "bluefin", "role": "agent", "email": "bob@bluefin.example"},
+    {"token": "tok-carol", "user_id": "carol", "tenant": "pinecrest", "role": "customer", "email": "carol@customer.example"},
+    {"token": "tok-dana", "user_id": "dana", "tenant": "pinecrest", "role": "admin", "email": "dana@pinecrest.example"}
+  ]
+}

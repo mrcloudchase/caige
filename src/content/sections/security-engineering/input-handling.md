@@ -346,7 +346,7 @@ The `assemble` used in `handle_chat` is this function with `system_policy` bound
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.3 has you add normalization, size limits, and pre-auth and post-auth rate limits to your practice system, wrap untrusted content in escaped randomized boundaries, move secrets out of prompts, and test that encoded variants are normalized and that a document containing your boundary string cannot break out.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.3 has you add normalization, size limits, and pre-auth and post-auth rate limits to the lab system, wrap untrusted content in escaped randomized boundaries, move secrets out of prompts, and test that encoded variants are normalized and that a document containing your boundary string cannot break out.
 
 ## Check your understanding
 

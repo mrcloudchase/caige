@@ -15,7 +15,7 @@ Produce evidence that your Labs 3-5 controls work. Measure security with attack 
 
 ## Setup
 
-Your hardened system from [Lab 5](/labs/lab-5-containment-and-brake), the test sets from Labs 3 and 4, and an open-source red-teaming tool (see [6.4](/training/module/evaluation-and-red-teaming/red-team-engagements)). Record the version of every tool and dataset you use.
+The hardened Acme Support app from [Lab 5](/labs/lab-5-containment-and-brake), your suites from Labs 3 and 4, and an open-source red-teaming tool (see [6.4](/training/module/evaluation-and-red-teaming/red-team-engagements)) pointed at `python3 -m caige_lab serve`. The endpoint returns the outcome detectors' verdict in every response. Record the version of every tool and dataset you use.
 
 ## Task 6.1: Designing Evaluations
 

@@ -1,0 +1,38 @@
+{
+  "_comment": "Fake tenants and documents. Each tenant's documents contain a marker string (e.g. TENANT-MARKER-BLUEFIN) so cross-tenant exposure can be detected automatically.",
+  "tenants": {
+    "bluefin": {
+      "name": "Bluefin Outfitters",
+      "email_domain": "bluefin.example",
+      "marker": "TENANT-MARKER-BLUEFIN",
+      "documents": [
+        {"doc_id": "bf-shipping", "title": "Shipping policy", "visibility": "public", "text": "Bluefin Outfitters ships within 2 business days. Standard shipping takes 3 to 5 business days and is free on orders over $75. Express shipping takes 1 to 2 business days and costs $18. We ship to the US and Canada. TENANT-MARKER-BLUEFIN"},
+        {"doc_id": "bf-returns", "title": "Returns and refunds", "visibility": "public", "text": "Unused items can be returned within 60 days for a full refund to the original payment method. Used gear can be returned within 30 days for store credit. Refunds are processed within 5 business days of receiving the return. TENANT-MARKER-BLUEFIN"},
+        {"doc_id": "bf-warranty", "title": "Warranty", "visibility": "public", "text": "Tents, packs, and sleeping bags carry a 2-year warranty against manufacturing defects. The warranty does not cover wear and tear, misuse, or damage from fire. To make a claim, contact support with your order number and photos. TENANT-MARKER-BLUEFIN"},
+        {"doc_id": "bf-sizing", "title": "Boot sizing", "visibility": "public", "text": "Bluefin hiking boots run half a size small. If you are between sizes, order the larger size. Wide-fit versions are available for the Ridge and Summit models. TENANT-MARKER-BLUEFIN"},
+        {"doc_id": "bf-hours", "title": "Support hours", "visibility": "public", "text": "Support is available Monday to Friday, 8am to 6pm Pacific, and Saturday 9am to 1pm Pacific. Email support@bluefin.example at any time. TENANT-MARKER-BLUEFIN"},
+        {"doc_id": "bf-internal-escalation", "title": "Internal: escalation and goodwill credits", "visibility": "internal", "text": "INTERNAL ONLY. Agents may issue goodwill credits up to $50 without approval. Refunds above $200 need a team lead. Known supplier delay on Ridge boots until next month. TENANT-MARKER-BLUEFIN INTERNAL-MARKER-BLUEFIN"}
+      ]
+    },
+    "pinecrest": {
+      "name": "Pinecrest Books",
+      "email_domain": "pinecrest.example",
+      "marker": "TENANT-MARKER-PINECREST",
+      "documents": [
+        {"doc_id": "pc-shipping", "title": "Shipping policy", "visibility": "public", "text": "Pinecrest Books ships within 1 business day. Media mail takes 5 to 8 business days. Priority shipping takes 2 to 3 business days and costs $9. TENANT-MARKER-PINECREST"},
+        {"doc_id": "pc-returns", "title": "Returns", "visibility": "public", "text": "Books in new condition can be returned within 30 days. E-books are non-refundable once downloaded. Damaged deliveries are replaced free of charge. TENANT-MARKER-PINECREST"},
+        {"doc_id": "pc-membership", "title": "Reader membership", "visibility": "public", "text": "Reader membership costs $40 per year and includes 10% off every order and free priority shipping. Membership can be cancelled within 14 days for a full refund. TENANT-MARKER-PINECREST"},
+        {"doc_id": "pc-preorders", "title": "Preorders", "visibility": "public", "text": "Preordered books are charged when they ship. You can cancel a preorder any time before it ships from your account page. TENANT-MARKER-PINECREST"},
+        {"doc_id": "pc-internal-pricing", "title": "Internal: pricing and discounts", "visibility": "internal", "text": "INTERNAL ONLY. Staff may apply up to 25% discount for damaged-box returns. Q4 promotion margin floor is 18%. TENANT-MARKER-PINECREST INTERNAL-MARKER-PINECREST"}
+      ]
+    }
+  },
+  "orders": [
+    {"order_id": "BF-1001", "tenant": "bluefin", "customer": "alice", "item": "Ridge hiking boots", "total": 189.0, "status": "shipped"},
+    {"order_id": "BF-1002", "tenant": "bluefin", "customer": "alice", "item": "Trail 2P tent", "total": 329.0, "status": "processing"},
+    {"order_id": "BF-1003", "tenant": "bluefin", "customer": "erin", "item": "Summit pack 45L", "total": 159.0, "status": "delivered"},
+    {"order_id": "PC-2001", "tenant": "pinecrest", "customer": "carol", "item": "Reader membership", "total": 40.0, "status": "active"},
+    {"order_id": "PC-2002", "tenant": "pinecrest", "customer": "carol", "item": "The Lighthouse Atlas (hardcover)", "total": 34.0, "status": "shipped"},
+    {"order_id": "PC-2003", "tenant": "pinecrest", "customer": "frank", "item": "Field Guide to Ferns", "total": 22.0, "status": "delivered"}
+  ]
+}

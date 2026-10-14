@@ -7,7 +7,7 @@ A free, vendor-agnostic program that trains and certifies engineers to guard AI 
 | Path | What it is |
 |---|---|
 | `src/` | The program website (Astro): training content, incident library, deployment standard, practice exam |
-| `lab/labs/` | The seven lab guides, published at caige.org/labs. See [`lab/README.md`](lab/README.md). |
+| `lab/` | **Acme Support**, the lab reference app: a multi-tenant AI agent with guardrail hooks, an emergency brake, budgets, audit log, and a scoring tool. Pure Python 3.11+. Lab guides are in `lab/labs/`. See [`lab/README.md`](lab/README.md). |
 | `exam/questions/` | Practice exam question pools, one file per domain |
 | `src/data/curriculum.json` | The program spine: domains, sections, weights, exam parameters |
 | `docs/style-guide.md` | Rules for writing content |
@@ -27,10 +27,10 @@ The seven domains cover how AI systems behave, risk and threat modeling, securit
 ```bash
 npm install
 npm run dev        # http://localhost:4321
-npm run check      # validate content and build the site
+npm run check      # validate content, run lab tests, build the site
 ```
 
-Requires Node 22, plus Python 3.11+ for the code-block checker.
+Requires Node 22 and Python 3.11+.
 
 ## Contributing
 

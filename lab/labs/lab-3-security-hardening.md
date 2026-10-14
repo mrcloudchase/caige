@@ -15,11 +15,11 @@ Fix the security risks from your Lab 2 threat model, starting with controls that
 
 ## Setup
 
-- Your practice system from [Lab 1](/labs/lab-1-map-the-system) and your threat model from [Lab 2](/labs/lab-2-threat-model).
-- A security test set. Use an open-source scanner or red-teaming tool (see [6.4](/training/module/evaluation-and-red-teaming/red-team-engagements)) to generate prompt-injection test cases. Add cases that plant instructions inside your own fake documents and tool results. Record the version of everything you use.
-- A benign test set of at least 50 normal requests, used to check that hardening does not break the product.
+- The Acme Support app (or your own practice system) connected to a real model, and your threat model from [Lab 2](/labs/lab-2-threat-model).
+- An **attack suite** in the lab's JSONL format, with `"kind": "attack"`. Build it for the threats in your threat model. Write cases yourself, or generate them with an open-source red-teaming tool (see [6.4](/training/module/evaluation-and-red-teaming/red-team-engagements)) pointed at `python3 -m caige_lab serve`. Include instructions planted in content the app processes: add your own test documents to `data/tenants.json` and pages to `data/web.json`. Record the version of every tool you use.
+- The shipped benign suite, `suites/benign.jsonl`.
 
-Run both sets before making changes and record the baseline.
+Run `python3 -m caige_lab eval --suite your-attacks.jsonl --suite suites/benign.jsonl --trials 5` before changing anything, and keep the baseline. The outcome detectors score attacks on what actually happened, such as an email leaving, another tenant's data appearing, or a refund issued, not on whether a filter fired.
 
 ## Task 3.1: Prompt Injection
 
@@ -47,13 +47,13 @@ Render model output with context-appropriate encoding. Block images and links to
 
 ## Task 3.5: Data Protection and Isolation
 
-Enforce tenant and permission filtering inside the retrieval query, using the authenticated identity. Add PII detection with validation, and switch logging to keyed pseudonymization.
+Enforce tenant and permission filtering inside the retrieval query, using the authenticated identity (in Acme Support: `tenant_filter` and `hide_internal_from_customers`, then confirm the benign suite still passes). Add PII detection with validation, and switch logging to keyed pseudonymization.
 
 **Outcome:** cross-tenant retrieval tests pass, and logs contain no raw PII.
 
 ## Task 3.6: Identity and Delegation
 
-Make every tool call carry the end user's identity with narrowly scoped, short-lived credentials. Enforce authorization in the tool backend, and make recipient allowlists exact-match on parsed domains.
+Make every tool call carry the end user's identity with narrowly scoped, short-lived credentials. Enforce authorization in the tool backend (`enforce_authorization`), and make recipient allowlists exact-match on parsed domains (`email_allowed_domains`).
 
 **Outcome:** tests showing that the model cannot act beyond the user's permissions, including with lookalike domains.
 

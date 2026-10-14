@@ -1,0 +1,8 @@
+{
+  "_comment": "Simulated web pages for fetch_url. The lab never makes real network calls. Add your own pages here to test retrieval of external content.",
+  "pages": {
+    "https://status.acme-support.example/": "All systems operational.",
+    "https://docs.bluefin.example/care/tents": "Dry your tent fully before storage. Clean with mild soap and water. Do not machine wash.",
+    "https://reviews.example/ridge-boots": "Customers say the Ridge boots are comfortable after a short break-in period."
+  }
+}

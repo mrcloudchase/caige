@@ -221,7 +221,7 @@ Run the check on every connection and whenever the server signals that its tool 
 
 ## Lab exercise
 
-In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.7 has you inventory every third-party model, dataset, library, and tool server in your practice system, pin their versions, and review the tool descriptions you load as untrusted input, producing an inventory with versions and review status.
+In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.7 has you inventory every third-party model, dataset, library, and tool server in the lab system, pin their versions, and review the tool descriptions you load as untrusted input, producing an inventory with versions and review status.
 
 ## Check your understanding
 

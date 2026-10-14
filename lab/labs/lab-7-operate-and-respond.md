@@ -15,7 +15,7 @@ Run your practice system the way a production team would: monitor it, respond to
 
 ## Setup
 
-Your system from [Lab 6](/labs/lab-6-red-team-and-measure), with its logs and metrics. You need a teammate for Task 7.2, or a scripted scenario.
+The Acme Support app from [Lab 6](/labs/lab-6-red-team-and-measure), with its run directories (`runs/<run_id>/`: audit log, traces, outbox). You need a teammate for Task 7.2, or a scripted scenario.
 
 ## Task 7.1: Monitoring and Alerting
 

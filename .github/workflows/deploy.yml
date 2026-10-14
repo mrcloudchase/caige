@@ -37,6 +37,9 @@ jobs:
       - name: Validate content
         run: npm run validate
 
+      - name: Test lab
+        run: npm run test:lab
+
       - name: Build
         run: npm run build
 

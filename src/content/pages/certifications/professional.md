@@ -10,10 +10,10 @@ The cAIge Professional credential shows that a candidate can secure a real AI sy
 
 ## Format
 
-Candidates get a fresh, randomized variant of a reference AI application and a fixed window, planned at 8 to 24 hours. Within that window they:
+Candidates get a fresh, randomized variant of the [lab](/labs) application and a fixed window, planned at 8 to 24 hours. Within that window they:
 
 1. **Threat-model the system**, then submit the threat model and blast-radius analysis.
-2. **Implement guardrails** using the application's guardrail interface.
+2. **Implement guardrails** using the lab's guardrail interface.
 3. **Run the system against hidden suites**:
    - a **hidden attack suite**: the attack success rate must fall below the threshold;
    - a **hidden benign suite**: the false-refusal rate must also stay below its threshold, so blocking everything fails;
@@ -27,13 +27,13 @@ A pass requires meeting every automated threshold and the rubric. The design rew
 
 **The Professional exam is in development.** It depends on:
 
-1. a deliberately vulnerable reference application, with a public version for practice;
+1. the public lab application, which is available now;
 2. private hidden suites and randomized app variants;
 3. the scoring harness and drill scripts;
 4. trained reviewers;
 5. a beta cohort.
 
-The best preparation today is to complete all seven [labs](/labs) on your own practice system, measuring both attack success and false refusals, and writing up your design as you go.
+The best preparation today is to complete all seven [labs](/labs). Get attack success low on your own attack suites without raising false refusals, and write up your design as you go.
 
 ## Prerequisites
 

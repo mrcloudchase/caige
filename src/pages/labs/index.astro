@@ -8,15 +8,20 @@ const labs = (await getCollection('labs')).sort((a, b) => a.data.order - b.data.
 <TrainingLayout title="Labs" currentPath="/labs">
   <h1>Hands-on Labs</h1>
   <p>
-    Each domain has a lab with one task per training section. You work on your own <strong>practice system</strong>:
-    a small AI application with retrieval, tools, and two test tenants, built in a sandbox with fake data.
-    <a href="/labs/lab-1-map-the-system">Lab 1</a> walks you through building and mapping it. Later labs threat-model
-    it, harden it, contain it, measure it, and operate it.
+    Each domain has a lab with one task per training section. The labs use <strong>Acme Support</strong>, a small
+    multi-tenant support assistant with retrieval, tools, an emergency brake, budgets, and a hash-chained audit log.
+    Its defaults are deliberately naive. You turn on and build the controls, then measure attack success and false
+    refusals with the lab's scoring tool. All data is fake and nothing leaves your machine.
   </p>
   <p>
-    A shared, deliberately vulnerable reference application with public scoring suites is planned but not yet
-    available. When it ships, these guides will be updated so everyone works against the same system.
+    It is pure Python 3.11+ with no dependencies. It runs offline with a deterministic stand-in model, or against any
+    OpenAI-compatible endpoint for real measurements. Get it from the
+    <a href="https://github.com/mrcloudchase/caige/tree/main/lab">lab directory of the cAIge repository</a>.
   </p>
+  <pre><code>git clone https://github.com/mrcloudchase/caige.git
+cd caige/lab
+python3 -m unittest
+python3 -m caige_lab eval --suite suites/benign.jsonl</code></pre>
 
   <div class="section-tiles">
     {labs.map((l) => (
