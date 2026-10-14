@@ -565,7 +565,7 @@
       "correct": [
         2
       ],
-      "explanation": "An ownership check at the point of return turns a misrouted response into an error, which is what OpenAI added after its March 2023 incident. Encryption at rest, TTLs, and classifiers do not stop correct-looking data from reaching the wrong user."
+      "explanation": "An ownership check at the point of return turns a misrouted response into an error, which would have caught the misrouted responses in OpenAI's March 2023 incident. Encryption at rest, TTLs, and classifiers do not stop correct-looking data from reaching the wrong user."
     },
     {
       "id": "D3-033",
@@ -738,7 +738,7 @@
         "Add an output PII classifier that redacts credentials appearing in tool results",
         "Rate-limit calls to the server so a compromised tool cannot be used repeatedly",
         "Raise the retrieval similarity threshold so fewer tool descriptions are retrieved",
-        "Pin hashes of each tool's name, description, and schema; fail closed on change"
+        "Pin a hash of each tool's full definition; fail closed on change"
       ],
       "correct": [
         3

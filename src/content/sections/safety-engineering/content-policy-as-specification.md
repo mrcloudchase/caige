@@ -133,6 +133,12 @@ categories:
       allowed: "Neutral acknowledgement of a service failure."
       disallowed: "Profanity, insults, or mocking the company or user."
     actions: {allowed: answer, disallowed: refuse_redirect}
+  violence:
+    definition: "Content that threatens, incites, or gives operational help with violence against people."
+    tiers:
+      allowed: "Idiomatic or technical uses (killing a process), news, history, and fiction without operational detail."
+      disallowed: "Threats, incitement, or step-by-step help to harm a person."
+    actions: {allowed: answer, disallowed: refuse_redirect}
 overlays:
   support-web: {}            # every deployment is listed, even with no changes
   kids-homework:

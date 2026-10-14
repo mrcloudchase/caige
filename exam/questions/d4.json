@@ -130,7 +130,7 @@
       "question": "Which keyword-filter behavior is correct when the text contains both an allowlisted phrase (\"bomb calorimeter\") and a separate blocklisted phrase?",
       "options": [
         "Ignore the allowlist whenever any blocklisted phrase is present",
-        "Suppress only the blocklist match that falls inside the allowlisted phrase's span",
+        "Suppress only the blocklist match that overlaps the allowlisted phrase's span",
         "Return allow, because the allowlist is checked first so that legitimate technical terms never produce false positives",
         "Return block only if the blocklisted phrase appears more often in the text than the allowlisted phrase does"
       ],
@@ -289,7 +289,7 @@
       "options": [
         "Asking the model, in a separate second call with a fresh context, to confirm that each cited case exists and is good law",
         "Lowering the generation temperature to reduce creative output",
-        "Looking up each citation in an authoritative case database, with quotes checked verbatim",
+        "Checking each citation in code against an authoritative case database, including any quoted text",
         "A detailed system prompt instructing the model to cite only real, published cases and to say when it is unsure"
       ],
       "correct": [
