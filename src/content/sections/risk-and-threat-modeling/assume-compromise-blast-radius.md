@@ -189,7 +189,7 @@ Human approval counts as breaking a leg in this model only if the approver sees 
 
 ## Where it breaks
 
-- **The inventory is never complete.** Unlisted channels (link unfurling in a chat app, a "harmless" fetch tool, a log viewer that renders HTML) put a leg back. Derive the inventory from deployed configuration, not from a design document.
+- **The inventory is rarely complete.** Unlisted channels (link unfurling in a chat app, a "harmless" fetch tool, a log viewer that renders HTML) put a leg back. Derive the inventory from deployed configuration, not from a design document.
 - **New features add legs back.** A "share summary" button or a web-search tool can quietly complete a trifecta that the original design avoided. Run the analysis on every tool or rendering change (section [7.3](/training/module/operations-and-governance/change-management)).
 - **Approval is a weak leg-breaker.** Approvers facing frequent prompts, or shown the model's description instead of the actual action, approve exfiltration too. Count approval as a break only for rare, well-presented decisions.
 - **Allowlists have holes.** EchoLeak's egress went through an allowlisted domain that had an open redirect. An allowlist is only as strong as the least trustworthy endpoint on it.

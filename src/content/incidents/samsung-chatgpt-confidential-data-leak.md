@@ -20,7 +20,7 @@ Samsung's semiconductor business lifted an internal restriction on ChatGPT on Ma
 2. Another engineer pasted program code used to identify defective equipment.
 3. A third employee pasted a recorded meeting, converted to text, so ChatGPT could produce minutes.
 
-The reported material included equipment measurement and yield data. Samsung reportedly took "emergency measures", including limiting each prompt to 1,024 bytes, and warned that access could be blocked if it happened again. On May 2, 2023, Bloomberg reported, and Samsung confirmed, a memo restricting generative AI tools on company-owned devices and internal networks. The memo also warned employees not to upload company information from personal devices, with disciplinary action up to termination for violations. The memo cited an internal survey in which about 65% of respondents saw such services as a security risk.
+The reported material included equipment measurement and yield data. Samsung reportedly took "emergency measures", including limiting each prompt to 1,024 bytes, and warned that access could be blocked if it happened again. On May 2, 2023, Bloomberg reported, and Samsung confirmed, a memo restricting generative AI tools on company-owned devices and internal networks. The memo also warned employees not to upload company information from personal devices, with disciplinary action up to termination for violations.
 
 At the time, ChatGPT consumer conversations could be reviewed and used to improve OpenAI's models unless the user opted out. API traffic was opt-in for training. Data submitted through the consumer service was therefore stored outside Samsung's control and could be retained.
 
@@ -48,4 +48,3 @@ At the time, ChatGPT consumer conversations could be reviewed and used to improv
 - Not every confidentiality loss needs an attacker. The most common AI data leak is an authorized person pasting data into the wrong service.
 - A policy change that enables a tool is a system change. It needs the same boundary analysis as a code change.
 - Bans push usage to personal devices, where it is harder to see. Sanctioned, controlled access to an approved service usually reduces risk more than prohibition.
-- Prompt size caps and similar controls reduce how much leaks per event but do not decide where data may go. Decide that with contracts and egress controls.

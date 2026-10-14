@@ -202,7 +202,7 @@ The field name carries the version (`owasp_llm_2025`). When you adopt the 2026 e
 
 - **Coverage is not protection.** Every OWASP ID can be "covered" by a threat entry whose control is a system prompt. The coverage check verifies that a threat was considered, not that it was controlled. Section [2.1](/training/module/risk-and-threat-modeling/safety-security-containment)'s layer check verifies control strength.
 - **Lists lag attacks.** Top 10 lists are revised every year or two, and ATLAS adds techniques after they are documented. New attack classes appear in research and incidents first.
-- **Mappings are many-to-many and lossy.** Jailbreaking falls under LLM01 in OWASP but is a separate technique in ATLAS. Sycophancy has no OWASP home at all. A one-to-one mapping table hides these gaps.
+- **Mappings are many-to-many and lossy.** Jailbreaking falls under LLM01 in OWASP but is a separate technique in ATLAS. Over-refusal has no OWASP home at all, and sycophancy fits LLM09 only partly. A one-to-one mapping table hides these gaps.
 - **Security lists miss safety.** OWASP and ATLAS are security frameworks. A system can look complete against both while ignoring over-refusal, harmful content on benign input, and drift. NIST AI 600-1 and the catalog fill that gap.
 - **Compliance can replace thinking.** A threat model written to satisfy a framework tends to follow the framework's structure instead of the system's data flows, and it misses whatever is unique to the system.
 - **Versions churn.** IDs move between editions, as LLM02 and LLM05 did. Undated references become ambiguous.

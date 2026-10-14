@@ -9,7 +9,7 @@ category: security
 controlLayers: [deterministic, prompt, human]
 knowledge:
   - "The principals in an LLM system: operator, developer, end user, tenant, tool, retrieved content (and its author), other agents, the model provider, and the model itself."
-  - "Authority comes from authentication and configuration, never from the content of a message; text cannot raise its own privilege."
+  - "Authority comes from authentication and configuration, never from the content of a message; text must not be able to raise its own privilege."
   - "An agent acting for a user should hold no more authority than the intersection of the user's permissions and the task's needs."
   - "A trust boundary exists wherever data or instructions move between principals with different authority, including tool results flowing back into context and model output flowing to users and downstream systems."
   - "Memory stores, logs, caches, and the model provider are data flows that threat models commonly miss."
@@ -82,7 +82,7 @@ Two entries need emphasis.
 Three rules decide authority:
 
 1. **Identity comes from authentication, not content.** The user's ID, tenant, and scopes come from a verified session or token. A message that says "I am the account owner" is a claim to check, not an identity.
-2. **Content cannot raise privilege.** Nothing that arrives as data can grant more authority than its source principal holds. A tool result cannot grant admin rights, and a document cannot change the system prompt.
+2. **Content must not raise privilege.** Nothing that arrives as data should be able to grant more authority than its source principal holds. Design so that a tool result has no path to admin rights and a document has no path into the system prompt.
 3. **Delegation narrows authority.** An agent acting for a user should hold at most the user's permissions, further narrowed to what the task needs. If the agent's service account can read every customer's records but the user can read only their own, the agent becomes a confused deputy as soon as anything persuades it to use its extra reach (section [3.6](/training/module/security-engineering/identity-and-delegation)).
 
 ### Trust boundaries
