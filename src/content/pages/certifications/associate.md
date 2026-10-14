@@ -31,8 +31,9 @@ Before the proctored exam launches, it needs:
 1. a larger question pool, so that each exam form draws from at least three times the number of questions it uses;
 2. a beta pilot with real candidates, with item statistics used to retire weak questions;
 3. a standard-setting study to set the cut score;
-4. a proctoring partner;
-5. verifiable digital credentials that anyone can check.
+4. a proctoring partner.
+
+Credential verification is already built. Each credential will be signed, and anyone can check it on the [verification page](/verify).
 
 ## Recertification
 

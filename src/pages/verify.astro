@@ -1,0 +1,131 @@
+---
+import TrainingLayout from '../layouts/TrainingLayout.astro';
+---
+
+<TrainingLayout title="Verify a Credential" currentPath="/verify">
+  <h1>Verify a cAIge Credential</h1>
+  <p>
+    Each cAIge credential is digitally signed. Open the verification link the holder shared, or paste it below.
+    Verification happens entirely in your browser: it checks the signature against the
+    <a href="/credentials/issuer.json">published signing keys</a> and the <a href="/credentials/revoked.json">revocation list</a>.
+    The credential travels in the URL fragment, so it is never sent to our server.
+  </p>
+
+  <div class="verify-box">
+    <label for="token">Verification link or code</label>
+    <textarea id="token" rows="3" placeholder="https://caige.org/verify#..."></textarea>
+    <button class="btn btn-primary" id="verify-btn" type="button">Verify</button>
+  </div>
+
+  <div id="verify-result" class="verify-result" role="status" aria-live="polite" hidden></div>
+
+  <h2>About verification</h2>
+  <ul>
+    <li><strong>Valid</strong> means the credential was signed by a current cAIge key, has not been edited, has not been revoked, and has not expired.</li>
+    <li>The practice exam's score report is not a credential and cannot be verified here.</li>
+    <li>The proctored exams are in development, so no credentials have been issued yet. See <a href="/certifications/associate">cAIge Associate</a> and <a href="/certifications/professional">cAIge Professional</a>.</li>
+    <li>You can also verify offline with the open-source script in the repository: <code>node scripts/credentials.mjs verify &lt;link&gt;</code>.</li>
+  </ul>
+</TrainingLayout>
+
+<script>
+  const input = document.getElementById('token') as HTMLTextAreaElement;
+  const out = document.getElementById('verify-result') as HTMLDivElement;
+
+  const fromB64url = (s: string) => {
+    const b64 = s.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(s.length / 4) * 4, '=');
+    return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  };
+
+  function show(kind: 'ok' | 'fail' | 'info', title: string, rows: [string, string][] = []) {
+    out.hidden = false;
+    out.className = `verify-result ${kind}`;
+    out.replaceChildren();
+    const h = document.createElement('div');
+    h.className = 'verify-title';
+    h.textContent = title;
+    out.append(h);
+    if (rows.length) {
+      const dl = document.createElement('dl');
+      for (const [k, v] of rows) {
+        const dt = document.createElement('dt');
+        dt.textContent = k;
+        const dd = document.createElement('dd');
+        dd.textContent = v;
+        dl.append(dt, dd);
+      }
+      out.append(dl);
+    }
+  }
+
+  async function verifyToken(raw: string) {
+    const token = raw.trim().replace(/^.*#/, '');
+    if (!token) return;
+    let envelope: { credential: string; signature: string };
+    let cred: Record<string, string>;
+    try {
+      envelope = JSON.parse(new TextDecoder().decode(fromB64url(token)));
+      cred = JSON.parse(envelope.credential);
+    } catch {
+      return show('fail', 'Not a valid cAIge verification link.');
+    }
+    const details: [string, string][] = [
+      ['Name', cred.name ?? ''],
+      ['Credential', cred.credential ?? ''],
+      ['Credential ID', cred.id ?? ''],
+      ['Issued', cred.issued ?? ''],
+      ['Expires', cred.expires ?? 'no expiry'],
+    ];
+    try {
+      const [issuer, revoked] = await Promise.all([
+        fetch('/credentials/issuer.json', { cache: 'no-store' }).then((r) => r.json()),
+        fetch('/credentials/revoked.json', { cache: 'no-store' }).then((r) => r.json()),
+      ]);
+      const key = (issuer.keys ?? []).find((k: { kid: string }) => k.kid === cred.kid);
+      if (!key) return show('fail', 'Not valid: signed with an unknown key.', details);
+      const publicKey = await crypto.subtle.importKey('jwk', { kty: 'OKP', crv: 'Ed25519', x: key.publicKey }, { name: 'Ed25519' }, false, ['verify']);
+      const ok = await crypto.subtle.verify({ name: 'Ed25519' }, publicKey, fromB64url(envelope.signature), new TextEncoder().encode(envelope.credential));
+      if (!ok) return show('fail', 'Not valid: the signature does not match. This credential has been altered or was not issued by cAIge.', details);
+      if ((revoked.revoked ?? []).some((r: { id: string }) => r.id === cred.id)) return show('fail', 'Not valid: this credential has been revoked.', details);
+      if (cred.expires && new Date(cred.expires) < new Date()) return show('fail', 'Not valid: this credential has expired.', details);
+      if (key.notAfter && new Date(cred.issued) > new Date(key.notAfter)) return show('fail', 'Not valid: issued after its signing key was retired.', details);
+      show('ok', 'Valid cAIge credential', details);
+    } catch (e) {
+      const unsupported = e instanceof DOMException && (e.name === 'NotSupportedError' || e.name === 'DataError');
+      show('info', unsupported
+        ? 'Your browser cannot verify Ed25519 signatures. Use a current browser, or verify with the repository script.'
+        : 'Verification could not be completed. Check your connection and try again.');
+    }
+  }
+
+  document.getElementById('verify-btn')?.addEventListener('click', () => verifyToken(input.value));
+  if (location.hash.length > 1) {
+    input.value = location.href;
+    verifyToken(location.hash);
+  }
+</script>
+
+<style>
+  .verify-box { display: flex; flex-direction: column; gap: 8px; margin: 24px 0; }
+  .verify-box label { font-weight: 600; font-size: 14px; }
+  .verify-box textarea {
+    width: 100%;
+    background: var(--color-code-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+  }
+  .verify-box .btn { align-self: flex-start; }
+  .verify-result { border: 1px solid var(--color-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; background: var(--color-surface); }
+  .verify-result.ok { border-color: var(--color-green); }
+  .verify-result.fail { border-color: var(--color-red); }
+  .verify-result.info { border-color: var(--color-yellow); }
+  .verify-title { font-weight: 700; margin-bottom: 8px; }
+  .verify-result dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; font-size: 14px; }
+  .verify-result dt { color: var(--color-text-muted); }
+  .verify-result dd { margin: 0; overflow-wrap: anywhere; }
+</style>

@@ -33,8 +33,9 @@ const practiceLinks = [
   { title: 'cAIge Associate', href: '/certifications/associate' },
   { title: 'cAIge Professional', href: '/certifications/professional' },
   { title: 'Practice Exam', href: '/practice-exam' },
+  { title: 'Verify a Credential', href: '/verify' },
 ];
-const inPractice = ['/labs', '/incidents', '/standard', '/certifications'].some(
+const inPractice = ['/labs', '/incidents', '/standard', '/certifications', '/verify'].some(
   p => currentPath === p || currentPath.startsWith(`${p}/`)
 );
 ---

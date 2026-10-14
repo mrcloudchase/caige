@@ -144,7 +144,7 @@ for (const d of curriculum.domains) {
 // ---- Internal links and images ----
 const programFiles = listMd('src/content/programs').map(p => ({ path: p, ...parse(p) }));
 const routes = new Set(['/', '/training', '/labs', '/incidents', '/standard', '/practice-exam', '/exam',
-  '/certifications/associate', '/certifications/professional']);
+  '/certifications/associate', '/certifications/professional', '/verify']);
 programFiles.forEach(p => routes.add(`/training/${p.data.slug}`));
 curriculum.domains.forEach(d => {
   routes.add(`/training/module/${d.slug}`);
