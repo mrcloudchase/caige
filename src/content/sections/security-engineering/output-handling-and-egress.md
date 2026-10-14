@@ -94,7 +94,7 @@ For any tool where the model chooses a URL (web fetch, webhook, image download):
 
 - Prefer a fixed set of allowed hosts, compared exactly on the parsed hostname.
 - If open-web fetching is required, resolve the hostname, reject private, loopback, link-local, and metadata addresses, connect to the validated address, and disable automatic redirects (OWASP SSRF Cheat Sheet).
-- Route all agent egress through an egress proxy that enforces the same policy at connect time. The MCP security best practices recommend proxies such as Smokescreen for this, because validating in application code alone leaves a time-of-check to time-of-use gap with DNS rebinding.
+- Route all agent egress through an egress proxy that enforces the same policy at connect time. The MCP security best practices suggest egress proxies such as Smokescreen and warn that DNS-based validation in application code has a time-of-check to time-of-use gap (DNS rebinding).
 - Put the agent's network in a segment that cannot reach internal services directly (Domain 5, section 5.2).
 
 ## Implementation

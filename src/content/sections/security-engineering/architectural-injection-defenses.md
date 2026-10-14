@@ -124,7 +124,7 @@ Taint tracking is the mechanism under CaMeL's capabilities, and you can add it t
 Hines et al. (2024) tested three ways of marking untrusted content so the model can tell it apart from instructions:
 
 - **Delimiting**: wrap the content in markers. Least effective, and an attacker who learns the markers can include them.
-- **Datamarking**: interleave a marker character through the content (for example, replace whitespace with `^`) and tell the model the marked text is data. In their tests it cut attack success in a summarization task from about 50% to under 3% with no measurable task loss.
+- **Datamarking**: interleave a marker character through the content (for example, replace whitespace with `^`) and tell the model the marked text is data. In their tests it cut attack success in a summarization task from about 50% to about 3% on one model with no measurable task loss.
 - **Encoding**: base64-encode the content and instruct the model to decode it. Most effective in their tests, but it hurt task quality on a smaller model.
 
 Spotlighting is a prompt-layer control. It reduces how often injection works, which is useful in front of a deterministic design. It does not bound what a successful injection can do, and the results were measured against non-adaptive attacks. Section 3.3 shows an implementation.
