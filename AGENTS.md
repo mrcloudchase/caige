@@ -11,7 +11,7 @@ cAIge (Certified AI Guardrail Engineer) is a free, vendor-agnostic program that 
 - the practice exam;
 - the lab guides (`lab/labs/`).
 
-Version 2.0. The v1.0 program is archived at the `v1.0` git tag.
+Version 2.0. The v1.0 program is archived on the `archive/v1.0` branch.
 
 ## Development
 

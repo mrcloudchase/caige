@@ -86,4 +86,4 @@ The [practice exam](/practice-exam) on this site is free and self-administered. 
 | Version | Date | Changes |
 |---|---|---|
 | 2.0 | 2026-10-14 | Rebuilt around safety, security, and containment. Seven domains, new Agent Containment and Control domain, hands-on lab, incident library, deployment standard, regenerated question bank, practice exam with answer review. |
-| 1.0 | 2026-03-07 | Initial release. Archived as the `v1.0` tag in the repository. |
+| 1.0 | 2026-03-07 | Initial release. Archived on the `archive/v1.0` branch of the repository. |
