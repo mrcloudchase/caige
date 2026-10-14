@@ -30,6 +30,8 @@ sources:
     url: "https://www.theregister.com/2025/07/22/replit_saastr_response/"
   - title: "PostgreSQL documentation: GRANT"
     url: "https://www.postgresql.org/docs/current/sql-grant.html"
+  - title: "PostgreSQL documentation: Privileges (defaults granted to PUBLIC)"
+    url: "https://www.postgresql.org/docs/current/ddl-priv.html"
   - title: "PostgreSQL documentation: Client Connection Defaults (default_transaction_read_only)"
     url: "https://www.postgresql.org/docs/current/runtime-config-client.html"
   - title: "AWS STS API Reference: AssumeRole (session policies and DurationSeconds)"
@@ -97,7 +99,7 @@ GRANT USAGE ON SCHEMA reporting TO agent_reader;
 GRANT SELECT ON reporting.order_status, reporting.product_catalog TO agent_reader;
 ```
 
-Three details matter. First, grant on narrow views in a separate schema, so new tables do not become readable by default. Second, check what the role can do through `PUBLIC`: functions are executable by `PUBLIC` by default, so a `SELECT` that calls a side-effecting function runs with whatever that function does; review `SECURITY DEFINER` functions in particular. Third, do not rely on `default_transaction_read_only`. It sets the default for new transactions, and a session can change it with `SET`, so it is a convenience, not a boundary ([PostgreSQL docs](https://www.postgresql.org/docs/current/runtime-config-client.html)). The privilege grant is the boundary ([PostgreSQL GRANT](https://www.postgresql.org/docs/current/sql-grant.html)).
+Three details matter. First, grant on narrow views in a separate schema, so new tables do not become readable by default. Second, check what the role can do through `PUBLIC`: functions are executable by `PUBLIC` by default ([PostgreSQL privileges](https://www.postgresql.org/docs/current/ddl-priv.html)), so a `SELECT` that calls a side-effecting function runs with whatever that function does; review `SECURITY DEFINER` functions in particular. Third, do not rely on `default_transaction_read_only`. It sets the default for new transactions, and a session can change it with `SET`, so it is a convenience, not a boundary ([PostgreSQL docs](https://www.postgresql.org/docs/current/runtime-config-client.html)). The privilege grant is the boundary ([PostgreSQL GRANT](https://www.postgresql.org/docs/current/sql-grant.html)).
 
 ### An exact-match recipient check in the email backend
 

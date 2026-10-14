@@ -201,7 +201,7 @@ class ControlPlane:
             self.orchestrator.terminate(run_id)     # do not wait for a step boundary
         elif target is RunState.STOPPED:
             self.broker.revoke_run_after(run_id, delay_s=LEASE_TTL_S)
-            self.reconciler.compensate(run_id)      # unwinds the saga outside the agent
+            self.reconciler.compensate_when_idle(run_id)  # after the in-flight call returns, unwind the saga
         # PAUSED: credentials are simply not renewed and expire within one TTL.
         self.audit.append(event="brake", run_id=run_id, operator=operator,
                           target=target.value, reason=reason)
