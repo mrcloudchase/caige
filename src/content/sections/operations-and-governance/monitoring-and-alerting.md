@@ -24,10 +24,6 @@ sources:
     url: "https://sre.google/sre-book/monitoring-distributed-systems/"
   - title: "Google SRE Workbook: Alerting on SLOs"
     url: "https://sre.google/workbook/alerting-on-slos/"
-  - title: "NIST AI 600-1: Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile (July 2024)"
-    url: "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence"
-  - title: "Regulation (EU) 2016/679 (GDPR)"
-    url: "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
 lastReviewed: "2026-10-14"
 ---
 
