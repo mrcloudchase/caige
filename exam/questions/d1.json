@@ -191,7 +191,7 @@
       "correct": [
         1
       ],
-      "explanation": "Every role is rendered into one sequence and processed by the same computation, so no channel exists that the model cannot read instructions from. There is no hidden data-only channel, prompt length is irrelevant, and delimiters are text that reduce risk without separating instructions from data."
+      "explanation": "Every role is rendered into one sequence and processed by the same computation, so no channel exists that the model cannot read instructions from. There is no hidden data-only channel, the lack of a formal grammar is not the reason, and delimiters are text that reduce risk without separating instructions from data."
     },
     {
       "id": "D1-012",

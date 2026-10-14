@@ -170,7 +170,8 @@
   outline-offset: -2px;
 }
 
-.training-main { margin-left: 300px; flex: 1; max-width: 900px; padding: 48px 64px; }
+.training-main { margin-left: 300px; flex: 1; min-width: 0; max-width: 900px; padding: 48px 64px; }
+.content { overflow-wrap: break-word; }
 
 /* Markdown Content */
 .content h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -295,7 +296,7 @@
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .sidebar.open ~ .sidebar-overlay { display: block; }
-  .training-main { margin-left: 0; padding: 48px 24px; }
+  .training-main { margin-left: 0; padding: 48px 16px; }
   .menu-toggle { display: block; }
 }
 

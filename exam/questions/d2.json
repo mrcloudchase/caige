@@ -534,7 +534,7 @@
       "type": "ms",
       "question": "Which elements must a valid risk acceptance record include under this domain's guidance? (Choose 3)",
       "options": [
-        "An expiry date or named reopening triggers",
+        "An expiry date, plus named triggers that reopen it earlier",
         "The specific residual risk after named controls",
         "A commitment that the risk will never be revisited",
         "The model's own assessment of the residual risk",
@@ -545,7 +545,7 @@
         1,
         4
       ],
-      "explanation": "An acceptance needs the right accountable signer, a specific scope (residual risk after named controls), and an expiry or reopening conditions. The model's self-assessment is not evidence, because the model is untrusted. A permanent acceptance is an unreviewed decision."
+      "explanation": "An acceptance needs the right accountable signer, a specific scope (residual risk after named controls), and an expiry with conditions that reopen it earlier. The model's self-assessment is not evidence, because the model is untrusted. A permanent acceptance is an unreviewed decision."
     },
     {
       "id": "D2-032",

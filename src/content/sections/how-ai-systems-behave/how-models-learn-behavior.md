@@ -12,7 +12,7 @@ knowledge:
   - "Instruction tuning, preference training (RLHF, DPO, RLAIF/Constitutional AI), and reasoning RL shape behavior on top of that knowledge; stages can be skipped, reordered, or repeated."
   - "RLHF maximizes a learned reward minus a KL penalty that keeps the policy close to a reference model, optimized through log-probabilities with a policy-gradient method such as PPO."
   - "Safety behavior is a learned statistical preference, often concentrated in the first few output tokens, which is why prefill attacks and small fine-tuning runs can undo it."
-  - "Refusing to discuss something is not the same as not knowing it; knowledge cannot be reliably removed from weights with current methods."
+  - "Refusing to discuss something is not the same as not knowing it; no current method has been shown to reliably remove knowledge from weights."
   - "Reasoning traces may not faithfully reflect the computation that produced an answer."
   - "Providers control pre-training and base alignment; application builders control prompts, sampling, runtime controls, architecture, and, on some platforms, fine-tuning including preference fine-tuning."
 skills:
@@ -109,7 +109,7 @@ Every stage after pre-training adjusts probabilities. None of them adds a rule t
 
 **Fine-tuning moves the preference.** Any gradient update can trade safety for whatever the new data rewards. The Qi et al. (2023) results apply to fine-tuning through hosted APIs, not only to open weights.
 
-**Refusal is not ignorance.** A model that refuses to explain something usually still encodes it. Unlearning research tries to remove specific hazardous knowledge (WMDP, Li et al., 2024, is one benchmark for this), but current methods cannot reliably and verifiably remove knowledge from weights. Treat anything in the pre-training data as potentially extractable.
+**Refusal is not ignorance.** A model that refuses to explain something usually still encodes it. Unlearning research tries to remove specific hazardous knowledge (WMDP, Li et al., 2024, is one benchmark for this), but no current method has been shown to remove knowledge from weights reliably and verifiably. Treat anything in the pre-training data as potentially extractable.
 
 **Behavior changes between versions.** A new model version is a new set of learned preferences. Capabilities can appear that earlier versions lacked. Whether such jumps are truly sudden "emergent abilities" is disputed: Schaeffer et al. (2023) argued many apparent jumps are artifacts of the metrics used. Either way, re-evaluate on every model change ([7.3](/training/module/operations-and-governance/change-management)).
 

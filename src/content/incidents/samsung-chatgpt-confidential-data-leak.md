@@ -45,6 +45,6 @@ At the time, ChatGPT consumer conversations could be reviewed and used to improv
 
 ## Lessons
 
-- Not every confidentiality loss needs an attacker. The most common AI data leak is an authorized person pasting data into the wrong service.
+- Not every confidentiality loss needs an attacker. A common form of AI data leak is an authorized person pasting data into the wrong service.
 - A policy change that enables a tool is a system change. It needs the same boundary analysis as a code change.
 - Bans push usage to personal devices, where it is harder to see. Sanctioned, controlled access to an approved service usually reduces risk more than prohibition.

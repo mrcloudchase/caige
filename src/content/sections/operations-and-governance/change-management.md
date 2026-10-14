@@ -106,7 +106,7 @@ Illustrative criteria, consistent with the Domain 7 thresholds in 7.1:
 | Guardrail error and timeout rate | above 1% | above 0.1% | at or below 0.1% |
 | p95 guardrail latency | n/a | above the 300 ms SLO | at or below 300 ms |
 
-Under these criteria the opening scenario's first change rolls back (12.9 / 3.0 = 4.3x) and the second is held, because encoded-injection probes pass on the control and fail on the canary.
+Under these criteria both of the opening scenario's changes roll back: the first on its block-rate ratio (12.9 / 3.0 = 4.3x), the second because encoded-injection probes pass on the control and fail on the canary.
 
 ### 5. Versioning and rollback (deterministic)
 

@@ -8,7 +8,7 @@
       "type": "mc",
       "question": "A team evaluated a new input classifier on 200 jailbreak strings from public forums and 200 benign questions written by the engineers, and measured 98% accuracy. After launch, customers asking how to \"kill a stuck process\" or \"terminate a contract\" are refused. What is the most likely root cause?",
       "options": [
-        "The classifier's threshold was tuned on the balanced set and is too aggressive for the production traffic mix and its class balance",
+        "The higher request volume in production overloaded the classifier, so it fell back to refusing ambiguous requests",
         "The benign set was unrepresentative of real users, so benign jargon that overlaps harmful vocabulary was never tested",
         "The jailbreak strings were too old to be detected by a modern classifier",
         "Accuracy is the wrong metric, and F1 on the same set would have revealed the problem"
@@ -16,7 +16,7 @@
       "correct": [
         1
       ],
-      "explanation": "Engineer-written benign prompts lack the jargon, typos, and overlapping vocabulary where over-refusal lives, so the friction was invisible in testing. A higher threshold would reduce flags, not cause them. Old jailbreak strings affect recall, not refusals of benign requests. F1 on the same unrepresentative set would hide the same problem."
+      "explanation": "Engineer-written benign prompts lack the jargon, typos, and overlapping vocabulary where over-refusal lives, so the friction was invisible in testing. Nothing in the scenario points to load, and FPR on benign jargon is a property of the classifier on that input, not of traffic volume. Old jailbreak strings affect recall, not refusals of benign requests. F1 on the same unrepresentative set would hide the same problem."
     },
     {
       "id": "D6-002",

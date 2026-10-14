@@ -135,7 +135,7 @@ Two guardrail consequences follow.
 
 **Low-probability outputs still happen at scale.** If a harmful or policy-violating completion has probability 0.0001 for a given prompt, you will probably not see it in 100 test runs. At one million requests with that prompt, the expected count is 100. A single passing test says little about a probabilistic system. Domain 6 covers how to size evaluations ([6.2](/training/module/evaluation-and-red-teaming/metrics-and-statistics)).
 
-**Temperature 0 is not deterministic on hosted APIs.** Greedy decoding is deterministic in principle, but the computation that produces the logits is not reliably identical across requests. Floating-point addition is not associative, and inference servers batch requests together. He and Thinking Machines Lab (2025) traced much of the variation to kernels that are not **batch invariant**: the order of a reduction changes with batch size, batch size changes with server load, and so the same request can produce different logits from one call to the next. When two tokens are close, a tiny difference flips the argmax, and every later token can then diverge. Their batch-invariant kernels made 1,000 completions identical where the default setup produced 80 distinct ones, at some cost in speed. Providers also update models and serving stacks. And some reasoning models fix sampling parameters or reject non-default values entirely; for example, Anthropic's documentation states that recent Claude models return an error for non-default `temperature`, `top_p`, or `top_k`. Do not build a control that depends on getting the same output twice.
+**Temperature 0 is not deterministic on hosted APIs.** Greedy decoding is deterministic in principle, but the computation that produces the logits is not reliably identical across requests. Floating-point addition is not associative, and inference servers batch requests together. He and Thinking Machines Lab (2025) traced much of the variation to kernels that are not **batch invariant**: the order of a reduction changes with batch size, batch size changes with server load, and so the same request can produce different logits from one call to the next. When two tokens are close, a tiny difference flips the argmax, and every later token can then diverge. Their batch-invariant kernels made 1,000 completions identical where the default setup produced 80 distinct ones, at some cost in speed. Providers also update models and serving stacks. And some reasoning models fix sampling parameters or reject non-default values entirely; for example, as of 2026 Anthropic's documentation states that its recent models return an error for non-default `temperature`, `top_p`, or `top_k`. Do not build a control that depends on getting the same output twice.
 
 ## Control patterns
 
@@ -168,7 +168,8 @@ def normalize_for_model(text: str) -> str:
     text = unicodedata.normalize("NFKC", text)
     # Drop invisible format characters: zero-width space/joiners, bidi controls, BOM, tag chars.
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
-    return text
+    # Normalize again: removing a character can leave a sequence that is no longer in NFKC form.
+    return unicodedata.normalize("NFKC", text)
 
 
 def check_input(raw: str) -> tuple[bool, str]:

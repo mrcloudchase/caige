@@ -205,6 +205,8 @@ def verify(entries: list[Entry], anchored_seq: int, anchored_hash: str) -> list[
             problems.append(f"hash mismatch at seq {e.seq}")
             break
         prev = e.hash
+    if anchored_seq < 0:
+        return problems                             # nothing anchored yet (empty log)
     by_seq = {e.seq: e.hash for e in entries}
     if by_seq.get(anchored_seq) != anchored_hash:
         problems.append(f"anchored head {anchored_seq} missing or rewritten")

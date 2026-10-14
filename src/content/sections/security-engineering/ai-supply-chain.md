@@ -59,7 +59,7 @@ AI systems have a longer supply chain than most software. Besides libraries, you
 
 ## Why it happens
 
-**Model files can be code.** Python's pickle format, the default for older PyTorch checkpoints, can import modules and call functions while loading. The Python documentation states that it is possible to construct malicious pickle data that executes arbitrary code during unpickling. In February 2024, JFrog reported about 100 models on Hugging Face with malicious payloads; one PyTorch model opened a reverse shell to a hard-coded IP address as soon as it was loaded, using pickle's `__reduce__` method. Loading the model was the exploit.
+**Model files can be code.** Python's pickle format, which PyTorch's `torch.save` checkpoints (`.bin`, `.pt`) use, can import modules and call functions while loading. The Python documentation states that it is possible to construct malicious pickle data that executes arbitrary code during unpickling. In February 2024, JFrog reported about 100 models on Hugging Face with malicious payloads; one PyTorch model opened a reverse shell to a hard-coded IP address as soon as it was loaded, using pickle's `__reduce__` method. Loading the model was the exploit.
 
 **Names are not provenance.** A model card describes a model; it does not prove who produced the weights. Look-alike repository names, compromised publisher accounts, and fine-tuned models that pass public benchmarks while carrying a backdoor are all documented risks (OWASP LLM03:2025). Adapters such as LoRA weights merged into a base model have the same problem.
 
@@ -104,7 +104,7 @@ AI systems have a longer supply chain than most software. Besides libraries, you
 ### MCP servers and tools
 
 - Maintain an allowlist of approved servers, pinned to versions.
-- At approval, record a hash of each tool's full definition (name, description, input schema). On every connection, recompute and compare. If anything changed, disable the server until someone reviews the change.
+- At approval, record a hash of each tool's full definition (name, title, description, schemas, annotations). On every connection, recompute and compare. If anything changed, disable the server until someone reviews the change.
 - Show reviewers the full tool descriptions, not the client's summarized view.
 - Treat descriptions and tool results from every server as untrusted content, and do not give one server's tools access to another server's data without a data-flow policy (section 3.2).
 - Run local servers sandboxed, with only the file system and network access they need, and show the exact startup command before first run, as the MCP security best practices require for one-click configuration.
@@ -169,12 +169,11 @@ import json
 
 
 def tool_fingerprint(tool: dict) -> str:
-    """Hash everything the model will read about a tool."""
+    """Hash the full tool definition as listed: name, title, description,
+    schemas, annotations, and any field added later. Hashing a hand-picked
+    subset would let a change in an unhashed field through."""
     canonical = json.dumps(
-        {"name": tool["name"],
-         "description": tool.get("description", ""),
-         "inputSchema": tool.get("inputSchema", {})},
-        sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        tool, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
     )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -193,6 +192,10 @@ def verify_server_tools(server_id: str, listed_tools: list[dict], approved: dict
     if expected is None:
         raise ToolDefinitionChanged(f"server {server_id} is not approved")
     seen = {t["name"]: tool_fingerprint(t) for t in listed_tools}
+    if len(seen) != len(listed_tools):
+        # A duplicate name would let an unreviewed definition hide behind
+        # an approved one in the dict above.
+        raise ToolDefinitionChanged(f"{server_id}: duplicate tool names")
     if set(seen) != set(expected):
         raise ToolDefinitionChanged(
             f"{server_id}: tool set changed: added={sorted(set(seen) - set(expected))} "
@@ -232,7 +235,7 @@ In [Lab 3: Security Hardening](/labs/lab-3-security-hardening), Task 3.7 has you
 
 1. Loading a pickle file can execute arbitrary code with the CI job's credentials. Use safetensors (refuse pickle from unreviewed sources), pin the revision and verify the file hash, and run model loading in a job without cloud credentials.
 2. A rug pull (with tool poisoning in the new description). Pinning tool-definition hashes at approval and failing closed on change detects it.
-3. The malicious code entered through the vendor's own build pipeline with a valid token, so the release was signed as genuine. Signing proves origin, not that the pipeline was uncompromised; scoped CI tokens and review of changes to prompts and agent configuration address the cause.
+3. The malicious code entered through the vendor's own build pipeline with a valid token, so a release signature would have marked it as genuine. Signing proves origin, not that the pipeline was uncompromised; scoped CI tokens and review of changes to prompts and agent configuration address the cause.
 4. Any two of: label review content as untrusted with its source so data-flow controls can treat it accordingly; extract and scan hidden text and metadata; restrict or rate-limit who can contribute; keep the corpus versioned so poisoned items can be removed and traced.
 
 </details>

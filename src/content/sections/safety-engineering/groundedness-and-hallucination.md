@@ -61,7 +61,7 @@ Retrieval brings its own failures. The right document may not be retrieved, two 
 
 ## Control patterns
 
-Ordered from strongest to weakest. Strong controls constrain what the system can say; weaker ones check what it said.
+Patterns 1 to 4 are ordered from strongest to weakest: strong controls constrain what the system can say; weaker ones check what it said. Pattern 5 adds human routing on top for high-stakes answers.
 
 ### 1. Answer from authoritative text, not from the model's paraphrase (deterministic)
 
@@ -72,7 +72,7 @@ For questions where the answer is a fixed fact the operator owns (refund rules, 
 Require structured output in which every factual statement carries citations (see [4.6](/training/module/safety-engineering/structured-output-enforcement)). Then check, in code:
 
 - every cited source ID is in the set retrieved for this request (an ID the model invented fails), and
-- every quoted span appears verbatim in the cited source after whitespace normalization.
+- every quoted span appears in the cited source after whitespace and case normalization.
 
 These checks are cheap and exact. They catch invented citations, which is the *Mata* failure. They do not show that the cited source supports the claim; that needs pattern 3.
 
@@ -80,8 +80,8 @@ These checks are cheap and exact. They catch invented citations, which is the *M
 
 Break the answer into atomic claims, then test each claim against the source text. This is the approach behind FActScore, which scores long-form text by the fraction of its atomic facts supported by a knowledge source ([Min et al., 2023](https://arxiv.org/abs/2305.14251)). Two checkers are common:
 
-- **NLI models** classify a (premise, hypothesis) pair as entailment, neutral, or contradiction. They are fast and cheap. Many are encoder models with a maximum input around 512 tokens; for example, `roberta-large-mnli` declares a 512-token limit ([model card](https://huggingface.co/FacebookAI/roberta-large-mnli)). Concatenating all sources into one premise overflows that limit, and most tokenizers truncate silently, so the supporting passage may never be seen. Split sources into chunks that fit with the claim, score each (chunk, claim) pair, and take the **maximum** entailment score across chunks as the claim's support.
-- **LLM judges** handle paraphrase, hedging, and numbers better and accept longer inputs, but cost more, vary between runs, and can be steered by text inside the sources. Use the injection-resistant judge pattern from [4.2](/training/module/safety-engineering/detection-and-classification), and do not use the generating model to judge its own answer.
+- **NLI models** classify a (premise, hypothesis) pair as entailment, neutral, or contradiction. They are fast and cheap. Many are encoder models with a maximum input around 512 tokens; for example, `roberta-large-mnli` declares a 512-token limit ([model card](https://huggingface.co/FacebookAI/roberta-large-mnli)). Concatenating all sources into one premise overflows that limit, and with truncation enabled (a common default in inference pipelines) the excess is dropped without an error, so the supporting passage may never be seen. Split sources into chunks that fit with the claim, score each (chunk, claim) pair, and take the **maximum** entailment score across chunks as the claim's support.
+- **LLM judges** handle paraphrase, hedging, and numbers better and accept longer inputs, but cost more, vary between runs, and can be steered by text inside the sources. Use the hardened judge pattern from [4.2](/training/module/safety-engineering/detection-and-classification), and do not use the generating model to judge its own answer.
 
 Claim extraction is usually done by a model, so it can drop or merge claims. Spot-check extraction against human annotation as part of validating the checker ([6.3](/training/module/evaluation-and-red-teaming/validating-judges-and-classifiers)).
 
@@ -236,7 +236,12 @@ def verify_citations(citations: list[dict], retrieved: dict[str, str]) -> list[s
             problems.append(f"citation {i}: source {source_id!r} was not retrieved for this request")
             continue
         quote = cit.get("quote")
-        if quote is not None and _norm(quote) not in _norm(text):
+        if quote is None:
+            continue
+        if not isinstance(quote, str) or not quote.strip():
+            # An empty string is "found" in every source; reject it.
+            problems.append(f"citation {i}: quote is empty or not text")
+        elif _norm(quote) not in _norm(text):
             problems.append(f"citation {i}: quoted text not found in {source_id}")
     return problems
 ```

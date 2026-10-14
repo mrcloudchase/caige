@@ -48,7 +48,7 @@ lastReviewed: "2026-10-14"
 
 ## The problem
 
-On March 20, 2023, some ChatGPT users saw the titles of other users' conversations in their sidebar. OpenAI took the service offline and later found that the same bug had shown some ChatGPT Plus subscribers another user's name, email address, payment address, card type, last four card digits, and card expiry date, during a window of about nine hours; OpenAI notified 1.2% of Plus subscribers. The cause was in redis-py, the open-source Redis client: a request cancelled at the wrong moment left its connection holding a response that the next, unrelated request then read ([incident](/incidents/chatgpt-redis-cache-leak)).
+On March 20, 2023, some ChatGPT users saw the titles of other users' conversations in their sidebar. OpenAI took the service offline and later found that the same bug had shown some ChatGPT Plus subscribers another user's name, email address, payment address, card type, last four card digits, and card expiry date, during a window of about nine hours. OpenAI estimated that the payment exposure affected 1.2% of the Plus subscribers active in that window. The cause was in redis-py, the open-source Redis client: a request cancelled at the wrong moment left its connection holding a response that the next, unrelated request then read ([incident](/incidents/chatgpt-redis-cache-leak)).
 
 No model was involved in the failure. A shared component returned one user's data to another, and nothing checked that the data belonged to the caller. AI systems add more places for that to happen: vector indexes shared across tenants, conversation memory, prompt caches, retrieved chunks that include data the user should not see, and logs full of prompts. This section is about keeping each caller's context limited to what that caller is entitled to, and about handling personal data that does legitimately flow through.
 
@@ -197,7 +197,7 @@ _EMAIL = re.compile(r"(?<![\w.+-])[\w.+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A
 _PHONE_US = re.compile(r"(?<!\w)(?:\+1[ .-]?)?(?:\(\d{3}\)|\d{3})[ .-]?\d{3}[ .-]?\d{4}(?!\d)")
 # Dates count as DOB only when a context keyword precedes them.
 _DOB = re.compile(
-    r"(?i)\b(?:dob|d\.o\.b\.|date of birth|born(?: on)?)\b[\s:]*"
+    r"(?i)\b(?:dob\b|d\.o\.b\.|date of birth\b|born(?: on)?\b)[\s:]*"
     r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}-\d{2}-\d{2})"
 )
 
@@ -261,8 +261,9 @@ def mask_card(digits: str) -> str:
 
 
 def pseudonym(value: str, key: bytes, kind: str) -> str:
-    """Stable keyed pseudonym. The key lives in a secrets manager and is
-    rotated on a schedule; without it, candidate values cannot be tested."""
+    """Stable keyed pseudonym. The key lives in a secrets manager; without
+    it, candidate values cannot be tested. Rotating the key changes every
+    pseudonym, so version keys and plan joins across a rotation."""
     normalized = value.strip().lower() if kind == "EMAIL" else value.strip()
     mac = hmac.new(key, f"{kind}:{normalized}".encode(), hashlib.sha256).hexdigest()
     return f"{kind}_{mac[:32]}"

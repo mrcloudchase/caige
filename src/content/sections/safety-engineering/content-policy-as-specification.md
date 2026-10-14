@@ -8,7 +8,7 @@ description: "How to write a content policy that engineers can implement, label 
 category: safety
 controlLayers: [human, runtime-ml, deterministic]
 knowledge:
-  - "A content policy is the specification every safety control is built and tested against; a policy that two reviewers apply differently cannot be enforced consistently by any detector."
+  - "A content policy is the specification every safety control is built and tested against; a policy that two reviewers apply differently will not be enforced consistently by any detector."
   - "A harm taxonomy names categories with definitions, inclusion and exclusion criteria, and an owner; categories must be specific enough to map to a detector and an action."
   - "Three tiers (allowed, needs-care, disallowed) map better to real traffic than allow/block, because most sensitive requests deserve a careful answer rather than a refusal."
   - "Worked examples and boundary pairs (near-identical requests on either side of a line) are the most useful part of a policy for labelers, judges, and test suites."
@@ -73,7 +73,7 @@ List the categories your system must handle. Each entry has:
 
 Public taxonomies are a starting point, not a finished policy. Purpose-built safety classifiers such as Llama Guard were designed to take the taxonomy as input, so the categories and their descriptions directly change what the classifier flags ([Inan et al., 2023](https://arxiv.org/abs/2312.06674)). That design makes the point concrete: the policy text is part of the detector's configuration.
 
-Include categories that are not about harm in the narrow sense: off-scope topics, statements about the operator's own policies (the Air Canada case in [4.3](/training/module/safety-engineering/groundedness-and-hallucination)), brand and tone rules like DPD's, and regulated advice. OWASP's 2025 list treats misinformation as its own risk ([LLM09:2025](https://genai.owasp.org/llmrisk/llm092025-misinformation/)), and a policy that does not name it will not get a detector for it.
+Include categories that are not about harm in the narrow sense: off-scope topics, statements about the operator's own policies (the Air Canada case in [4.3](/training/module/safety-engineering/groundedness-and-hallucination)), brand and tone rules like DPD's, and regulated advice. OWASP's 2025 list treats misinformation as its own risk ([LLM09:2025](https://genai.owasp.org/llmrisk/llm092025-misinformation/)), and a policy that does not name it is unlikely to get a detector for it.
 
 ### 2. Three tiers instead of two
 
@@ -134,11 +134,12 @@ categories:
       disallowed: "Profanity, insults, or mocking the company or user."
     actions: {allowed: answer, disallowed: refuse_redirect}
 overlays:
+  support-web: {}            # every deployment is listed, even with no changes
   kids-homework:
     regulated_advice.medical: {needs_care: refuse_redirect}
 ```
 
-The router that turns a detector's verdict into an action should fail closed. An unknown category, a missing tier, or an overlay that names a category that does not exist is a configuration error, and the safe response to a configuration error is the strictest action plus an alert, not a default allow.
+The router that turns a detector's verdict into an action should fail closed. An unknown category, a missing tier, an unknown deployment, or an overlay that names a category that does not exist is a configuration error, and the safe response to a configuration error is the strictest action plus an alert, not a default allow.
 
 ```python
 from dataclasses import dataclass
@@ -173,7 +174,12 @@ def resolve_action(policy: dict, deployment: str, verdict: Verdict) -> tuple[Act
         raise PolicyConfigError(f"unknown category {verdict.category!r}")
 
     actions = dict(category["actions"])
-    overlay = policy.get("overlays", {}).get(deployment, {})
+    overlays = policy.get("overlays", {})
+    if deployment not in overlays:
+        # A typo or missing entry must not silently fall back to the base
+        # policy, which may be more permissive than the intended overlay.
+        raise PolicyConfigError(f"unknown deployment {deployment!r}")
+    overlay = overlays[deployment]
     for cat_name in overlay:
         if cat_name not in policy["categories"]:
             raise PolicyConfigError(f"overlay {deployment!r} names unknown category {cat_name!r}")
@@ -217,7 +223,7 @@ def run_policy_examples(classify, examples) -> list[str]:
 ## Where it breaks
 
 - **Policies that cannot be labeled.** If reviewers disagree often on a category, the definition is the problem, not the reviewers. Tightening the threshold of a detector trained on noisy labels moves errors around rather than reducing them. Measure agreement and rewrite the category before tuning anything.
-- **Drift between the document and the configuration.** The prose says one thing, the classifier threshold implements another, and the judge prompt was copied from last year's version. Linking versions (pattern 5) and logging the version with each decision is the only way to notice.
+- **Drift between the document and the configuration.** The prose says one thing, the classifier threshold implements another, and the judge prompt was copied from last year's version. Linking versions (pattern 5) and logging the version with each decision is how you notice.
 - **Policies that are too long for the detectors that read them.** A judge prompt containing a 40-page policy dilutes attention and costs more per call. Give each detector the categories it is responsible for, not the whole document.
 - **Overlays chosen by the wrong input.** If the overlay is selected by a request parameter the client controls, or by what the user claims about themselves, any user can select the permissive one.
 - **Context the policy cannot see.** A policy evaluated per message misses harm that builds across turns or is split between turns. Detectors that need conversation context must be given it, which raises cost (see [4.2](/training/module/safety-engineering/detection-and-classification)).

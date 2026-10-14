@@ -134,7 +134,7 @@ Spotlighting is a prompt-layer control. It reduces how often injection works, wh
 A taint-tracking gate in the controller. The model proposes tool calls; this code decides whether they run.
 
 ```python
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 PUBLIC = frozenset({"*"})
 
@@ -142,12 +142,15 @@ PUBLIC = frozenset({"*"})
 @dataclass(frozen=True)
 class Labeled:
     value: object
-    origins: frozenset = field(default_factory=frozenset)  # e.g. {"user"}, {"email:123"}
-    readers: frozenset = PUBLIC                             # lowercased principals; "*" = anyone
+    origins: frozenset  # e.g. {"user"}, {"email:123"}; no default
+    readers: frozenset  # lowercased principals; PUBLIC = anyone; no default
 
     @property
     def untrusted(self) -> bool:
-        return any(o != "user" and o != "system" for o in self.origins)
+        # Fail closed: a value with no recorded origin is untrusted.
+        if not self.origins:
+            return True
+        return any(o not in ("user", "system") for o in self.origins)
 
 
 def combine(value: object, *inputs: Labeled) -> Labeled:
@@ -171,7 +174,7 @@ def check_send_email(to: Labeled, body: Labeled) -> None:
     if to.untrusted:
         raise PolicyViolation("recipient derived from untrusted content")
     # 2. Every reader restriction on the body must allow this recipient.
-    if body.readers != PUBLIC and str(to.value).lower() not in body.readers:
+    if body.readers != PUBLIC and str(to.value).strip().lower() not in body.readers:
         raise PolicyViolation("body contains data the recipient may not read")
 
 
@@ -183,7 +186,12 @@ def execute(tool_name: str, args: dict[str, Labeled], tools: dict, policies: dic
     policy(**args)
     raw_args = {k: v.value for k, v in args.items()}
     result = tools[tool_name](**raw_args)
-    return combine(result, *args.values())
+    # The tool backend labels what it returns (e.g. origin "email:123",
+    # readers {"owner@corp.example"}). Unlabeled output is refused, because
+    # inheriting only the arguments' labels would mark fetched email as "user".
+    if not isinstance(result, Labeled) or not result.origins:
+        raise PolicyViolation(f"{tool_name} returned unlabeled data")
+    return combine(result.value, result, *args.values())
 ```
 
 Walk through the GitHub case with this gate. The private repository contents are labeled `readers={"owner@corp.example"}`. The public pull request is an external sink whose readers are everyone. A policy for `create_pull_request` on a public repo would reject any body whose readers are not `PUBLIC`, so the private data cannot be written there, whatever the model was told. The labels come from the tool backend that returned the data, not from the model.

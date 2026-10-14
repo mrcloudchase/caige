@@ -163,6 +163,7 @@ class Lease:
 class ControlPlane:
     def __init__(self, broker, orchestrator, reconciler, authz, audit):
         self._runs: dict[str, RunRecord] = {}
+        self._lease_expiry: dict[str, float] = {}   # server-side; never trust the client's copy
         self._lock = threading.Lock()
         self.broker = broker              # issues and revokes credentials
         self.orchestrator = orchestrator  # starts and terminates sandboxes
@@ -176,13 +177,18 @@ class ControlPlane:
             rec = self._runs[run_id]
             if rec.state is not RunState.RUNNING:
                 raise BrakeEngaged(rec.state)
-            return Lease(run_id, rec.epoch, time.time() + LEASE_TTL_S)
+            expires_at = time.time() + LEASE_TTL_S
+            self._lease_expiry[run_id] = expires_at
+            return Lease(run_id, rec.epoch, expires_at)
 
     def is_valid(self, lease: Lease) -> bool:
         with self._lock:
             rec = self._runs.get(lease.run_id)
+            # Expiry comes from the control plane's record, so a tampered harness cannot
+            # extend its own lease by presenting a later expires_at.
+            expires_at = min(lease.expires_at, self._lease_expiry.get(lease.run_id, 0.0))
             return (rec is not None and rec.state is RunState.RUNNING
-                    and rec.epoch == lease.epoch and time.time() < lease.expires_at)
+                    and rec.epoch == lease.epoch and time.time() < expires_at)
 
     # ---- operator-facing (human principals only) ----
     def engage(self, run_id: str, operator: str, target: RunState, reason: str) -> None:
@@ -195,6 +201,9 @@ class ControlPlane:
             if rec.state in (RunState.STOPPED, RunState.KILLED):
                 return  # terminal; nothing to do
             self._runs[run_id] = replace(rec, state=target, epoch=rec.epoch + 1)
+        # Record first, so the brake is in the audit trail even if a later step raises.
+        self.audit.append(event="brake", run_id=run_id, operator=operator,
+                          target=target.value, reason=reason)
         # The epoch bump already makes the gateway refuse new calls on old leases.
         if target is RunState.KILLED:
             self.broker.revoke_run(run_id)          # hard kill: in-flight calls fail at the resource
@@ -203,8 +212,6 @@ class ControlPlane:
             self.broker.revoke_run_after(run_id, delay_s=LEASE_TTL_S)
             self.reconciler.compensate_when_idle(run_id)  # after the in-flight call returns, unwind the saga
         # PAUSED: credentials are simply not renewed and expire within one TTL.
-        self.audit.append(event="brake", run_id=run_id, operator=operator,
-                          target=target.value, reason=reason)
 
     def resume(self, run_id: str, approvers: frozenset[str], reason: str) -> None:
         # Two distinct eligible people; since they are distinct, at least one is not the owner.
@@ -269,7 +276,7 @@ Points to notice:
 - `cp.acquire_lease` raising on a network error ends the run. The harness does not continue when it cannot confirm it is allowed to.
 - The gateway independently calls `cp.is_valid(lease)` (or validates a signed lease) before executing, so a harness bug or a replayed credential still hits the brake.
 - On resume, `ckpt.pending` is still set, so the harness re-sends the same call with the same idempotency key. A backend that already executed it returns the stored result. For tools that do not support idempotency keys, the harness should not retry automatically: it marks the call "outcome unknown" and asks a human to reconcile against the system of record.
-- Nothing here is in the prompt. The model never learns whether a brake exists, and nothing it outputs changes the brake's behavior.
+- Nothing here is in the prompt. The brake is not part of the model's context, and nothing the model outputs changes the brake's behavior.
 
 ## Where it breaks
 

@@ -75,7 +75,7 @@ request
 [4] post-auth rate limits     keys: user id, tenant id, API key     -> 429
   |
   v
-[5] normalize                 NFKC, strip invisible characters
+[5] normalize                 strip invisible characters, NFKC
   |
   v
 [6] token limit               on normalized text                    -> 413
@@ -116,7 +116,7 @@ model
 - **Escape** untrusted content so it cannot contain the delimiter syntax at all. HTML-escaping `<`, `>`, `&`, and quotes means no document can produce a literal closing tag.
 - **Randomize** the boundary per request (`<untrusted_3f9c2a71e0b4d8a6>`), so an attacker cannot predict it even if escaping is missed somewhere.
 - **Datamark** (Hines et al., 2024): interleave a marker through the content so the model sees continuously that it is data.
-- Put untrusted content in the user or tool turn. Never put it in the system role, and do not invent `<system>` tags inside a user turn; the model does not treat text in the user turn as system authority just because of a tag, and doing so teaches it that tags in the user turn can carry authority.
+- Put untrusted content in the user or tool turn. Never put it in the system role, and do not invent `<system>` tags inside a user turn. A tag gives the text no real system authority, and to the extent the model gives such tags weight, an attacker can type the same tags.
 - Do not append a trailing system message after the conversation to "remind" the model. Some APIs and chat templates reject a system message anywhere but first, and others silently reformat it.
 
 None of this is a parameterized query. The model still reads the content as tokens and can still follow it.
@@ -165,12 +165,19 @@ _INVISIBLE_RANGES = (
     (0x0000, 0x0008), (0x000B, 0x000C), (0x000E, 0x001F),  # C0 controls except \t \n \r
     (0x007F, 0x009F),    # DEL and C1 controls
     (0x00AD, 0x00AD),    # soft hyphen
+    (0x034F, 0x034F),    # combining grapheme joiner
+    (0x115F, 0x1160),    # Hangul fillers
+    (0x180E, 0x180E),    # Mongolian vowel separator
     (0x200B, 0x200F),    # zero-width space, ZWNJ, ZWJ, LRM, RLM
     (0x202A, 0x202E),    # bidi embeddings and overrides
     (0x2060, 0x2064),    # word joiner, invisible operators
     (0x2066, 0x2069),    # bidi isolates
+    (0x3164, 0x3164),    # Hangul filler
+    (0xFE00, 0xFE0F),    # variation selectors (can smuggle bytes after a visible character)
     (0xFEFF, 0xFEFF),    # zero-width no-break space / BOM
+    (0xFFA0, 0xFFA0),    # halfwidth Hangul filler
     (0xE0000, 0xE007F),  # Tags block ("ASCII smuggling")
+    (0xE0100, 0xE01EF),  # variation selectors supplement
 )
 
 
@@ -180,9 +187,13 @@ def _is_invisible(ch: str) -> bool:
 
 
 def normalize_for_model(text: str) -> str:
-    """Text that is actually sent to the model and written to logs."""
-    text = unicodedata.normalize("NFKC", text)
-    return "".join(ch for ch in text if not _is_invisible(ch))
+    """Text that is actually sent to the model (and scanned, and logged).
+
+    Strip first, then normalize: an invisible character between a base
+    letter and a combining mark would otherwise block composition.
+    """
+    text = "".join(ch for ch in text if not _is_invisible(ch))
+    return unicodedata.normalize("NFKC", text)
 
 
 # Partial map for illustration. In production, generate it from the Unicode
@@ -236,7 +247,7 @@ def scan_views(text: str, max_layers: int = 2, max_views: int = 16) -> list[str]
     return [_fold(v) for v in raw_views]
 ```
 
-Stripping the zero-width joiner breaks some emoji sequences and stripping ZWNJ affects some Persian and Indic text. If your users write in those scripts, keep ZWNJ in the model-bound text and remove it only in the scan views.
+Stripping the zero-width joiner and variation selectors breaks some emoji sequences, and stripping ZWNJ affects some Persian and Indic text. If your users write in those scripts, keep ZWNJ in the model-bound text and remove it only in the scan views. The range list is a starting point, not a complete inventory; review it against each new Unicode release.
 
 ### Limits and pipeline order
 

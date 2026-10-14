@@ -184,7 +184,7 @@ async def guarded_stream(pieces: AsyncIterator[str], check: Check, *, holdback_c
         yield ("text", pending)
 ```
 
-Because each batch is checked before release, `retract` in this mode removes text that was checked under less context, which is the conservative choice. The caller should stop consuming `pieces` after a retract, which cancels generation.
+Because each batch is checked before release, `retract` in this mode removes text that was checked under less context, which is the conservative choice. After a retract, the caller should close the `pieces` iterator (for example with `aclose()`) so generation stops instead of running on unseen.
 
 Speculative generation while the input check runs. Nothing is released until the check passes, and generation in this phase must not call tools.
 
@@ -202,13 +202,18 @@ async def speculative_generate(user_input: str, input_check: Check,
             await queue.put(None)  # always unblock the consumer, even on error
 
     producer = asyncio.create_task(produce())
-    if not await run_check(input_check, user_input, timeout_s, fail_closed=True):
-        producer.cancel()
-        yield ("refuse", "input_check_failed")
-        return
-    while (piece := await queue.get()) is not None:
-        yield ("text", piece)
-    await producer  # re-raise any generation error
+    try:
+        if not await run_check(input_check, user_input, timeout_s, fail_closed=True):
+            yield ("refuse", "input_check_failed")
+            return
+        while (piece := await queue.get()) is not None:
+            yield ("text", piece)
+        await producer  # re-raise any generation error
+    finally:
+        # Runs on refusal, on error, and when the consumer closes this
+        # generator early (for example after a retract): stop generating.
+        if not producer.done():
+            producer.cancel()
 ```
 
 In a full pipeline, the `text` events from `speculative_generate` are the `pieces` fed to `guarded_stream`, so output checks still apply.
@@ -244,11 +249,15 @@ class CircuitBreaker:
         return True
 
     def record_success(self) -> None:
+        if self.state == "open":
+            return                            # a late result from before the trip closes nothing
         self.state = "closed"                 # trial success: HALF-OPEN -> CLOSED
         self._failures = 0
         self._trial_in_flight = False
 
     def record_failure(self) -> None:
+        if self.state == "open":
+            return                            # already open; do not extend the timer
         if self.state == "half_open":
             self._trip()                      # trial failure: HALF-OPEN -> OPEN
             return
@@ -262,6 +271,12 @@ class CircuitBreaker:
         self._failures = 0
         self._trial_in_flight = False
 
+    def abandon(self) -> None:
+        """A call was cancelled (client went away): free the trial slot without
+        counting a dependency failure."""
+        if self.state == "half_open":
+            self._trial_in_flight = False
+
 
 async def call_guardrail(breaker: CircuitBreaker, check: Check, text: str, timeout_s: float,
                          on_unavailable: Callable[[str], bool]) -> bool:
@@ -271,7 +286,7 @@ async def call_guardrail(breaker: CircuitBreaker, check: Check, text: str, timeo
     try:
         result = await asyncio.wait_for(check(text), timeout_s)
     except asyncio.CancelledError:
-        breaker.record_failure()  # do not leave a half-open trial stuck in flight
+        breaker.abandon()  # do not leave a half-open trial stuck in flight
         raise
     except Exception as exc:
         breaker.record_failure()

@@ -55,7 +55,7 @@ Nobody instructed those models to attack anyone. They were optimizing for a scor
 
 Agents that run code, browse, or use a shell execute instructions chosen at runtime by a model. From the host's point of view, that is untrusted code. Three things make it harder than ordinary untrusted code:
 
-1. **It adapts.** A capable agent reads error messages, probes, and retries. A misconfiguration that a static exploit would never find is found by search.
+1. **It adapts.** A capable agent reads error messages, probes, and retries. A misconfiguration that a static exploit would miss can be found by search.
 2. **It has a motive whenever the task rewards an outcome.** Evaluations and production tasks both reward success. METR and the incident above show models taking shortcuts the designers did not intend (see [5.6](/training/module/agent-containment-and-control/external-control-plane-and-audit)).
 3. **It runs near valuable things.** Sandboxes are often placed close to source code, credentials, internal package mirrors, and metadata services, because the agent's task needs some of them.
 
@@ -131,6 +131,8 @@ ALLOWED_PORTS = frozenset({443})
 
 def _is_public(ip: str) -> bool:
     addr = ipaddress.ip_address(ip)
+    if addr.version == 6 and addr.ipv4_mapped is not None:
+        addr = addr.ipv4_mapped    # ::ffff:169.254.169.254 is the metadata address
     return addr.is_global and not addr.is_multicast
 
 

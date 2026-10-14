@@ -258,7 +258,7 @@ Keep the on-call dashboard to one screen. If something needs scrolling to find d
 - **Block rate falls for good reasons too.** An attack campaign ending, or a product change that reduces abusive traffic, also lowers it. The page is still right: the on-call engineer checks probes and coverage and closes the alert in minutes if both are healthy.
 - **Judges drift and can be attacked.** An LLM judge labeling the allowed sample has its own error rate and can be targeted by content written to fool it. Re-validate it against human labels on a schedule.
 - **The sample store is itself a risk.** Redaction misses things, access groups grow, and retention jobs fail silently. Monitor the retention job and audit access to the store like any other sensitive system.
-- **Monitoring cannot stop anything.** It tells you something is wrong. Containment ([7.2](/training/module/operations-and-governance/incident-response-and-disclosure)) and the brake ([5.5](/training/module/agent-containment-and-control/the-emergency-brake)) are what limit the damage.
+- **Monitoring alone does not stop anything.** It tells you something is wrong; at most it triggers an automated pause. Containment ([7.2](/training/module/operations-and-governance/incident-response-and-disclosure)) and the brake ([5.5](/training/module/agent-containment-and-control/the-emergency-brake)) are what limit the damage.
 
 ## Lab exercise
 

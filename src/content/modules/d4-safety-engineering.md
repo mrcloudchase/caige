@@ -28,7 +28,7 @@ Domain 1 explains why models hallucinate and why outputs vary even at temperatur
 After this domain you should be able to:
 
 1. Write a content policy that engineers can implement and test, with tiers, worked examples, deployment overlays, and versioning.
-2. Build a layered detection pipeline with calibrated scores, explicit thresholds, and an injection-resistant judge, and choose where to integrate it.
+2. Build a layered detection pipeline with calibrated scores, explicit thresholds, and a judge hardened against injection, and choose where to integrate it.
 3. Check groundedness per claim and per source chunk, verify citations deterministically, and design abstention.
 4. Measure over-refusal and write refusals that help the user without exposing the system's internals.
 5. Evaluate sycophancy, route crisis signals to human resources, and apply stricter handling for minors and high-stakes advice.

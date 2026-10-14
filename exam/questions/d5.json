@@ -97,7 +97,7 @@
       "options": [
         "A standard container with the default seccomp profile, since namespaces already give each customer a separate process tree and filesystem",
         "A process sandbox using chroot to limit the filesystem view, with network access left on for package installs",
-        "A gVisor or Firecracker microVM sandbox per session with no network interface and egress only through an external proxy",
+        "A gVisor sandbox or Firecracker microVM per session with no network interface and egress only through an external proxy",
         "A container in privileged mode so the sandbox can mount per-customer volumes on demand"
       ],
       "correct": [

@@ -97,7 +97,7 @@ For a multi-step workflow that cannot be one database transaction, register a co
 
 - **Gate less, gate better.** Move safe work into tier 1 by adding sandboxing and reversibility, so tier 3 prompts are rare and meaningful.
 - **Batch by decision, not by call.** One approval for "these 40 refunds, total $3,100, all under policy limit" is easier to review well than 40 prompts. The batch is still bound to its exact contents.
-- **Measure.** Track approval rate, median time to decision, and per-reviewer rates. A reviewer who approves 100% in under three seconds is not reviewing.
+- **Measure.** Track approval rate, median time to decision, and per-reviewer rates. A reviewer who approves 100% of requests in under three seconds is probably not reviewing.
 - **Seed known-bad requests.** Periodically inject a synthetic action that should be rejected (with the reviewer informed that tests occur) and measure the catch rate.
 - **Route by expertise and load.** Rotate reviewers, cap queue length, and set a conservative default when no reviewer is available: the action waits or is rejected, it does not auto-approve.
 

@@ -4,7 +4,7 @@ title: "Detection and Classification"
 slug: detection-and-classification
 module: safety-engineering
 sectionOrder: 2
-description: "Rules, ML classifiers, embedding similarity, and LLM judges; calibrated scores and explicit threshold bands; layered pipelines that send only ambiguous cases to expensive checks; injection-resistant judges; and where to integrate detection."
+description: "Rules, ML classifiers, embedding similarity, and LLM judges; calibrated scores and explicit threshold bands; layered pipelines that send only ambiguous cases to expensive checks; judges hardened against injection; and where to integrate detection."
 category: safety
 controlLayers: [deterministic, runtime-ml]
 knowledge:
@@ -59,7 +59,7 @@ The detection stack is a runtime-ml layer with deterministic pieces (rules, rout
 
 ### 1. Normalize before you match
 
-Apply Unicode normalization (NFKC), strip zero-width and format characters, decode known encodings, and case-fold before rules and classifiers run. Otherwise a fullwidth or zero-width-split word slips past a rule that would have caught it. The full treatment, including homoglyphs and layered decoding, is in [3.3 Input Handling](/training/module/security-engineering/input-handling).
+Strip zero-width, bidi, and Tags-block characters, apply Unicode normalization (NFKC), decode known encodings, and case-fold before rules and classifiers run. Otherwise a fullwidth or zero-width-split word slips past a rule that would have caught it. The full treatment, including homoglyphs and layered decoding, is in [3.3 Input Handling](/training/module/security-engineering/input-handling).
 
 ### 2. Rules with honest semantics
 
@@ -80,7 +80,7 @@ Calibrate each classifier on a labeled sample of your own traffic, using Platt s
 - At or above the **block threshold**, the stage blocks. Choose it from the precision you need: of the requests it blocks, what fraction must be true violations.
 - Between them is the **ambiguous band**, which goes to the next, more expensive stage.
 
-Lowering the allow threshold or raising the block threshold sends more traffic to the judge: more cost, fewer errors. Where you set them depends on the costs of each error type for this category (a missed self-harm signal and a missed rude word do not cost the same) and on the base rate in production. A threshold that gives 95% precision on a balanced test set can give far lower precision when violations are rare, because the benign false positives outnumber the true positives. The arithmetic is in [6.2 Metrics and Statistics](/training/module/evaluation-and-red-teaming/metrics-and-statistics); the design consequence here is that thresholds are set per category from your data, not copied from a vendor default.
+Lowering the allow threshold or raising the block threshold sends more traffic to the judge: more cost, and fewer errors only if the judge is more accurate than the classifier on that band, which you measure rather than assume. Where you set them depends on the costs of each error type for this category (a missed self-harm signal and a missed rude word do not cost the same) and on the base rate in production. A threshold that gives 95% precision on a balanced test set can give far lower precision when violations are rare, because the benign false positives outnumber the true positives. The arithmetic is in [6.2 Metrics and Statistics](/training/module/evaluation-and-red-teaming/metrics-and-statistics); the design consequence here is that thresholds are set per category from your data, not copied from a vendor default.
 
 ### 4. A layered pipeline that routes only the ambiguous band
 
@@ -90,7 +90,7 @@ Order stages from cheapest to most expensive, and give every stage except the la
 request
   |
   v
-[0] normalize (NFKC, strip zero-width, decode, casefold)
+[0] normalize (strip invisible, NFKC, decode, casefold)
   |
   v
 [1] rules ---------------- block-rule hit -----------------> BLOCK
@@ -162,13 +162,17 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
-ZERO_WIDTH = re.compile(r"[​-‏⁠-⁤﻿]")
+# Zero-width, bidi, and Tags-block characters. The full list is in 3.3.
+INVISIBLE = re.compile(
+    "[\u00ad\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff"
+    "\U000e0000-\U000e007f]"
+)
 
 
 def normalize(text: str) -> str:
-    text = unicodedata.normalize("NFKC", text)
-    text = ZERO_WIDTH.sub("", text)
-    return text.casefold()
+    # Strip first, then NFKC, matching 3.3's normalize_for_model.
+    text = INVISIBLE.sub("", text)
+    return unicodedata.normalize("NFKC", text).casefold()
 
 
 BLOCK_RULES = {"bomb_making": re.compile(r"\bhow to (?:make|build) (?:a |an )?(?:pipe )?bomb\b")}
@@ -187,8 +191,9 @@ def check_rules(normalized: str) -> RuleResult:
     allowed_spans = [m.span() for rx in ALLOW_PHRASES for m in rx.finditer(normalized)]
 
     def suppressed(span: tuple[int, int]) -> bool:
-        # An allowlist entry suppresses only a match that lies inside it.
-        return any(a0 <= span[0] and span[1] <= a1 for a0, a1 in allowed_spans)
+        # An allowlist entry suppresses only a match that overlaps it,
+        # never a match elsewhere in the text.
+        return any(a0 < span[1] and span[0] < a1 for a0, a1 in allowed_spans)
 
     for rule_id, rx in BLOCK_RULES.items():
         for m in rx.finditer(normalized):
@@ -363,7 +368,7 @@ Give the classifier stage a calibrated allow threshold as well as a block thresh
 <details>
 <summary>2. A keyword filter checks the allowlist first and returns "allow" if any allowlisted phrase appears. Why is this a bypass?</summary>
 
-Any user can append an allowlisted phrase to a message and suppress every blocklist match in it. An allowlist entry should suppress only the blocklist match whose span it contains.
+Any user can append an allowlisted phrase to a message and suppress every blocklist match in it. An allowlist entry should suppress only the blocklist match whose span it overlaps.
 </details>
 
 <details>

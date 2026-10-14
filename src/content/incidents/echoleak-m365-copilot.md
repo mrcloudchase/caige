@@ -16,7 +16,7 @@ sources:
 
 ## What happened
 
-Researchers at Aim Labs (Aim Security) reported a vulnerability in Microsoft 365 Copilot to Microsoft in January 2025. Microsoft finalized a server-side fix in May 2025 and assigned CVE-2025-32711; Aim Labs published the details, under the name EchoLeak, in June 2025. Microsoft reported no customer action was required.
+Researchers at Aim Labs (Aim Security) reported a vulnerability in Microsoft 365 Copilot to Microsoft in January 2025. Microsoft fixed the issue in its service, so no customer action was required, and published CVE-2025-32711 in June 2025, when Aim Labs also published the details under the name EchoLeak. Microsoft rated it critical and reported no evidence of exploitation in the wild.
 
 The attack started with one email sent to anyone in the target organization. The victim did not need to open it. When the victim later asked Copilot a question, Copilot's retrieval could pull the attacker's email into the same context as internal documents, chats, and files. The email's instructions told the assistant to take sensitive information from that context and include it in a markdown image URL pointing at the attacker. When Copilot's answer was rendered, the browser fetched the image and delivered the data, with no click.
 

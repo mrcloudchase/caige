@@ -35,4 +35,4 @@ The same bug exposed payment-related information. During a window of about nine 
 
 ## Lessons
 
-The most famous early data exposure in a consumer AI product had nothing to do with the model. AI applications are web applications first, and the classic isolation failures (shared caches, pooled connections, missing ownership checks) apply in full. A cheap ownership check at the point of return would have turned a cross-user leak into an error.
+One of the first widely reported data exposures in a consumer AI product had nothing to do with the model. AI applications are web applications first, and the classic isolation failures (shared caches, pooled connections, missing ownership checks) apply in full. A cheap ownership check at the point of return would have turned a cross-user leak into an error.

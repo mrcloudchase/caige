@@ -177,7 +177,7 @@ Content-Security-Policy: default-src 'self'; script-src 'self';
 ```python
 import ipaddress
 import socket
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 FETCH_ALLOWED_HOSTS = frozenset({"api.weather.example", "en.wikipedia.org"})
 
@@ -187,19 +187,25 @@ class EgressDenied(Exception):
 
 
 def validate_fetch_target(url: str) -> tuple[str, list[str]]:
-    """Validate a model-chosen URL. Returns (hostname, validated IPs).
+    """Validate a model-chosen URL. Returns (canonical URL, validated IPs).
 
     Application-level check only. The egress proxy must enforce the same
     policy at connect time, because DNS can change between this check and
     the connection (rebinding).
     """
-    parts = urlsplit(url)
+    try:
+        parts = urlsplit(url.strip())
+        port = parts.port
+    except ValueError as exc:
+        raise EgressDenied("unparseable URL") from exc
     if parts.scheme != "https" or parts.username or parts.password:
         raise EgressDenied("https only, no credentials in URL")
+    if port not in (None, 443):
+        raise EgressDenied("port not allowed")
     host = (parts.hostname or "").rstrip(".")
     if host not in FETCH_ALLOWED_HOSTS:
         raise EgressDenied(f"host not allowlisted: {host!r}")
-    infos = socket.getaddrinfo(host, parts.port or 443, proto=socket.IPPROTO_TCP)
+    infos = socket.getaddrinfo(host, 443, proto=socket.IPPROTO_TCP)
     ips = sorted({info[4][0] for info in infos})
     if not ips:
         raise EgressDenied("no addresses")
@@ -207,15 +213,18 @@ def validate_fetch_target(url: str) -> tuple[str, list[str]]:
         addr = ipaddress.ip_address(ip)
         if not addr.is_global:
             raise EgressDenied(f"{host} resolves to non-public address {ip}")
-    return host, ips
+    # Rebuild the URL from the parsed parts so the HTTP client cannot parse
+    # the original string differently (userinfo, backslashes, ports).
+    canonical = urlunsplit(("https", host, parts.path or "/", parts.query, ""))
+    return canonical, ips
 
 
 def fetch_for_agent(url: str, http_client) -> bytes:
-    validate_fetch_target(url)
+    canonical, _ = validate_fetch_target(url)
     # The client is configured to use the egress proxy and to NOT follow
     # redirects; a redirect is returned to the agent as a new URL that goes
     # through validate_fetch_target again.
-    resp = http_client.get(url, follow_redirects=False, timeout=10)
+    resp = http_client.get(canonical, follow_redirects=False, timeout=10)
     return resp.content[:1_000_000]
 ```
 

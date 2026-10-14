@@ -88,13 +88,15 @@ header {
   font-size: 0.9rem;
   font-weight: 500;
   transition: color 0.2s ease;
+  white-space: nowrap;
 }
 
 .header-inner nav a:hover { color: var(--color-text); opacity: 1; }
 
 @media (max-width: 600px) {
   .header-inner { padding: 0 16px; }
-  .header-inner nav { gap: 20px; }
+  .header-inner nav { gap: 14px; }
+  .header-inner nav a { font-size: 0.8rem; }
 }
 
 /* Buttons */

@@ -44,7 +44,7 @@ lastReviewed: "2026-10-14"
 
 A vendor's prompt-injection detector advertises 95% recall and a 1% false positive rate. Your assistant handles one million requests a day, and you estimate that about one request in a thousand is an injection attempt. You deploy it in blocking mode. On day one the support queue fills with legitimate users who were blocked, and the security team reviewing flagged requests finds that fewer than one in ten is an attack.
 
-Nobody lied. The vendor's numbers were measured on a balanced test set. At your base rate, those same numbers produce roughly eleven false alarms for every real attack. This section gives you the arithmetic to see that before deployment, the definitions to measure attack success honestly, and the statistics to say how sure you are.
+Nobody lied. The vendor's numbers were measured on a balanced test set. At your base rate, those same numbers produce roughly ten false alarms for every real attack. This section gives you the arithmetic to see that before deployment, the definitions to measure attack success honestly, and the statistics to say how sure you are.
 
 ## Why it happens
 

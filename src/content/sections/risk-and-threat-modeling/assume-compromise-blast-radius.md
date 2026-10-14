@@ -42,7 +42,7 @@ Every domain in this program applies one design test: **"If the model were fully
 
 ## The problem
 
-In June 2025 Microsoft patched CVE-2025-32711, which Aim Security named "EchoLeak", in Microsoft 365 Copilot. The attack needed one email. The attacker sent a message to an employee's inbox, worded as ordinary guidance to the recipient. Later, when the employee asked Copilot an ordinary business question, Copilot's retrieval pulled the email into context next to the user's private documents. The hidden instructions told the model to put sensitive data into a link. Microsoft had several defenses, and each one was bypassed:
+In June 2025 Microsoft disclosed CVE-2025-32711, already fixed on its side, which Aim Security named "EchoLeak", in Microsoft 365 Copilot. The attack needed one email. The attacker sent a message to an employee's inbox, worded as ordinary guidance to the recipient. Later, when the employee asked Copilot an ordinary business question, Copilot's retrieval pulled the email into context next to the user's private documents. The hidden instructions told the model to put sensitive data into a link. Microsoft had several defenses, and each one was bypassed:
 
 - The prompt-injection classifier missed the email because it was phrased as if addressed to a human.
 - Link redaction handled inline markdown links but not markdown's reference-style syntax.

@@ -105,7 +105,7 @@ Cap the total attempts and total cost per request. When attempts run out, return
 
 ### 5. Templates with output encoding
 
-For high-stakes or strictly formatted output, let the model supply data fields and let code assemble the final text or markup from a template. The model then cannot add a fake system notice, a link, or extra formatting.
+For high-stakes or strictly formatted output, let the model supply data fields and let code assemble the final text or markup from a template. The model controls only the field values, so it cannot add links, buttons, or formatting outside them. Text inside a field can still imitate a notice, which is why values still get encoding and content checks.
 
 Templates move presentation out of the model's control. They do not make the inserted values safe. The `answer` field is still model-controlled text, and if it is inserted into HTML unescaped, a response containing `<img src=...>` becomes markup in the user's browser. Encode each value for its destination: HTML-escape for HTML, parameterize for SQL, URL-encode for query strings. The full treatment is in [3.4 Output Handling and Egress Control](/training/module/security-engineering/output-handling-and-egress).
 
@@ -188,10 +188,16 @@ class SearchArgs(BaseModel):
     max_results: int = Field(ge=1, le=10)
 
 
+class Priority(str, Enum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+
+
 class TicketArgs(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     summary: str = Field(min_length=1, max_length=500)
-    priority: Category
+    priority: Priority
 
 
 TOOL_ARG_MODELS: dict[str, type[BaseModel]] = {

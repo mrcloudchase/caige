@@ -107,16 +107,22 @@ THIS_RESOURCE = "https://files-mcp.example.com"   # our canonical URI (audience)
 _jwks = PyJWKClient(f"{ISSUER}/.well-known/jwks.json")
 
 
-class Forbidden(Exception):
+class Unauthorized(Exception):   # map to HTTP 401
+    pass
+
+
+class Forbidden(Exception):      # map to HTTP 403
     pass
 
 
 def verify_bearer(auth_header: str | None, required_scope: str) -> dict:
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise Forbidden("missing bearer token")
+        raise Unauthorized("missing bearer token")
     token = auth_header.removeprefix("Bearer ")
-    key = _jwks.get_signing_key_from_jwt(token).key
     try:
+        # Key lookup is inside the try: a malformed token or unknown key id
+        # must be rejected as unauthorized, not surface as a server error.
+        key = _jwks.get_signing_key_from_jwt(token).key
         claims = jwt.decode(
             token,
             key,
@@ -125,9 +131,10 @@ def verify_bearer(auth_header: str | None, required_scope: str) -> dict:
             issuer=ISSUER,
             options={"require": ["exp", "iat", "iss", "aud", "sub"]},
         )
-    except jwt.InvalidTokenError as exc:
-        raise Forbidden("invalid token") from exc
-    if required_scope not in claims.get("scope", "").split():
+    except jwt.PyJWTError as exc:
+        raise Unauthorized("invalid token") from exc
+    scope = claims.get("scope")
+    if not isinstance(scope, str) or required_scope not in scope.split():
         raise Forbidden(f"missing scope {required_scope}")
     return claims
 
@@ -140,7 +147,7 @@ def read_file_tool(auth_header: str | None, file_id: str, acl) -> bytes:
     return acl.load(file_id)
 ```
 
-There is no `user_id` parameter for the model to fill. The audience check is what turns "valid token" into "valid token for this server." Map `Forbidden` to 401 for token failures and 403 for scope or permission failures, as the MCP specification's error table describes.
+There is no `user_id` parameter for the model to fill. The audience check is what turns "valid token" into "valid token for this server." `Unauthorized` maps to 401 and `Forbidden` (insufficient scope or permission) to 403, as the MCP specification's error table describes.
 
 ### Upstream calls: exchange, do not pass through
 
